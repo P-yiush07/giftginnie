@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/onboarding_model.dart';
 import '../constants/colors.dart';
 import '../constants/images.dart';
+import '../views/authHome_screen.dart';
+import '../utils/global.dart';
 
 class OnboardingController extends ChangeNotifier {
   int currentPage = 0;
@@ -31,6 +33,27 @@ class OnboardingController extends ChangeNotifier {
     if (currentPage < onboardingPages.length - 1) {
       currentPage++;
       notifyListeners();
+    } else {
+      // Navigate to AuthHomeScreen with sliding transition
+      Navigator.of(navigatorKey.currentContext!).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => 
+            const AuthHomeScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+            var tween = Tween(begin: begin, end: end)
+                .chain(CurveTween(curve: curve));
+            var offsetAnimation = animation.drive(tween);
+            return SlideTransition(
+              position: offsetAnimation,
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      );
     }
   }
 
