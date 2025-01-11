@@ -18,9 +18,12 @@ class SignInScreen extends StatelessWidget {
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
       ),
-      child: ChangeNotifierProvider(
-        create: (_) => SignInController(),
-        child: const SignInView(),
+      child: Container(
+        color: AppColors.white,
+        child: ChangeNotifierProvider(
+          create: (_) => SignInController(),
+          child: const SignInView(),
+        ),
       ),
     );
   }
@@ -43,7 +46,7 @@ class SignInView extends StatelessWidget {
         return true;
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         body: SafeArea(
           child: Column(
             children: [
@@ -420,13 +423,13 @@ class SignInView extends StatelessWidget {
       children: [
         _buildSocialButton(
           text: controller.model.facebookButtonText,
-          icon: AppIcons.facebookIcon,
+          icon: AppIcons.svg_facebookIcon,
           onPressed: controller.handleFacebookLogin,
         ),
         const SizedBox(height: 16),
         _buildSocialButton(
           text: controller.model.googleButtonText,
-          icon: AppIcons.googleIcon,
+          icon: AppIcons.svg_googleIcon,
           onPressed: controller.handleGoogleLogin,
         ),
       ],

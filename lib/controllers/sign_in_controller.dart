@@ -2,23 +2,45 @@ import 'package:flutter/material.dart';
 import '../models/sign_in_model.dart';
 
 class SignInController extends ChangeNotifier {
-  final SignInModel model = SignInModel();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController otpController = TextEditingController();
-  bool isLoading = false;
-  bool isPhoneVerified = false;
+  final SignInModel _model = SignInModel();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _otpController = TextEditingController();
+  bool _isLoading = false;
+  bool _isPhoneVerified = false;
 
+  // Getters
+  SignInModel get model => _model;
+  TextEditingController get phoneController => _phoneController;
+  TextEditingController get otpController => _otpController;
+  bool get isLoading => _isLoading;
+  bool get isPhoneVerified => _isPhoneVerified;
+  String get formattedPhone {
+    if (_phoneController.text.isEmpty) return '';
+    return '+91 ${_phoneController.text}';
+  }
+
+  // Setters
+  set isLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  set isPhoneVerified(bool value) {
+    _isPhoneVerified = value;
+    notifyListeners();
+  }
+
+  @override
   void dispose() {
-    phoneController.dispose();
-    otpController.dispose();
+    _phoneController.dispose();
+    _otpController.dispose();
     super.dispose();
   }
 
   Future<void> verifyPhone() async {
-    if (phoneController.text.isEmpty) return;
+    if (_phoneController.text.isEmpty) return;
     
     isLoading = true;
-    notifyListeners();
 
     try {
       // TODO: Implement phone verification logic
@@ -26,22 +48,19 @@ class SignInController extends ChangeNotifier {
       isPhoneVerified = true;
     } finally {
       isLoading = false;
-      notifyListeners();
     }
   }
 
   Future<void> handlePhoneLogin() async {
-    if (otpController.text.isEmpty) return;
+    if (_otpController.text.isEmpty) return;
     
     isLoading = true;
-    notifyListeners();
 
     try {
       // TODO: Implement OTP verification logic
       await Future.delayed(const Duration(seconds: 2)); // Simulated delay
     } finally {
       isLoading = false;
-      notifyListeners();
     }
   }
 
@@ -59,11 +78,5 @@ class SignInController extends ChangeNotifier {
 
   void backToPhoneInput() {
     isPhoneVerified = false;
-    notifyListeners();
-  }
-
-  String get formattedPhone {
-    if (phoneController.text.isEmpty) return '';
-    return '+91 ${phoneController.text}';
   }
 }

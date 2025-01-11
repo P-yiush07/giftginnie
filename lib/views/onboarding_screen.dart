@@ -53,7 +53,7 @@ class OnboardingView extends StatelessWidget {
                     controller.previousPage();
                   } else if (details.primaryVelocity! < 0) {
                     // Swiped left
-                    controller.nextPage();
+                    controller.nextPage(context);
                   }
                 },
                 child: Column(
@@ -146,7 +146,7 @@ class OnboardingView extends StatelessWidget {
                           const SizedBox(width: 16),
                           FilledButton(
                             onPressed: () {
-                              controller.nextPage();
+                              controller.nextPage(context);
                             },
                             style: FilledButton.styleFrom(
                               minimumSize: const Size(120, 48),

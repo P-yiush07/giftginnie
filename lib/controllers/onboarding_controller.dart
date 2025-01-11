@@ -3,39 +3,46 @@ import '../models/onboarding_model.dart';
 import '../constants/colors.dart';
 import '../constants/images.dart';
 import '../views/authHome_screen.dart';
-import '../utils/global.dart';
 
 class OnboardingController extends ChangeNotifier {
-  int currentPage = 0;
-  
-  List<OnboardingModel> onboardingPages = [
+  int _currentPage = 0;
+  final List<OnboardingModel> _onboardingPages = [
     OnboardingModel(
       title: 'Browse Best Gift',
       description: 'Explore a variety of nearby Gift and their mouthwatering menus right at your fingertips.',
-      imagePath: AppImages.onboardingPhone,
+      imagePath: AppImages.webp_onboardingPhone,
       bgColor: AppColors.primaryBg
     ),
     OnboardingModel(
       title: 'Real Time Tracking',
       description: 'Track the status of your order in real-time, from preparation to delivery.',
-      imagePath: AppImages.onboardingPhone,
+      imagePath: AppImages.webp_onboardingPhone,
       bgColor: AppColors.secondaryBg
     ),
     OnboardingModel(
       title: 'Secure Payments',
       description: 'Enjoy hassle-free and secure payment options for a seamless checkout experience.',
-      imagePath: AppImages.onboardingPhone,
+      imagePath: AppImages.webp_onboardingPhone,
       bgColor: AppColors.tertiaryBg
     ),
   ];
 
-  void nextPage() {
-    if (currentPage < onboardingPages.length - 1) {
-      currentPage++;
-      notifyListeners();
+  // Getters
+  int get currentPage => _currentPage;
+  List<OnboardingModel> get onboardingPages => _onboardingPages;
+
+  // Setter
+  set currentPage(int value) {
+    _currentPage = value;
+    notifyListeners();
+  }
+
+  void nextPage(BuildContext context) {
+    if (_currentPage < _onboardingPages.length - 1) {
+      currentPage = _currentPage + 1;
     } else {
-      // Navigate to AuthHomeScreen with sliding transition
-      Navigator.of(navigatorKey.currentContext!).pushReplacement(
+      Navigator.pushReplacement(
+        context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) => 
             const AuthHomeScreen(),
@@ -58,14 +65,12 @@ class OnboardingController extends ChangeNotifier {
   }
 
   void previousPage() {
-    if (currentPage > 0) {
-      currentPage--;
-      notifyListeners();
+    if (_currentPage > 0) {
+      currentPage = _currentPage - 1;
     }
   }
 
   void skipOnboarding() {
-    currentPage = onboardingPages.length - 1;
-    notifyListeners();
+    currentPage = _onboardingPages.length - 1;
   }
 }

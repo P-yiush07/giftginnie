@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:giftginnie_ui/models/auth_home_model.dart';
+import 'package:giftginnie_ui/views/onboarding_screen.dart';
+import 'package:giftginnie_ui/views/sign_in_screen.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/icons.dart';
@@ -18,15 +20,12 @@ class AuthHomeScreen extends StatelessWidget {
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.black,
+        systemNavigationBarColor: AppColors.authBackground,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Container(
-        color: Colors.black,
-        child: ChangeNotifierProvider(
-          create: (_) => AuthController(),
-          child: const AuthHomeView(),
-        ),
+        color: AppColors.authBackground,
+        child: const AuthHomeView(),
       ),
     );
   }
@@ -34,6 +33,56 @@ class AuthHomeScreen extends StatelessWidget {
 
 class AuthHomeView extends StatelessWidget {
   const AuthHomeView({super.key});
+
+  void navigateToOnboarding(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => 
+          const OnboardingScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(-1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(begin: begin, end: end)
+              .chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
+  }
+
+  void navigateToSignIn(BuildContext context) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => 
+          const SignInScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(begin: begin, end: end)
+              .chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
+  }
+
+  void navigateToSignUp(BuildContext context) {
+    // TODO: Implement navigation to sign up screen
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +93,10 @@ class AuthHomeView extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: const AssetImage(AppImages.authBackground),
+            image: const AssetImage(AppImages.webp_authBackground),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              Colors.black.withAlpha(200),
+              AppColors.authBackgroundOverlay,
               BlendMode.darken,
             ),
           ),
@@ -60,13 +109,13 @@ class AuthHomeView extends StatelessWidget {
                 top: 10,
                 left: 4,
                 child: IconButton(
-                  onPressed: () => controller.navigateToOnboarding(context),
+                  onPressed: () => navigateToOnboarding(context),
                   icon: SvgPicture.asset(
-                    AppIcons.authBackIcon,
+                    AppIcons.svg_authBackIcon,
                     width: 24,
                     height: 24,
                     colorFilter: const ColorFilter.mode(
-                      Colors.white,
+                      AppColors.authTitleText,
                       BlendMode.srcIn,
                     ),
                   ),
@@ -84,7 +133,7 @@ class AuthHomeView extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.authTitleText,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -93,7 +142,7 @@ class AuthHomeView extends StatelessWidget {
                       model.welcomeDescription,
                       style: const TextStyle(
                         fontSize: 16,
-                        color: Colors.white70,
+                        color: AppColors.authDescriptionText,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -114,7 +163,7 @@ class AuthHomeView extends StatelessWidget {
     return Column(
       children: [
         FilledButton(
-          onPressed: () => controller.handleEmailSignIn(context),
+          onPressed: () => navigateToSignIn(context),
           style: FilledButton.styleFrom(
             backgroundColor: AppColors.primary,
             minimumSize: const Size(double.infinity, 56),
@@ -127,20 +176,20 @@ class AuthHomeView extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.white,
+              color: AppColors.authTitleText,
             ),
           ),
         ),
         const SizedBox(height: 16),
         _buildSocialButton(
           text: model.facebookButtonText,
-          icon: AppIcons.facebookIcon,
+          icon: AppIcons.svg_facebookIcon,
           onPressed: controller.handleFacebookSignIn,
         ),
         const SizedBox(height: 16),
         _buildSocialButton(
           text: model.googleButtonText,
-          icon: AppIcons.googleIcon,
+          icon: AppIcons.svg_googleIcon,
           onPressed: controller.handleGoogleSignIn,
         ),
         const SizedBox(height: 24),
@@ -149,10 +198,10 @@ class AuthHomeView extends StatelessWidget {
           children: [
             Text(
               model.noAccountText,
-              style: const TextStyle(color: Colors.white70),
+              style: const TextStyle(color: AppColors.authDescriptionText),
             ),
             TextButton(
-              onPressed: () => controller.navigateToSignUp(context),
+              onPressed: () => navigateToSignUp(context),
               style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
                 minimumSize: Size.zero,
@@ -180,7 +229,7 @@ class AuthHomeView extends StatelessWidget {
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.authSocialButtonBackground,
         minimumSize: const Size(double.infinity, 56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),
@@ -200,7 +249,7 @@ class AuthHomeView extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: AppColors.authSocialButtonText,
             ),
           ),
         ],
