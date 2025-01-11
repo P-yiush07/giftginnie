@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../controllers/onboarding_controller.dart';
 import 'package:provider/provider.dart';
+import '../constants/colors.dart';
 
 class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+  const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class OnboardingScreen extends StatelessWidget {
 }
 
 class OnboardingView extends StatelessWidget {
-  const OnboardingView({Key? key}) : super(key: key);
+  const OnboardingView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -105,8 +106,8 @@ class OnboardingView extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
                               color: index == controller.currentPage
-                                  ? const Color(0xFFED6E61)
-                                  : Colors.grey.shade300,
+                                  ? AppColors.primary
+                                  : AppColors.dotInactive,
                             ),
                           ),
                         ),
@@ -121,6 +122,7 @@ class OnboardingView extends StatelessWidget {
                             onPressed: controller.skipOnboarding,
                             style: TextButton.styleFrom(
                               minimumSize: const Size(150, 48),
+                              foregroundColor: AppColors.textGrey,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
@@ -128,28 +130,27 @@ class OnboardingView extends StatelessWidget {
                             child: const Text(
                               'Skip',
                               style: TextStyle(
-                                color: Colors.grey,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                           const SizedBox(width: 16),
-                          ElevatedButton(
-                            onPressed: controller.nextPage,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFED6E61),
+                          FilledButton(
+                            onPressed: () {
+                              controller.nextPage();
+                            },
+                            style: FilledButton.styleFrom(
                               minimumSize: const Size(120, 48),
-                              padding: const EdgeInsets.symmetric(horizontal: 52),
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
                               ),
-                              elevation: 0,
                             ),
                             child: const Text(
                               'Next',
                               style: TextStyle(
-                                color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),

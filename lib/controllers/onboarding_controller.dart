@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/onboarding_model.dart';
+import '../constants/colors.dart';
+import '../constants/images.dart';
 
 class OnboardingController extends ChangeNotifier {
   int currentPage = 0;
@@ -8,20 +10,20 @@ class OnboardingController extends ChangeNotifier {
     OnboardingModel(
       title: 'Browse Best Gift',
       description: 'Explore a variety of nearby Gift and their mouthwatering menus right at your fingertips.',
-      imagePath: 'assets/images/phone.png',
-      bgColor: 0xFFED6E61
+      imagePath: AppImages.onboardingPhone,
+      bgColor: AppColors.primaryBg
     ),
     OnboardingModel(
       title: 'Real Time Tracking',
       description: 'Track the status of your order in real-time, from preparation to delivery.',
-      imagePath: 'assets/images/phone.png',
-      bgColor: 0xFF4CAF50
+      imagePath: AppImages.onboardingPhone,
+      bgColor: AppColors.secondaryBg
     ),
     OnboardingModel(
       title: 'Secure Payments',
       description: 'Enjoy hassle-free and secure payment options for a seamless checkout experience.',
-      imagePath: 'assets/images/phone.png',
-      bgColor: 0xFF9DFFB3
+      imagePath: AppImages.onboardingPhone,
+      bgColor: AppColors.tertiaryBg
     ),
   ];
 
