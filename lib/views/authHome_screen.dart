@@ -6,15 +6,28 @@ import '../constants/colors.dart';
 import '../constants/icons.dart';
 import '../constants/images.dart';
 import '../controllers/authHome_controller.dart';
+import 'package:flutter/services.dart';
 
 class AuthHomeScreen extends StatelessWidget {
   const AuthHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthController(),
-      child: const AuthHomeView(),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.black,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Container(
+        color: Colors.black,
+        child: ChangeNotifierProvider(
+          create: (_) => AuthController(),
+          child: const AuthHomeView(),
+        ),
+      ),
     );
   }
 }
@@ -40,29 +53,29 @@ class AuthHomeView extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Stack(
-              children: [
-                // Back button
-                Positioned(
-                  top: 16,
-                  left: 0,
-                  child: IconButton(
-                    onPressed: () => controller.navigateToOnboarding(context),
-                    icon: SvgPicture.asset(
-                      AppIcons.authBackIcon,
-                      width: 24,
-                      height: 24,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
+          child: Stack(
+            children: [
+              // Back button
+              Positioned(
+                top: 10,
+                left: 4,
+                child: IconButton(
+                  onPressed: () => controller.navigateToOnboarding(context),
+                  icon: SvgPicture.asset(
+                    AppIcons.authBackIcon,
+                    width: 24,
+                    height: 24,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
                     ),
                   ),
                 ),
-                // Main content
-                Column(
+              ),
+              // Main content
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Spacer(),
@@ -89,8 +102,8 @@ class AuthHomeView extends StatelessWidget {
                     const SizedBox(height: 48),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -114,6 +127,7 @@ class AuthHomeView extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
           ),
         ),

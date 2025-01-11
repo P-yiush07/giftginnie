@@ -32,8 +32,15 @@ class AuthController extends ChangeNotifier {
   void handleEmailSignIn(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const SignInScreen(),
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const SignInScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 200),
       ),
     );
   }
