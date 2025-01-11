@@ -6,6 +6,7 @@ class SignInController extends ChangeNotifier {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController otpController = TextEditingController();
   bool isLoading = false;
+  bool isPhoneVerified = false;
 
   void dispose() {
     phoneController.dispose();
@@ -13,14 +14,30 @@ class SignInController extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<void> handlePhoneLogin() async {
-    if (phoneController.text.isEmpty || otpController.text.isEmpty) return;
+  Future<void> verifyPhone() async {
+    if (phoneController.text.isEmpty) return;
     
     isLoading = true;
     notifyListeners();
 
     try {
-      // TODO: Implement phone authentication logic
+      // TODO: Implement phone verification logic
+      await Future.delayed(const Duration(seconds: 2)); // Simulated delay
+      isPhoneVerified = true;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> handlePhoneLogin() async {
+    if (otpController.text.isEmpty) return;
+    
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      // TODO: Implement OTP verification logic
       await Future.delayed(const Duration(seconds: 2)); // Simulated delay
     } finally {
       isLoading = false;
@@ -38,5 +55,15 @@ class SignInController extends ChangeNotifier {
 
   Future<void> resendOTP() async {
     // TODO: Implement OTP resend logic
+  }
+
+  void backToPhoneInput() {
+    isPhoneVerified = false;
+    notifyListeners();
+  }
+
+  String get formattedPhone {
+    if (phoneController.text.isEmpty) return '';
+    return '+91 ${phoneController.text}';
   }
 }
