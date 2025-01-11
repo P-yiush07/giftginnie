@@ -5,15 +5,23 @@ import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/icons.dart';
 import '../controllers/sign_in_controller.dart';
+import '../views/authHome_screen.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => SignInController(),
-      child: const SignInView(),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: ChangeNotifierProvider(
+        create: (_) => SignInController(),
+        child: const SignInView(),
+      ),
     );
   }
 }
@@ -28,50 +36,73 @@ class SignInView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        systemOverlayStyle: const SystemUiOverlayStyle(
-          statusBarColor: Colors.white,
-          statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
-          statusBarBrightness: Brightness.light, // For iOS (dark icons)
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              model.title,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+            // Back button
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) => 
+                        const AuthHomeScreen(),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(-1.0, 0.0);
+                        const end = Offset.zero;
+                        const curve = Curves.easeInOut;
+                        var tween = Tween(begin: begin, end: end)
+                            .chain(CurveTween(curve: curve));
+                        var offsetAnimation = animation.drive(tween);
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                      transitionDuration: const Duration(milliseconds: 300),
+                    ),
+                  );
+                },
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              model.subtitle,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      model.title,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      model.subtitle,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    _buildPhoneInput(controller),
+                    const SizedBox(height: 16),
+                    _buildOTPInput(controller),
+                    const SizedBox(height: 24),
+                    _buildLoginButton(controller),
+                    const SizedBox(height: 24),
+                    _buildDivider(model.orText),
+                    const SizedBox(height: 24),
+                    _buildSocialButtons(controller),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 32),
-            _buildPhoneInput(controller),
-            const SizedBox(height: 16),
-            _buildOTPInput(controller),
-            const SizedBox(height: 24),
-            _buildLoginButton(controller),
-            const SizedBox(height: 24),
-            _buildDivider(model.orText),
-            const SizedBox(height: 24),
-            _buildSocialButtons(controller),
           ],
         ),
       ),
