@@ -14,8 +14,8 @@ class OnboardingController extends ChangeNotifier {
       bgColor: AppColors.primaryBg
     ),
     OnboardingModel(
-      title: 'Real Time Tracking',
-      description: 'Track the status of your order in real-time, from preparation to delivery.',
+      title: 'Track Your Orders',
+      description: 'Stay updated with real-time tracking of your gift orders from purchase to delivery.',
       imagePath: AppImages.webp_onboardingPhone,
       bgColor: AppColors.secondaryBg
     ),

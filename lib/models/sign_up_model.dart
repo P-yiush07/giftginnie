@@ -1,4 +1,4 @@
-class SignInModel {
+class SignUpModel {
   final String title;
   final String subtitle;
   final String phoneLabel;
@@ -9,15 +9,15 @@ class SignInModel {
   final String googleButtonText;
   final String resendOtpText;
 
-  SignInModel({
-    this.title = 'Welcome Back 😉',
-    this.subtitle = 'Log in to your account to start gifting joy and surprises to your loved ones.',
+  SignUpModel({
+    this.title = 'Welcome',
+    this.subtitle = 'Create an account to unlock exclusive gifts and offers for your loved ones.',
     this.phoneLabel = 'Phone Number',
     this.otpLabel = 'OTP Verification',
-    this.loginButtonText = 'Log in',
+    this.loginButtonText = 'Sign Up',
     this.orText = 'OR',
-    this.facebookButtonText = 'Continue with Facebook',
-    this.googleButtonText = 'Continue with Google',
+    this.facebookButtonText = 'Sign Up with Facebook',
+    this.googleButtonText = 'Sign Up with Google',
     this.resendOtpText = 'Resend OTP',
   });
 }

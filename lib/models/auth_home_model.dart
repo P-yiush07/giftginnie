@@ -9,7 +9,7 @@ class AuthHomeModel {
 
   AuthHomeModel({
     this.welcomeTitle = 'Welcome to Gift Ginnie',
-    this.welcomeDescription = 'Get ready to discover and order delicious meals from your favorite Gift with Gift Ginnie.',
+    this.welcomeDescription = 'Explore a world of thoughtful gifts and make every occasion special with Gift Ginnie.',
     this.signInButtonText = 'Sign in',
     this.facebookButtonText = 'Continue with Facebook',
     this.googleButtonText = 'Continue with Google',

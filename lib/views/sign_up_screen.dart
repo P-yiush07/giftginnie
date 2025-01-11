@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:giftginnie_ui/controllers/sign_up_controller.dart';
+import 'package:giftginnie_ui/models/sign_up_model.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/icons.dart';
 import '../controllers/sign_in_controller.dart';
 import '../views/authHome_screen.dart';
 
-class SignInScreen extends StatelessWidget {
-  const SignInScreen({super.key});
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,20 +23,20 @@ class SignInScreen extends StatelessWidget {
       child: Container(
         color: AppColors.white,
         child: ChangeNotifierProvider(
-          create: (_) => SignInController(),
-          child: const SignInView(),
+          create: (_) => SignUpController(),
+          child: const SignUpView(),
         ),
       ),
     );
   }
 }
 
-class SignInView extends StatelessWidget {
-  const SignInView({super.key});
+class SignUpView extends StatelessWidget {
+  const SignUpView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<SignInController>(context);
+    final controller = Provider.of<SignUpController>(context);
     final model = controller.model;
 
     return WillPopScope(
@@ -56,7 +58,7 @@ class SignInView extends StatelessWidget {
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.black),
                   onPressed: () {
-                    final controller = Provider.of<SignInController>(context, listen: false);
+                    final controller = Provider.of<SignUpController>(context, listen: false);
                     controller.isPhoneVerified ? controller.backToPhoneInput() : Navigator.of(context).pop();
                   },
                 ),
@@ -106,7 +108,7 @@ class SignInView extends StatelessWidget {
     );
   }
 
-  Widget _buildPhoneInput(SignInController controller) {
+  Widget _buildPhoneInput(SignUpController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -183,7 +185,7 @@ class SignInView extends StatelessWidget {
     );
   }
 
-  Widget _buildOTPInput(SignInController controller) {
+  Widget _buildOTPInput(SignUpController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -311,7 +313,7 @@ class SignInView extends StatelessWidget {
     );
   }
 
-  Widget _buildLoginButton(SignInController controller) {
+  Widget _buildLoginButton(SignUpController controller) {
     return FilledButton(
       onPressed: controller.handlePhoneLogin,
       style: FilledButton.styleFrom(
@@ -419,7 +421,7 @@ class SignInView extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialButtons(SignInController controller) {
+  Widget _buildSocialButtons(SignUpController controller) {
     return Column(
       children: [
         _buildSocialButton(
@@ -437,7 +439,7 @@ class SignInView extends StatelessWidget {
     );
   }
 
-  Widget _buildVerifyButton(SignInController controller) {
+  Widget _buildVerifyButton(SignUpController controller) {
     return FilledButton(
       onPressed: controller.verifyPhone,
       style: FilledButton.styleFrom(

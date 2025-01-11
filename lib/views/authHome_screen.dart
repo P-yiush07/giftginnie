@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:giftginnie_ui/models/auth_home_model.dart';
 import 'package:giftginnie_ui/views/onboarding_screen.dart';
 import 'package:giftginnie_ui/views/sign_in_screen.dart';
+import 'package:giftginnie_ui/views/sign_up_screen.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/icons.dart';
@@ -81,7 +82,26 @@ class AuthHomeView extends StatelessWidget {
   }
 
   void navigateToSignUp(BuildContext context) {
-    // TODO: Implement navigation to sign up screen
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => 
+          const SignUpScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(begin: begin, end: end)
+              .chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
   }
 
   @override
