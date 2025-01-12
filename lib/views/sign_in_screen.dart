@@ -6,6 +6,8 @@ import '../constants/colors.dart';
 import '../constants/icons.dart';
 import '../controllers/sign_in_controller.dart';
 import '../views/authHome_screen.dart';
+import '../views/success_screen.dart';
+import '../models/success_model.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -56,8 +58,11 @@ class SignInView extends StatelessWidget {
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.black),
                   onPressed: () {
-                    final controller = Provider.of<SignInController>(context, listen: false);
-                    controller.isPhoneVerified ? controller.backToPhoneInput() : Navigator.of(context).pop();
+                    final controller =
+                        Provider.of<SignInController>(context, listen: false);
+                    controller.isPhoneVerified
+                        ? controller.backToPhoneInput()
+                        : Navigator.of(context).pop();
                   },
                 ),
               ),
@@ -171,7 +176,8 @@ class SignInView extends StatelessWidget {
               ),
               filled: true,
               fillColor: Colors.grey[50],
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
@@ -243,7 +249,8 @@ class SignInView extends StatelessWidget {
               ),
               filled: true,
               fillColor: Colors.grey[50],
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
@@ -282,10 +289,10 @@ class SignInView extends StatelessWidget {
             ),
           ],
         ),
-        
+
         // Spacer between groups
         const SizedBox(height: 32),
-        
+
         // Action Buttons Group
         _buildLoginButton(controller),
         const SizedBox(height: 16),
@@ -312,25 +319,53 @@ class SignInView extends StatelessWidget {
   }
 
   Widget _buildLoginButton(SignInController controller) {
-    return FilledButton(
-      onPressed: controller.handlePhoneLogin,
-      style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        minimumSize: const Size(double.infinity, 56),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
-      ),
-      child: controller.isLoading
-          ? const CircularProgressIndicator(color: Colors.white)
-          : Text(
-              controller.model.loginButtonText,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+    return Builder(
+      builder: (context) => FilledButton(
+        onPressed: () async {
+          final success = await controller.handlePhoneLogin();
+          if (success && context.mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SuccessScreen(
+                  model: SuccessModel(
+                    title: 'Login Successful',
+                    message:
+                        'Welcome back! You\'ve successfully logged into your Gift Ginnie account.',
+                    buttonText: 'Continue to Home',
+                    showBackButton: false,
+                  ),
+                  onButtonPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AuthHomeScreen()),
+                      (route) => false,
+                    );
+                  },
+                ),
               ),
-            ),
+            );
+          }
+        },
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          minimumSize: const Size(double.infinity, 56),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+        ),
+        child: controller.isLoading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Text(
+                controller.model.loginButtonText,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+      ),
     );
   }
 

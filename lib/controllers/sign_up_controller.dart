@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/sign_up_model.dart';
+import 'package:get_it/get_it.dart';
+import 'package:giftginnie_ui/services/auth_service.dart';
+
+final GetIt serviceLocator = GetIt.instance;
 
 class SignUpController extends ChangeNotifier {
   final SignUpModel _model = SignUpModel();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
+  final AuthService _authService = serviceLocator<AuthService>();
   bool _isLoading = false;
   bool _isPhoneVerified = false;
 

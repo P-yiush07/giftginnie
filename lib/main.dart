@@ -5,9 +5,11 @@ import 'views/onboarding_screen.dart';
 import 'constants/colors.dart';
 import 'utils/global.dart';
 import 'package:provider/provider.dart';
+import 'services/service_locator.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  setupServiceLocator();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
