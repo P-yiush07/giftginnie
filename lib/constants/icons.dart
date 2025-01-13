@@ -3,4 +3,12 @@ abstract class AppIcons {
   static const String svg_googleIcon = 'assets/images/google_icon.svg';
   static const String svg_authBackIcon = 'assets/images/authBack_icon.svg';
   static const String svg_successCheck = 'assets/images/success_check.svg';
+
+  // Navigation Tabs Icons
+
+  static const String svg_homeTabIcon = 'assets/images/home.svg';
+  static const String svg_cartTabIcon = 'assets/images/mall-bag.svg';
+  static const String svg_searchTabIcon = 'assets/images/search.svg';
+  static const String svg_orderTabIcon = 'assets/images/enter-the-keyboard.svg';
+  static const String svg_profileTabIcon = 'assets/images/user.svg';
 }

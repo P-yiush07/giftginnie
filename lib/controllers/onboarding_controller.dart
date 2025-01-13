@@ -27,6 +27,8 @@ class OnboardingController extends ChangeNotifier {
     ),
   ];
 
+  final PageController pageController = PageController();
+
   // Getters
   int get currentPage => _currentPage;
   List<OnboardingModel> get onboardingPages => _onboardingPages;
@@ -37,9 +39,18 @@ class OnboardingController extends ChangeNotifier {
     notifyListeners();
   }
 
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
+
   void nextPage(BuildContext context) {
     if (_currentPage < _onboardingPages.length - 1) {
-      currentPage = _currentPage + 1;
+      pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     } else {
       Navigator.pushReplacement(
         context,
@@ -66,11 +77,38 @@ class OnboardingController extends ChangeNotifier {
 
   void previousPage() {
     if (_currentPage > 0) {
-      currentPage = _currentPage - 1;
+      pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
-  void skipOnboarding() {
-    currentPage = _onboardingPages.length - 1;
+  void skipOnboarding(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => 
+          const AuthHomeScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(begin: begin, end: end)
+              .chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
+  }
+
+  void onPageChanged(int page) {
+    _currentPage = page;
+    notifyListeners();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:giftginnie_ui/views/home_screen.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/icons.dart';
@@ -321,35 +322,40 @@ class SignInView extends StatelessWidget {
   Widget _buildLoginButton(SignInController controller) {
     return Builder(
       builder: (context) => FilledButton(
-        onPressed: () async {
-          final success = await controller.handlePhoneLogin();
-          if (success && context.mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SuccessScreen(
-                  model: SuccessModel(
-                    title: 'Login Successful',
-                    message:
-                        'Welcome back! You\'ve successfully logged into your Gift Ginnie account.',
-                    buttonText: 'Continue to Home',
-                    showBackButton: false,
-                  ),
-                  onButtonPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const AuthHomeScreen()),
-                      (route) => false,
-                    );
-                  },
-                ),
-              ),
-            );
-          }
-        },
+        onPressed: controller.otpController.text.length == 6 
+            ? () async {
+                final success = await controller.handlePhoneLogin();
+                if (success && context.mounted) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SuccessScreen(
+                        model: SuccessModel(
+                          title: 'Login Successful',
+                          message:
+                              'Welcome back! You\'ve successfully logged into your Gift Ginnie account.',
+                          buttonText: 'Continue to Home',
+                          showBackButton: false,
+                        ),
+                        onButtonPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const HomeScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                }
+              }
+            : null,
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: controller.otpController.text.length == 6 
+              ? AppColors.primary 
+              : Colors.grey,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -474,9 +480,13 @@ class SignInView extends StatelessWidget {
 
   Widget _buildVerifyButton(SignInController controller) {
     return FilledButton(
-      onPressed: controller.verifyPhone,
+      onPressed: controller.phoneController.text.length == 10 
+          ? controller.verifyPhone 
+          : null,
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: controller.phoneController.text.length == 10 
+            ? AppColors.primary 
+            : Colors.grey,
         minimumSize: const Size(double.infinity, 56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),

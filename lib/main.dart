@@ -5,15 +5,18 @@ import 'views/onboarding_screen.dart';
 import 'constants/colors.dart';
 import 'utils/global.dart';
 import 'package:provider/provider.dart';
-import 'services/service_locator.dart';
+import 'services/cache_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  setupServiceLocator();
+  
+  // Initialize CacheService
+  await CacheService().init();
+
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
-    statusBarBrightness: Brightness.light, // For iOS (dark icons)
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
   ));
   runApp(const MyApp());
 }

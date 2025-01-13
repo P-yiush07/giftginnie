@@ -1,0 +1,35 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g clip-path="url(#clip0_186_3516)">
+<path d="M7.99996 14.7776C11.3751 14.7776 14.1111 12.0416 14.1111 8.66653C14.1111 5.29147 11.3751 2.55542 7.99996 2.55542C4.62489 2.55542 1.88885 5.29147 1.88885 8.66653C1.88885 12.0416 4.62489 14.7776 7.99996 14.7776Z" fill="white"/>
+<path d="M7.99996 14.7776C11.3751 14.7776 14.1111 12.0416 14.1111 8.66653C14.1111 5.29147 11.3751 2.55542 7.99996 2.55542C4.62489 2.55542 1.88885 5.29147 1.88885 8.66653C1.88885 12.0416 4.62489 14.7776 7.99996 14.7776Z" fill="url(#pattern0_186_3516)" fill-opacity="0.05" style="mix-blend-mode:darken"/>
+<path d="M7.99996 14.7776C11.3751 14.7776 14.1111 12.0416 14.1111 8.66653C14.1111 5.29147 11.3751 2.55542 7.99996 2.55542C4.62489 2.55542 1.88885 5.29147 1.88885 8.66653C1.88885 12.0416 4.62489 14.7776 7.99996 14.7776Z" fill="#31D583"/>
+<path d="M7.99996 14.7776C11.3751 14.7776 14.1111 12.0416 14.1111 8.66653C14.1111 5.29147 11.3751 2.55542 7.99996 2.55542C4.62489 2.55542 1.88885 5.29147 1.88885 8.66653C1.88885 12.0416 4.62489 14.7776 7.99996 14.7776Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M7.99996 14.7776C11.3751 14.7776 14.1111 12.0416 14.1111 8.66653C14.1111 5.29147 11.3751 2.55542 7.99996 2.55542C4.62489 2.55542 1.88885 5.29147 1.88885 8.66653C1.88885 12.0416 4.62489 14.7776 7.99996 14.7776Z" stroke="url(#pattern1_186_3516)" stroke-opacity="0.05" stroke-width="1.5" stroke-linejoin="round" style="mix-blend-mode:darken"/>
+<path d="M7.99996 14.7776C11.3751 14.7776 14.1111 12.0416 14.1111 8.66653C14.1111 5.29147 11.3751 2.55542 7.99996 2.55542C4.62489 2.55542 1.88885 5.29147 1.88885 8.66653C1.88885 12.0416 4.62489 14.7776 7.99996 14.7776Z" stroke="#31D583" stroke-width="1.5" stroke-linejoin="round"/>
+<path d="M7.91983 5.11792L7.91943 8.78752L10.5102 11.3783" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1.33331 2.99992L3.66665 1.33325" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1.33331 2.99992L3.66665 1.33325" stroke="url(#pattern2_186_3516)" stroke-opacity="0.05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="mix-blend-mode:darken"/>
+<path d="M1.33331 2.99992L3.66665 1.33325" stroke="#31D583" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M14.6667 2.99992L12.3334 1.33325" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M14.6667 2.99992L12.3334 1.33325" stroke="url(#pattern3_186_3516)" stroke-opacity="0.05" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="mix-blend-mode:darken"/>
+<path d="M14.6667 2.99992L12.3334 1.33325" stroke="#31D583" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<pattern id="pattern0_186_3516" patternContentUnits="objectBoundingBox" width="4.34618" height="4.34619">
+<use xlink:href="#image0_186_3516" transform="scale(0.067909)"/>
+</pattern>
+<pattern id="pattern1_186_3516" patternContentUnits="objectBoundingBox" width="4.34618" height="4.34619">
+<use xlink:href="#image0_186_3516" transform="scale(0.067909)"/>
+</pattern>
+<pattern id="pattern2_186_3516" patternContentUnits="objectBoundingBox" width="22.7657" height="31.872">
+<use xlink:href="#image0_186_3516" transform="scale(0.355714 0.498)"/>
+</pattern>
+<pattern id="pattern3_186_3516" patternContentUnits="objectBoundingBox" width="22.7657" height="31.872">
+<use xlink:href="#image0_186_3516" transform="scale(0.355714 0.498)"/>
+</pattern>
+<clipPath id="clip0_186_3516">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+<image id="image0_186_3516" width="64" height="64" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAONJREFUeF7t20EOhEAIRFG4/6F7DvEnYeFzryQIv6pBd2behOu9dPvsbog+k+NLgArQAqmJcw9iAAhSgZKB3IJkkAySQTJ4CiE+gA8oBeg0mH3Ai084P89HhqwEqIA209ICsQdjAeaZIgaAYKxBDMCAYy8fXwAIgiAIcoJpJEYGI4VjB3YrbC9gL2AvkCB43cM5PgZgAAZgQFnNZAhdGykQBEEQBEEQDBmgAm2glM/z+QUYisYUGoldO7kY32IEAzCg6RgIRgjFAsw+AgRBMNYgBmCAT2TCYfoPPz/HCqQCX1eBHzHnv7C7WhBSAAAAAElFTkSuQmCC"/>
+</defs>
+</svg>

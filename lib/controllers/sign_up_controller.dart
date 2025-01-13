@@ -13,6 +13,22 @@ class SignUpController extends ChangeNotifier {
   bool _isLoading = false;
   bool _isPhoneVerified = false;
 
+  SignUpController() {
+    // Add listeners to controllers
+    _phoneController.addListener(_onPhoneChanged);
+    _otpController.addListener(_onOtpChanged);
+  }
+
+  void _onPhoneChanged() {
+    // Trigger UI update when phone number changes
+    notifyListeners();
+  }
+
+  void _onOtpChanged() {
+    // Trigger UI update when OTP changes
+    notifyListeners();
+  }
+
   // Getters
   SignUpModel get model => _model;
   TextEditingController get phoneController => _phoneController;
@@ -37,6 +53,8 @@ class SignUpController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _phoneController.removeListener(_onPhoneChanged);
+    _otpController.removeListener(_onOtpChanged);
     _phoneController.dispose();
     _otpController.dispose();
     super.dispose();

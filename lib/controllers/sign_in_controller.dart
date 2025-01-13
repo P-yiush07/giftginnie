@@ -1,19 +1,32 @@
 import 'package:flutter/material.dart';
 import '../models/sign_in_model.dart';
-import '../services/auth_service.dart';
-import 'package:get_it/get_it.dart';
-
-final GetIt serviceLocator = GetIt.instance;
+import '../services/services.dart';
 
 class SignInController extends ChangeNotifier {
   final SignInModel _model = SignInModel();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
-  final AuthService _authService = serviceLocator<AuthService>();
+  final AuthService _authService = AuthService();
   
   bool _isLoading = false;
   bool _isPhoneVerified = false;
   String? _error;
+
+  SignInController() {
+    // Add listeners to controllers
+    _phoneController.addListener(_onPhoneChanged);
+    _otpController.addListener(_onOtpChanged);
+  }
+
+  void _onPhoneChanged() {
+    // Trigger UI update when phone number changes
+    notifyListeners();
+  }
+
+  void _onOtpChanged() {
+    // Trigger UI update when OTP changes
+    notifyListeners();
+  }
 
   // Getters
   SignInModel get model => _model;
@@ -41,6 +54,8 @@ class SignInController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _phoneController.removeListener(_onPhoneChanged);
+    _otpController.removeListener(_onOtpChanged);
     _phoneController.dispose();
     _otpController.dispose();
     super.dispose();
@@ -70,7 +85,7 @@ class SignInController extends ChangeNotifier {
     isLoading = true;
 
     try {
-      // final token = await _authService.verifyOTP(
+      // await _authService.verifyOTP(
       //   _phoneController.text, 
       //   _otpController.text
       // );
