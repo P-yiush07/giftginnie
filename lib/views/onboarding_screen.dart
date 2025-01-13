@@ -2,15 +2,23 @@ import 'package:flutter/material.dart';
 import '../controllers/onboarding_controller.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
+import 'package:flutter/services.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => OnboardingController(),
-      child: const OnboardingView(),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+        statusBarBrightness: Brightness.light, // For iOS (dark icons)
+      ),
+      child: ChangeNotifierProvider(
+        create: (_) => OnboardingController(),
+        child: const OnboardingView(),
+      ),
     );
   }
 }
@@ -45,7 +53,7 @@ class OnboardingView extends StatelessWidget {
                     controller.previousPage();
                   } else if (details.primaryVelocity! < 0) {
                     // Swiped left
-                    controller.nextPage();
+                    controller.nextPage(context);
                   }
                 },
                 child: Column(
@@ -138,7 +146,7 @@ class OnboardingView extends StatelessWidget {
                           const SizedBox(width: 16),
                           FilledButton(
                             onPressed: () {
-                              controller.nextPage();
+                              controller.nextPage(context);
                             },
                             style: FilledButton.styleFrom(
                               minimumSize: const Size(120, 48),
