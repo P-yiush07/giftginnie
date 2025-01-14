@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
@@ -25,23 +26,33 @@ class CacheService {
   }
 
   Future<void> _loadFromCache() async {
-    _token = _prefs.getString(_tokenKey);
-    final userStr = _prefs.getString(_userKey);
-    if (userStr != null) {
-      _userData = Map<String, dynamic>.from(userStr as Map);
+    try {
+      _token = _prefs.getString(_tokenKey);
+      final userStr = _prefs.getString(_userKey);
+      if (userStr != null) {
+        // Parse the JSON string to Map
+        _userData = json.decode(userStr) as Map<String, dynamic>;
+      }
+      debugPrint('Loaded from cache - Token: $_token, User: $_userData');
+    } catch (e) {
+      debugPrint('Error loading from cache: $e');
+      // Clear potentially corrupted data
+      await _prefs.remove(_tokenKey);
+      await _prefs.remove(_userKey);
+      _token = null;
+      _userData = null;
     }
-    debugPrint('Loaded from cache - Token: $_token, User: $_userData');
   }
 
   // Auth Data Management
   Future<void> saveAuthData({
     required String token,
-    required Map<String, dynamic> userData,
+    Map<String, dynamic>? userData,
   }) async {
-    await Future.wait([
-      _prefs.setString(_tokenKey, token),
-      _prefs.setString(_userKey, userData.toString()),
-    ]);
+    await _prefs.setString(_tokenKey, token);
+    if (userData != null) {
+      await _prefs.setString(_userKey, json.encode(userData));
+    }
     _token = token;
     _userData = userData;
   }

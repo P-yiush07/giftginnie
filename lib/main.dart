@@ -1,34 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/controllers/authHome_controller.dart';
-import 'views/onboarding_screen.dart';
+import 'package:giftginnie_ui/widgets/splash_screen.dart';
 import 'constants/colors.dart';
 import 'utils/global.dart';
 import 'package:provider/provider.dart';
 import 'services/cache_service.dart';
+import 'api/api_client.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize CacheService
-  await CacheService().init();
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    // Initialize CacheService first
+    await CacheService().init();
+    
+    // Then initialize API client
+    // final apiClient = ApiClient();
+    // await apiClient.testConnection(); 
 
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-    statusBarBrightness: Brightness.light,
-    systemNavigationBarColor: Colors.transparent,
-    systemNavigationBarDividerColor: Colors.transparent,
-    systemNavigationBarIconBrightness: Brightness.dark,
-  ));
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ));
 
-  // Enable transparent navigation bar
-  await SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.edgeToEdge,
-    overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
-  );
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.edgeToEdge,
+      overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
+    );
 
-  runApp(const MyApp());
+    runApp(const MyApp());
+  } catch (e) {
+    debugPrint('Initialization Error: $e');
+    // run the app even if initialization fails
+    runApp(const MyApp());
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -62,7 +72,7 @@ class MyApp extends StatelessWidget {
           ),
           scaffoldBackgroundColor: Colors.transparent,
         ),
-        home: const OnboardingScreen(),
+        home: const SplashScreen(),
       ),
     );
   }

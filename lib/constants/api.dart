@@ -1,11 +1,12 @@
 abstract class ApiConstants {
-  static const String baseUrl = 'https://api.example.com';
+  static const String baseUrl = 'http://10.0.2.2:8000/api/v1';
 }
 
 abstract class ApiEndpoints {
   // Auth endpoints
-  static const String sendOTP = '/auth/send-otp';
-  static const String verifyOTP = '/auth/verify-otp';
+  static const String sendOTP = '/users/auth/sendOTP/';
+  static const String verifyOTP = '/users/auth/verifyOTP/';
+  static const String refreshToken = '/users/auth/tokens/refresh/';
   
   // User endpoints
   static const String userProfile = '/user/profile';
@@ -15,5 +16,4 @@ abstract class ApiEndpoints {
   
   // Order endpoints
   static const String orders = '/orders';
-  
 }

@@ -101,4 +101,13 @@ class ApiClient {
     }
     return Exception('Something went wrong');
   }
+
+  Future<void> testConnection() async {
+    try {
+      final response = await _dio.get('/');
+      print('Connection successful: ${response.statusCode}');
+    } catch (e) {
+      print('Connection failed: $e');
+    }
+  }
 }

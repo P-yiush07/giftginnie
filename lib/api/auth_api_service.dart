@@ -1,3 +1,5 @@
+import 'package:giftginnie_ui/models/otp_verification_model.dart';
+
 import 'api_client.dart';
 import '../constants/api.dart';
 
@@ -6,22 +8,49 @@ class AuthApiService {
   
   AuthApiService({ApiClient? client}) : _client = client ?? ApiClient();
 
-  Future<Map<String, dynamic>> sendOTP(String phoneNumber) async {
-    // TODO: Replace with actual endpoint
-    return _client.post(
+  Future<OtpVerificationModel> sendOTP(String phoneNumber) async {
+    final response = await _client.post(
       ApiEndpoints.sendOTP,
-      data: {'phone': phoneNumber},
-    );
-  }
-
-  Future<Map<String, dynamic>> verifyOTP(String phoneNumber, String otp) async {
-    // TODO: Replace with actual endpoint
-    return _client.post(
-      ApiEndpoints.verifyOTP,
       data: {
-        'phone': phoneNumber,
-        'otp': otp,
+        'phone_number': phoneNumber,
+        'country_code': '91',
       },
     );
+
+    if (response['message'] == 'OTP sent successfully') {
+      return OtpVerificationModel.fromJson(response['data']);
+    } else {
+      throw Exception('Failed to send OTP');
+    }
+  }
+
+  Future<Map<String, dynamic>> verifyOTP({
+    required String phoneNumber,
+    required String otp,
+    required String verificationId,
+    required String token,
+  }) async {
+    final response = await _client.post(
+      ApiEndpoints.verifyOTP,
+      data: {
+        'phone_number': phoneNumber,
+        'country_code': '91',
+        'otp': otp,
+        'verification_id': verificationId,
+        'token': token,
+      },
+    );
+
+    return response;
+  }
+
+  Future<Map<String, dynamic>> refreshToken(String refreshToken) async {
+    final response = await _client.post(
+      ApiEndpoints.refreshToken,
+      data: {
+        'refresh': [refreshToken],
+      },
+    );
+    return response;
   }
 }

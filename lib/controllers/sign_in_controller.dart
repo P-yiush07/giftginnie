@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/sign_in_model.dart';
 import '../services/services.dart';
+import '../models/otp_verification_model.dart';
 
 class SignInController extends ChangeNotifier {
   final SignInModel _model = SignInModel();
@@ -11,6 +12,7 @@ class SignInController extends ChangeNotifier {
   bool _isLoading = false;
   bool _isPhoneVerified = false;
   String? _error;
+  OtpVerificationModel? _verificationData;
 
   SignInController() {
     // Add listeners to controllers
@@ -68,7 +70,7 @@ class SignInController extends ChangeNotifier {
     isLoading = true;
 
     try {
-      // await _authService.sendOTP(_phoneController.text);
+      _verificationData = await _authService.sendOTP(_phoneController.text);
       isPhoneVerified = true;
     } catch (e) {
       _error = e.toString();
@@ -76,25 +78,30 @@ class SignInController extends ChangeNotifier {
     } finally {
       isLoading = false;
     }
+    notifyListeners();
   }
 
   Future<bool> handlePhoneLogin() async {
-    if (_otpController.text.isEmpty) return false;
+    if (_otpController.text.isEmpty || _verificationData == null) return false;
     
     _error = null;
     isLoading = true;
 
     try {
-      // await _authService.verifyOTP(
-      //   _phoneController.text, 
-      //   _otpController.text
-      // );
+      await _authService.verifyOTP(
+        phoneNumber: _phoneController.text,
+        otp: _otpController.text,
+        verificationId: _verificationData!.verificationId,
+        token: _verificationData!.authToken,
+      );
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = 'Wrong OTP, please re-enter';
+      _otpController.clear();
       return false;
     } finally {
       isLoading = false;
+      notifyListeners();
     }
   }
 
