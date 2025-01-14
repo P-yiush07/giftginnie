@@ -490,7 +490,9 @@ class SignInView extends StatelessWidget {
   Widget _buildVerifyButton(SignInController controller) {
     final bool isEnabled = controller.phoneController.text.length == 10;
     return FilledButton(
-      onPressed: isEnabled ? controller.verifyPhone : null,
+      onPressed: isEnabled ? () async {
+        await controller.verifyPhone();
+      } : null,
       style: FilledButton.styleFrom(
         backgroundColor: isEnabled ? AppColors.primary : Colors.grey,
         minimumSize: const Size(double.infinity, 56),

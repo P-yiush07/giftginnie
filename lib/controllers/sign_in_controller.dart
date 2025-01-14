@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/sign_in_model.dart';
-import '../services/services.dart';
+import '../services/auth_service.dart';
 import '../models/otp_verification_model.dart';
 
 class SignInController extends ChangeNotifier {
@@ -66,19 +66,24 @@ class SignInController extends ChangeNotifier {
   Future<void> verifyPhone() async {
     if (_phoneController.text.isEmpty) return;
     
+    debugPrint('Starting phone verification...');
     _error = null;
     isLoading = true;
 
     try {
       _verificationData = await _authService.sendOTP(_phoneController.text);
+      debugPrint('OTP sent successfully');
       isPhoneVerified = true;
+      debugPrint('isPhoneVerified set to: $_isPhoneVerified');
+      notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      debugPrint('Error during verification: $e');
+      _error = e.toString().replaceAll('Exception: ', '');
       isPhoneVerified = false;
     } finally {
       isLoading = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<bool> handlePhoneLogin() async {
@@ -88,6 +93,12 @@ class SignInController extends ChangeNotifier {
     isLoading = true;
 
     try {
+      debugPrint('Verifying OTP with:');
+      debugPrint('Phone: ${_phoneController.text}');
+      debugPrint('OTP: ${_otpController.text}');
+      debugPrint('VerificationId: ${_verificationData!.verificationId}');
+      debugPrint('Token: ${_verificationData!.authToken}');
+      
       await _authService.verifyOTP(
         phoneNumber: _phoneController.text,
         otp: _otpController.text,
@@ -96,6 +107,7 @@ class SignInController extends ChangeNotifier {
       );
       return true;
     } catch (e) {
+      debugPrint('Error in handlePhoneLogin: $e');
       _error = 'Wrong OTP, please re-enter';
       _otpController.clear();
       return false;

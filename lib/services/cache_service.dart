@@ -51,7 +51,8 @@ class CacheService {
   }) async {
     await _prefs.setString(_tokenKey, token);
     if (userData != null) {
-      await _prefs.setString(_userKey, json.encode(userData));
+      final userStr = json.encode(userData);
+      await _prefs.setString(_userKey, userStr);
     }
     _token = token;
     _userData = userData;
@@ -68,7 +69,23 @@ class CacheService {
 
   // Getters
   String? get token => _token;
-  Map<String, dynamic>? get userData => _userData;
+  Map<String, dynamic>? get userData {
+    if (_userData != null) return _userData;
+    
+    final userStr = _prefs.getString(_userKey);
+    if (userStr != null) {
+      try {
+        _userData = json.decode(userStr) as Map<String, dynamic>;
+        return _userData;
+      } catch (e) {
+        debugPrint('Error decoding user data: $e');
+        // Clear corrupted data
+        _prefs.remove(_userKey);
+        _userData = null;
+      }
+    }
+    return null;
+  }
   bool get isAuthenticated => _token != null;
 
   // Generic Storage Methods

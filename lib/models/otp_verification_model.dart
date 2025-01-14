@@ -9,8 +9,8 @@ class OtpVerificationModel {
 
   factory OtpVerificationModel.fromJson(Map<String, dynamic> json) {
     return OtpVerificationModel(
-      verificationId: json['verification_id'],
-      authToken: json['authToken'],
+      verificationId: json['verification_id'] ?? '',
+      authToken: json['authToken'] ?? '',
     );
   }
 }

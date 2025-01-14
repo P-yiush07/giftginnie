@@ -6,7 +6,6 @@ import 'constants/colors.dart';
 import 'utils/global.dart';
 import 'package:provider/provider.dart';
 import 'services/cache_service.dart';
-import 'api/api_client.dart';
 
 void main() async {
   try {
