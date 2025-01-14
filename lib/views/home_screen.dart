@@ -34,40 +34,33 @@ class HomeView extends StatelessWidget {
   }) {
     final color = isActive ? AppColors.primary : Colors.grey;
     
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const SizedBox(height: 10),
-        SvgPicture.asset(
-          icon,
-          colorFilter: ColorFilter.mode(
-            color,
-            BlendMode.srcIn,
+    return SizedBox(
+      width: 70,
+      height: 50,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 6), 
+          SvgPicture.asset(
+            icon,
+            colorFilter: ColorFilter.mode(
+              color,
+              BlendMode.srcIn,
+            ),
+            height: 28,
+            width: 28,
           ),
-          height: 26,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            color: color,
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-        ),
-        const SizedBox(height: 2),
-        Container(
-          width: 5,
-          height: 5,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive ? color : Colors.transparent,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -146,7 +139,7 @@ class HomeView extends StatelessWidget {
       builder: (context, controller, _) {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle.light.copyWith(
-            systemNavigationBarColor: Colors.white,
+            systemNavigationBarColor: Colors.transparent,
             systemNavigationBarIconBrightness: Brightness.dark,
           ),
           child: Scaffold(
@@ -165,33 +158,23 @@ class HomeView extends StatelessWidget {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, -3),
                   ),
                 ],
               ),
-              child: SafeArea(
-                child: Theme(
-                  data: Theme.of(context).copyWith(
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                  ),
-                  child: BottomNavigationBar(
-                    elevation: 0,
-                    currentIndex: controller.currentIndex,
-                    onTap: controller.setCurrentIndex,
-                    type: BottomNavigationBarType.fixed,
-                    backgroundColor: Colors.white,
-                    selectedItemColor: AppColors.primary,
-                    unselectedItemColor: Colors.grey,
-                    selectedLabelStyle: const TextStyle(height: 0),
-                    unselectedLabelStyle: const TextStyle(height: 0),
-                    showSelectedLabels: true,
-                    showUnselectedLabels: true,
-                    items: _navigationItems,
-                  ),
-                ),
+              child: BottomNavigationBar(
+                elevation: 0,
+                currentIndex: controller.currentIndex,
+                onTap: controller.setCurrentIndex,
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: Colors.white,
+                selectedItemColor: AppColors.primary,
+                unselectedItemColor: Colors.grey,
+                selectedFontSize: 0,
+                unselectedFontSize: 0,
+                items: _navigationItems,
               ),
             ),
           ),

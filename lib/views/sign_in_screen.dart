@@ -320,9 +320,10 @@ class SignInView extends StatelessWidget {
   }
 
   Widget _buildLoginButton(SignInController controller) {
+    final bool isEnabled = controller.otpController.text.length == 6;
     return Builder(
       builder: (context) => FilledButton(
-        onPressed: controller.otpController.text.length == 6 
+        onPressed: isEnabled
             ? () async {
                 final success = await controller.handlePhoneLogin();
                 if (success && context.mounted) {
@@ -353,9 +354,7 @@ class SignInView extends StatelessWidget {
               }
             : null,
         style: FilledButton.styleFrom(
-          backgroundColor: controller.otpController.text.length == 6 
-              ? AppColors.primary 
-              : Colors.grey,
+          backgroundColor: isEnabled ? AppColors.primary : Colors.grey,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -365,10 +364,10 @@ class SignInView extends StatelessWidget {
             ? const CircularProgressIndicator(color: Colors.white)
             : Text(
                 controller.model.loginButtonText,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: isEnabled ? Colors.white : Colors.grey[300],
                 ),
               ),
       ),
@@ -479,14 +478,11 @@ class SignInView extends StatelessWidget {
   }
 
   Widget _buildVerifyButton(SignInController controller) {
+    final bool isEnabled = controller.phoneController.text.length == 10;
     return FilledButton(
-      onPressed: controller.phoneController.text.length == 10 
-          ? controller.verifyPhone 
-          : null,
+      onPressed: isEnabled ? controller.verifyPhone : null,
       style: FilledButton.styleFrom(
-        backgroundColor: controller.phoneController.text.length == 10 
-            ? AppColors.primary 
-            : Colors.grey,
+        backgroundColor: isEnabled ? AppColors.primary : Colors.grey,
         minimumSize: const Size(double.infinity, 56),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),
@@ -494,12 +490,12 @@ class SignInView extends StatelessWidget {
       ),
       child: controller.isLoading
           ? const CircularProgressIndicator(color: Colors.white)
-          : const Text(
+          : Text(
               'Verify Phone',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: isEnabled ? Colors.white : Colors.grey[300],
               ),
             ),
     );

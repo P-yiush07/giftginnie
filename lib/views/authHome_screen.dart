@@ -21,11 +21,10 @@ class AuthHomeScreen extends StatelessWidget {
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: AppColors.authBackground,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Container(
-        color: AppColors.authBackground,
+        // color: AppColors.authBackground,
         child: const AuthHomeView(),
       ),
     );

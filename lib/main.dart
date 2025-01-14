@@ -17,7 +17,17 @@ void main() async {
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.light,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.dark,
   ));
+
+  // Enable transparent navigation bar
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+    overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
+  );
+
   runApp(const MyApp());
 }
 
@@ -42,6 +52,7 @@ class MyApp extends StatelessWidget {
             seedColor: AppColors.primary,
             brightness: Brightness.light,
           ),
+          scaffoldBackgroundColor: Colors.transparent,
         ),
         darkTheme: ThemeData(
           useMaterial3: true,
@@ -49,6 +60,7 @@ class MyApp extends StatelessWidget {
             seedColor: AppColors.primary,
             brightness: Brightness.dark,
           ),
+          scaffoldBackgroundColor: Colors.transparent,
         ),
         home: const OnboardingScreen(),
       ),
