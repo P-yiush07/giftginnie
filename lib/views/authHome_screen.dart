@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/models/auth_home_model.dart';
 import 'package:giftginnie_ui/views/onboarding_screen.dart';
 import 'package:giftginnie_ui/views/sign_in_screen.dart';
@@ -149,9 +150,8 @@ class AuthHomeView extends StatelessWidget {
                     const Spacer(),
                     Text(
                       model.welcomeTitle,
-                      style: const TextStyle(
+                      style: AppFonts.heading1.copyWith(
                         fontSize: 24,
-                        fontWeight: FontWeight.bold,
                         color: AppColors.authTitleText,
                       ),
                       textAlign: TextAlign.center,
@@ -159,7 +159,7 @@ class AuthHomeView extends StatelessWidget {
                     const SizedBox(height: 12),
                     Text(
                       model.welcomeDescription,
-                      style: const TextStyle(
+                      style: AppFonts.paragraph.copyWith(
                         fontSize: 16,
                         color: AppColors.authDescriptionText,
                       ),
@@ -192,9 +192,8 @@ class AuthHomeView extends StatelessWidget {
           ),
           child: Text(
             model.signInButtonText,
-            style: const TextStyle(
+            style: AppFonts.paragraph.copyWith(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
               color: AppColors.authTitleText,
             ),
           ),
@@ -217,7 +216,9 @@ class AuthHomeView extends StatelessWidget {
           children: [
             Text(
               model.noAccountText,
-              style: const TextStyle(color: AppColors.authDescriptionText),
+              style: AppFonts.paragraph.copyWith(
+                color: AppColors.authDescriptionText
+                ),
             ),
             TextButton(
               onPressed: () => navigateToSignUp(context),
@@ -228,7 +229,7 @@ class AuthHomeView extends StatelessWidget {
               ),
               child: Text(
                 model.signUpButtonText,
-                style: TextStyle(
+                style: AppFonts.paragraph.copyWith(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
@@ -265,9 +266,8 @@ class AuthHomeView extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             text,
-            style: const TextStyle(
+            style: AppFonts.paragraph.copyWith(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
               color: AppColors.authSocialButtonText,
             ),
           ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/constants/fonts.dart';
+import 'package:giftginnie_ui/constants/images.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/home_tab_controller.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -125,7 +127,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                           children: [
                             Text(
                               'HomeTown',
-                              style: TextStyle(
+                              style: AppFonts.paragraph.copyWith(
                                 fontSize: 14,
                                 color: AppColors.textGrey,
                               ),
@@ -135,14 +137,14 @@ class _HomeTabViewState extends State<HomeTabView> {
                               children: [
                                 Icon(
                                   Icons.location_on,
-                                  size: 16,
+                                  size: 18,
                                   color: AppColors.primaryRed,
                                 ),
                                 const SizedBox(width: 4),
-                                const Text(
+                                Text(
                                   '6391 Elgin St, Delaware 10299',
-                                  style: TextStyle(
-                                    fontSize: 14,
+                                  style: AppFonts.paragraph.copyWith(
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w500,
                                     color: AppColors.black,
                                   ),
@@ -187,7 +189,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                   ),
                   decoration: InputDecoration(
                     hintText: 'Search Gift, Products, Labels....',
-                    hintStyle: TextStyle(
+                    hintStyle: AppFonts.paragraph.copyWith(
                       color: AppColors.textGrey,
                     ),
                     prefixIcon: Padding(
@@ -269,9 +271,9 @@ class _HomeTabViewState extends State<HomeTabView> {
                                           color: const Color(0xFFFFFFFF),
                                           borderRadius: BorderRadius.circular(16),
                                         ),
-                                        child: const Text(
+                                        child: Text(
                                           'Limited Time',
-                                          style: TextStyle(
+                                          style: AppFonts.paragraph.copyWith(
                                             color: Color(0xFFED6E61),
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
@@ -281,20 +283,18 @@ class _HomeTabViewState extends State<HomeTabView> {
                                     const Spacer(),
                                     Text(
                                       _offers[index].title,
-                                      style: const TextStyle(
+                                      style: AppFonts.paragraph.copyWith(
                                         color: Colors.white,
                                         fontSize: 20,
-                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                     Row(
                                       children: [
-                                        const Text(
+                                        Text(
                                           'upto ',
-                                          style: TextStyle(
+                                          style: AppFonts.paragraph.copyWith(
                                             color: Colors.white,
                                             fontSize: 32,
-                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         Text(
@@ -305,12 +305,11 @@ class _HomeTabViewState extends State<HomeTabView> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                        const Text(
+                                        Text(
                                           ' off',
-                                          style: TextStyle(
+                                          style: AppFonts.paragraph.copyWith(
                                             color: Colors.white,
                                             fontSize: 32,
-                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                       ],
@@ -367,7 +366,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                                           ),
                                           child: Text(
                                             _offers[index].buttonText,
-                                            style: const TextStyle(
+                                            style: AppFonts.paragraph.copyWith(
                                               color: Colors.white,
                                               fontSize: 14,
                                               fontWeight: FontWeight.w500,
@@ -406,13 +405,12 @@ class _HomeTabViewState extends State<HomeTabView> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
                         'Categories',
-                        style: TextStyle(
+                        style: AppFonts.heading1.copyWith(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
                           color: AppColors.black,
                         ),
                       ),
@@ -472,6 +470,49 @@ class _HomeTabViewState extends State<HomeTabView> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 100,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // First row
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildProductCategoryChip('Diary'),
+                                  const SizedBox(width: 12),
+                                  _buildProductCategoryChip('Water Bottle'),
+                                  const SizedBox(width: 12),
+                                  _buildProductCategoryChip('Wooden Calender'),
+                                  const SizedBox(width: 12),
+                                  _buildProductCategoryChip('Wooden Frame'),
+                                  const SizedBox(width: 12),
+                                  _buildProductCategoryChip('Photo Frame'),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              // Second row
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildProductCategoryChip('Mug'),
+                                  const SizedBox(width: 12),
+                                  _buildProductCategoryChip('T-Shirt'),
+                                  const SizedBox(width: 12),
+                                  _buildProductCategoryChip('Custom Gift'),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 // Increased spacing before Top Products
@@ -482,18 +523,17 @@ class _HomeTabViewState extends State<HomeTabView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Top Products',
-                        style: TextStyle(
+                        style: AppFonts.heading1.copyWith(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
                           color: AppColors.black,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Gift your loved ones the best products',
-                        style: TextStyle(
+                        style: AppFonts.paragraph.copyWith(
                           fontSize: 14,
                           color: AppColors.textGrey,
                         ),
@@ -536,6 +576,124 @@ class _HomeTabViewState extends State<HomeTabView> {
                     ],
                   ),
                 ),
+                // After the Top Products section, add:
+                const SizedBox(height: 40),
+                
+                // Popular Categories Section
+                Container(
+                  width: double.infinity,
+                  height: 125,
+                  padding: const EdgeInsets.fromLTRB(16.0, 28.0, 16.0, 16.0),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFFFFF1EB),
+                        const Color(0xFFF7F5CA),
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Popular Categories',
+                        style: AppFonts.paragraph.copyWith(
+                          fontSize: 18,
+                          color: AppColors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Start your day with the right mind',
+                        style: AppFonts.paragraph.copyWith(
+                          fontSize: 14,
+                          color: AppColors.textGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // After the Popular Categories section
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 280,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    children: [
+                      _buildGiftCategoryCard(
+                        image: AppImages.webp_giftCat1,
+                        rating: 4.5,
+                        title: 'Gift Categories 1',
+                        categories: ['Birthday', 'Anniversary'],
+                        isBestDeal: true,
+                      ),
+                      const SizedBox(width: 16), // Add spacing between cards
+                      _buildGiftCategoryCard(
+                        image: AppImages.webp_giftCat2,
+                        rating: 3.5,
+                        title: 'Gift Categories 2',
+                        categories: ['Birthday', 'Anniversary'],
+                        isBestDeal: false,
+                      ),
+                      const SizedBox(width: 16), // Add spacing between cards
+                      _buildGiftCategoryCard(
+                        image: AppImages.webp_giftCat1,
+                        rating: 4.5,
+                        title: 'Gift Categories 3',
+                        categories: ['Birthday', 'Anniversary'],
+                        isBestDeal: true,
+                      ),
+                      // Add more cards as needed
+                    ],
+                  ),
+                ),
+                // After the gift category ListView,
+                const SizedBox(height: 24),
+                Material(
+                  color: Colors.white,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      image: DecorationImage(
+                        image: AssetImage(AppImages.webp_cta),
+                        fit: BoxFit.fitHeight,
+                        alignment: Alignment.centerRight,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'For Bulk Orders',
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 14,
+                              color: AppColors.textDarkGrey.withOpacity(0.8),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'CONNECT\nOVER\nWHATSAPP',
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 24,
+                              height: 1.2,
+                              color: AppColors.textDarkGrey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),  // Added bottom spacing
               ],
             ),
           ],
@@ -582,10 +740,9 @@ class _HomeTabViewState extends State<HomeTabView> {
         const SizedBox(height: 8),
         Text(
           label,
-          style: const TextStyle(
+          style: AppFonts.paragraph.copyWith(
             fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColors.black,
+            color: AppColors.labelGrey,
           ),
         ),
       ],
@@ -675,10 +832,9 @@ class _HomeTabViewState extends State<HomeTabView> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: AppFonts.heading1.copyWith(
                       color: Colors.white,
                       fontSize: 16, // Decreased from 24
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -698,10 +854,9 @@ class _HomeTabViewState extends State<HomeTabView> {
                       // Delivery Text
                       Text(
                         '$deliveryDays Days Delivery',
-                        style: const TextStyle(
+                        style: AppFonts.paragraph.copyWith(
                           fontSize: 14, // Decreased from 20
                           color: Colors.white,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -715,7 +870,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                       // Rating Text
                       Text(
                         rating.toString(),
-                        style: const TextStyle(
+                        style: AppFonts.paragraph.copyWith(
                           fontSize: 14, // Decreased from 20
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
@@ -728,6 +883,179 @@ class _HomeTabViewState extends State<HomeTabView> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProductCategoryChip(String label) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          // Handle chip tap
+          print('Category chip tapped: $label');
+        },
+        splashColor: AppColors.primaryRed.withOpacity(0.1),
+        highlightColor: AppColors.primaryRed.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Color(0xFFF9F9F9),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppColors.grey300,
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Text(
+            label,
+            style: AppFonts.paragraph.copyWith(
+              fontSize: 14,
+              color: Color(0xFF656565),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGiftCategoryCard({
+    required String image,
+    required double rating,
+    required String title,
+    required List<String> categories,
+    required bool isBestDeal,
+  }) {
+    return Container(
+      width: 200,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              // Image
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Image.asset(
+                  image,
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              // Dark Gradient Overlay
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Container(
+                  height: 180,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.2),
+                        Colors.black.withOpacity(0.6),
+                      ],
+                      stops: const [0.0, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+              // Best Deal Badge
+              if (isBestDeal)
+                Positioned(
+                  top: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryRed,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      'Best Deal',
+                      style: AppFonts.paragraph.copyWith(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              // Rating
+              Positioned(
+                bottom: 12,
+                left: 12,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.star_rounded,
+                      size: 16,
+                      color: AppColors.ratingAmber,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      rating.toString(),
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppFonts.paragraph.copyWith(
+                    color: AppColors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  categories.join(', '),
+                  style: AppFonts.heading1.copyWith(
+                    fontSize: 14,
+                    color: AppColors.primaryRed,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

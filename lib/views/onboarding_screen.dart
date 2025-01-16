@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/constants/fonts.dart';
 import '../controllers/onboarding_controller.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
@@ -83,9 +84,9 @@ class OnboardingView extends StatelessWidget {
                     children: [
                       Text(
                         controller.onboardingPages[controller.currentPage].title,
-                        style: const TextStyle(
+                        style: AppFonts.heading1.copyWith(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w400,
                           color: Colors.black,
                         ),
                       ),
@@ -93,7 +94,7 @@ class OnboardingView extends StatelessWidget {
                       Text(
                         controller.onboardingPages[controller.currentPage].description,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: AppFonts.paragraph.copyWith(
                           fontSize: 16,
                           color: Colors.grey,
                         ),
@@ -135,11 +136,10 @@ class OnboardingView extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(24),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Skip',
-                              style: TextStyle(
+                              style: AppFonts.paragraph.copyWith(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -156,11 +156,10 @@ class OnboardingView extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(24),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Next',
-                              style: TextStyle(
+                              style: AppFonts.paragraph.copyWith(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
