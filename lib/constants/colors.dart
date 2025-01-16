@@ -29,7 +29,7 @@ abstract class AppColors {
   static const Color primaryRed = Color(0xFFED6E61);
   static const Color successGreen = Color(0xFF4CD964);
   static const Color ratingAmber = Color(0xFFFFB300);
-  
+ 
  
   static const Color grey50 = Color(0xFFFAFAFA);
   static const Color grey100 = Color(0xFFF5F5F5);

@@ -25,7 +25,6 @@ class AuthHomeScreen extends StatelessWidget {
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Container(
-        // color: AppColors.authBackground,
         child: const AuthHomeView(),
       ),
     );
@@ -34,29 +33,6 @@ class AuthHomeScreen extends StatelessWidget {
 
 class AuthHomeView extends StatelessWidget {
   const AuthHomeView({super.key});
-
-  void navigateToOnboarding(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => 
-          const OnboardingScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(-1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
-          var tween = Tween(begin: begin, end: end)
-              .chain(CurveTween(curve: curve));
-          var offsetAnimation = animation.drive(tween);
-          return SlideTransition(
-            position: offsetAnimation,
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 300),
-      ),
-    );
-  }
 
   void navigateToSignIn(BuildContext context) {
     Navigator.push(
@@ -124,23 +100,6 @@ class AuthHomeView extends StatelessWidget {
         child: SafeArea(
           child: Stack(
             children: [
-              // Back button
-              Positioned(
-                top: 10,
-                left: 4,
-                child: IconButton(
-                  onPressed: () => navigateToOnboarding(context),
-                  icon: SvgPicture.asset(
-                    AppIcons.svg_authBackIcon,
-                    width: 24,
-                    height: 24,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.authTitleText,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-              ),
               // Main content
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),

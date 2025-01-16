@@ -186,6 +186,16 @@ class SignInView extends StatelessWidget {
             ],
           ),
         ),
+        if (controller.error != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            controller.error!,
+            style: const TextStyle(
+              color: Colors.red,
+              fontSize: 14,
+            ),
+          ),
+        ],
       ],
     );
   }

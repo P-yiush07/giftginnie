@@ -85,7 +85,7 @@ class OnboardingController extends ChangeNotifier {
   }
 
   void skipOnboarding(BuildContext context) {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => 
@@ -104,6 +104,7 @@ class OnboardingController extends ChangeNotifier {
         },
         transitionDuration: const Duration(milliseconds: 300),
       ),
+      (route) => false,
     );
   }
 

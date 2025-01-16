@@ -5,6 +5,7 @@ import 'package:giftginnie_ui/config/api.dart';
 import 'package:giftginnie_ui/models/otp_verification_model.dart';
 import 'package:giftginnie_ui/services/cache_service.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import '../config/auth_config.dart';
 
 class AuthService {
   late final Dio _dio;
@@ -77,6 +78,14 @@ class AuthService {
 
   // API Methods
   Future<OtpVerificationModel> sendOTP(String phoneNumber) async {
+    if (AuthConfig.useDummyAuth) {
+      // Return dummy verification data when using dummy auth
+      return OtpVerificationModel(
+        verificationId: 'dummy_verification_id',
+        authToken: 'dummy_auth_token',
+      );
+    }
+
     try {
       final response = await _dio.post(
         ApiEndpoints.sendOTP,
@@ -97,6 +106,20 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>> getDummyTokens() async {
+    try {
+      final response = await _dio.get(ApiEndpoints.dummyToken);
+      
+      if (response.statusCode == 200) {
+        return response.data;
+      }
+      throw Exception('Failed to get dummy tokens');
+    } on DioException catch (e) {
+      debugPrint('Error getting dummy tokens: $e');
+      throw Exception('Failed to get dummy tokens. Please try again.');
+    }
+  }
+
   Future<void> verifyOTP({
     required String phoneNumber,
     required String otp,
@@ -104,32 +127,45 @@ class AuthService {
     required String token,
   }) async {
     try {
-      final response = await _dio.post(
-        ApiEndpoints.verifyOTP,
-        data: {
-          'phone_number': phoneNumber,
-          'country_code': '91',
-          'otp': otp,
-          'verification_id': verificationId,
-          'token': token,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data['data'] as Map<String, dynamic>;
-        await _saveAuthData(
-          accessToken: data['access'],
-          refreshToken: data['refresh'],
-          userData: {
-            'user_id': JwtDecoder.decode(data['access'])['user_id'],
+      Map<String, dynamic> data;
+      
+      if (AuthConfig.useDummyAuth) {
+        // Get dummy tokens directly without OTP verification
+        final response = await _dio.get(ApiEndpoints.dummyToken);
+        if (response.statusCode != 200) {
+          throw Exception('Failed to get dummy tokens');
+        }
+        data = response.data;
+      } else {
+        // Use real OTP verification
+        final response = await _dio.post(
+          ApiEndpoints.verifyOTP,
+          data: {
             'phone_number': phoneNumber,
+            'country_code': '91',
+            'otp': otp,
+            'verification_id': verificationId,
+            'token': token,
           },
         );
-      } else {
-        throw Exception(response.data['message'] ?? 'Failed to verify OTP');
+        
+        if (response.statusCode != 200) {
+          throw Exception(response.data['message'] ?? 'Failed to verify OTP');
+        }
+        data = response.data['data'];
       }
+
+      // Save auth data
+      await _saveAuthData(
+        accessToken: data['access'],
+        refreshToken: data['refresh'],
+        userData: {
+          'user_id': JwtDecoder.decode(data['access'])['user_id'],
+          'phone_number': phoneNumber,
+        },
+      );
     } on DioException catch (e) {
-      debugPrint('Error verifying OTP: $e');
+      debugPrint('Error in auth process: $e');
       if (e.response?.statusCode == 401) {
         throw Exception('Invalid OTP. Please try again.');
       }

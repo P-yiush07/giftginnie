@@ -75,11 +75,11 @@ class SignInController extends ChangeNotifier {
       debugPrint('OTP sent successfully');
       isPhoneVerified = true;
       debugPrint('isPhoneVerified set to: $_isPhoneVerified');
-      notifyListeners();
     } catch (e) {
       debugPrint('Error during verification: $e');
-      _error = e.toString().replaceAll('Exception: ', '');
+      _error = 'Please try again later.';
       isPhoneVerified = false;
+      notifyListeners();
     } finally {
       isLoading = false;
       notifyListeners();

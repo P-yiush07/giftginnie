@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/constants/images.dart';
+import 'package:giftginnie_ui/views/address_selection_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/home_tab_controller.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -122,42 +124,51 @@ class _HomeTabViewState extends State<HomeTabView> {
                       const SizedBox(width: 12),
                       // Location Info
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'HomeTown',
-                              style: AppFonts.paragraph.copyWith(
-                                fontSize: 14,
-                                color: AppColors.textGrey,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              SlidePageRoute(page: const AddressSelectionScreen())
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'HomeTown',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 14,
+                                  color: AppColors.textGrey,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on,
-                                  size: 18,
-                                  color: AppColors.primaryRed,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '6391 Elgin St, Delaware 10299',
-                                  style: AppFonts.paragraph.copyWith(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.black,
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on,
+                                    size: 18,
+                                    color: AppColors.primaryRed,
                                   ),
-                                ),
-                                const Icon(
-                                  Icons.keyboard_arrow_down,
-                                  size: 20,
-                                ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '6391 Elgin St, Delaware 10299',
+                                    style: AppFonts.paragraph.copyWith(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.black,
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.keyboard_arrow_down,
+                                    color: AppColors.black,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
                       // Settings Icon
                       IconButton(
                         icon: Icon(
