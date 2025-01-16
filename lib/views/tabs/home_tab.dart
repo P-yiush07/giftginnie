@@ -128,7 +128,10 @@ class _HomeTabViewState extends State<HomeTabView> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              SlidePageRoute(page: const AddressSelectionScreen())
+                              SlidePageRoute(
+                                page: const AddressSelectionScreen(),
+                                direction: SlideDirection.bottom,
+                              )
                             );
                           },
                           child: Column(

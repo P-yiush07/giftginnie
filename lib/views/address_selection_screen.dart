@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 import '../constants/fonts.dart';
+import 'add_address_screen.dart';
+import '../config/route_transitions.dart';
 
 class AddressSelectionScreen extends StatelessWidget {
   const AddressSelectionScreen({super.key});
@@ -36,7 +38,13 @@ class AddressSelectionScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: InkWell(
                 onTap: () {
-                  // Handle add address
+                  Navigator.push(
+                    context,
+                    SlidePageRoute(
+                      page: const AddAddressScreen(),
+                      direction: SlideDirection.right,
+                    ),
+                  );
                 },
                 child: Container(
                   decoration: BoxDecoration(
