@@ -10,6 +10,9 @@ import 'package:giftginnie_ui/constants/icons.dart';
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
+import 'package:giftginnie_ui/views/search_screen.dart';
+import 'package:giftginnie_ui/views/category_screen.dart';
+import 'package:giftginnie_ui/constants/categories.dart';
 
 class OfferBanner {
   final String title;
@@ -190,39 +193,51 @@ class _HomeTabViewState extends State<HomeTabView> {
             // Search Bar with SVG icon
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Container(
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(26),
-                ),
-                child: TextField(
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    SlidePageRoute(
+                      page: const SearchScreen(),
+                      direction: SlideDirection.right
+                    )
+                  );
+                },
+                child: Container(
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(26),
                   ),
-                  decoration: InputDecoration(
-                    hintText: 'Search Gift, Products, Labels....',
-                    hintStyle: AppFonts.paragraph.copyWith(
-                      color: AppColors.textGrey,
+                  child: TextField(
+                    enabled: false,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
                     ),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
+                    decoration: InputDecoration(
+                      hintText: 'Search Gift, Products, Labels....',
+                      hintStyle: AppFonts.paragraph.copyWith(
+                        color: AppColors.textGrey,
                       ),
-                      child: SvgPicture.asset(
-                        AppIcons.svg_searchTabIcon,
-                        colorFilter: ColorFilter.mode(
-                          AppColors.textGrey,
-                          BlendMode.srcIn,
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 12.0,
+                        ),
+                        child: SvgPicture.asset(
+                          AppIcons.svg_searchTabIcon,
+                          colorFilter: ColorFilter.mode(
+                            AppColors.textGrey,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -432,56 +447,23 @@ class _HomeTabViewState extends State<HomeTabView> {
                     const SizedBox(height: 16),
                     SizedBox(
                       height: 100,
-                      child: ListView(
+                      child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        children: [
-                          _buildCategoryItem(
-                            icon: '🏅',
-                            label: 'Prizes',
-                          ),
-                          const SizedBox(width: 16),
-                          _buildCategoryItem(
-                            icon: '🎂',
-                            label: 'Birthday',
-                          ),
-                          const SizedBox(width: 16),
-                          _buildCategoryItem(
-                            icon: '💑',
-                            label: 'Anniversary',
-                          ),
-                          const SizedBox(width: 16),
-                          _buildCategoryItem(
-                            icon: '🐱',
-                            label: 'Pet Gifts',
-                          ),
-                          const SizedBox(width: 16),
-                          _buildCategoryItem(
-                            icon: '👔',
-                            label: 'Corporate',
-                          ),
-                          const SizedBox(width: 16),
-                          _buildCategoryItem(
-                            icon: '💝',
-                            label: 'Valentine',
-                          ),
-                          const SizedBox(width: 16),
-                          _buildCategoryItem(
-                            icon: '🎄',
-                            label: 'Christmas',
-                          ),
-                          const SizedBox(width: 16),
-                          _buildCategoryItem(
-                            icon: '👶',
-                            label: 'Baby',
-                          ),
-                          const SizedBox(width: 16),
-                          _buildCategoryItem(
-                            icon: '🎓',
-                            label: 'Graduation',
-                          ),
-                        ],
+                        itemCount: mockCategories.length,
+                        itemBuilder: (context, index) {
+                          final category = mockCategories[index];
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: index != mockCategories.length - 1 ? 16.0 : 0,
+                            ),
+                            child: _buildCategoryItem(
+                              icon: category['icon'] as String,
+                              label: category['name'] as String,
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -729,8 +711,16 @@ class _HomeTabViewState extends State<HomeTabView> {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-              // Handle category tap
-              print('Category tapped: $label');
+              Navigator.push(
+                context,
+                SlidePageRoute(
+                  page: CategoryScreen(
+                    categoryName: label,
+                    categoryIcon: icon,
+                  ),
+                  direction: SlideDirection.right
+                ),
+              );
             },
             borderRadius: BorderRadius.circular(32),
             child: Ink(
