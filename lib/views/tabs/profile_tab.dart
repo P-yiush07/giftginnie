@@ -6,6 +6,7 @@ import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/profile_tab_controller.dart';
 import '../../../views/edit_profile_screen.dart';
+import '../../../views/favourite_gifts_screen.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -190,7 +191,13 @@ class ProfileTabView extends StatelessWidget {
                       title: 'My Favourite Gift',
                       subtitle: 'Manage your favourite Gift.',
                       onTap: () {
-                        // Handle favourite gifts
+                        Navigator.push(
+                          context,
+                          SlidePageRoute(
+                            page: const FavouriteGiftsScreen(),
+                            direction: SlideDirection.right,
+                          ),
+                        );
                       },
                     ),
                     Padding(

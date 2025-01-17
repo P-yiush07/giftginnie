@@ -4,6 +4,8 @@ import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/cart_tab_controller.dart';
+import 'package:giftginnie_ui/views/coupon_screen.dart';
+import 'package:giftginnie_ui/config/route_transitions.dart';
 
 class CartTab extends StatelessWidget {
   const CartTab({super.key});
@@ -209,35 +211,46 @@ class _CartTabViewState extends State<CartTabView> {
   }
 
   Widget _buildOffersSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'Offers and Benefits',
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          SlidePageRoute(
+            page: const CouponScreen(),
+            direction: SlideDirection.right,
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Offers and Benefits',
+                style: AppFonts.paragraph.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Text(
+              'Apply Coupon',
               style: AppFonts.paragraph.copyWith(
-                fontSize: 16,
+                color: AppColors.primaryRed,
                 fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-          Text(
-            'Apply Coupon',
-            style: AppFonts.paragraph.copyWith(
+            Icon(
+              Icons.chevron_right,
               color: AppColors.primaryRed,
-              fontWeight: FontWeight.w500,
             ),
-          ),
-          Icon(
-            Icons.chevron_right,
-            color: AppColors.primaryRed,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

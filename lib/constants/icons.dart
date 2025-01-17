@@ -11,4 +11,9 @@ abstract class AppIcons {
   static const String svg_searchTabIcon = 'assets/images/search.svg';
   static const String svg_orderTabIcon = 'assets/images/enter-the-keyboard.svg';
   static const String svg_profileTabIcon = 'assets/images/user.svg';
+
+  static const String svg_couponIcon = 'assets/images/coupon.svg';
+  
+  // New heart icon
+  static const String svg_heartIcon = 'assets/images/wishlist.png';
 }

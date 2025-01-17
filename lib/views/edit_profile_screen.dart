@@ -221,8 +221,8 @@ class EditProfileView extends StatelessWidget {
             controller: controller,
             keyboardType: keyboardType,
             style: const TextStyle(
-              color: Colors.black,
-              fontSize: 16,
+              color: AppColors.authSocialButtonText,
+              fontSize: 15,
             ),
             decoration: InputDecoration(
               prefixIcon: Padding(

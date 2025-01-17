@@ -8,6 +8,10 @@ class HomeController extends ChangeNotifier {
   int get currentIndex => _currentIndex;
 
   void setCurrentIndex(int index) {
+    if (_currentIndex == index) {
+      return;
+    }
+    
     _currentIndex = index;
     if (index == 3) { // Orders tab index
       ordersController.loadOrders();
