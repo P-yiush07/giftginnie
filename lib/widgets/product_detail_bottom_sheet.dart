@@ -186,7 +186,7 @@ class ProductDetailBottomSheet extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 50),
                           // Ratings Header
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -222,7 +222,7 @@ class ProductDetailBottomSheet extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          '4.8',
+                                          product.rating.toStringAsFixed(1),
                                           style: AppFonts.heading1.copyWith(
                                             fontSize: 28,
                                             color: Colors.black,
@@ -243,7 +243,7 @@ class ProductDetailBottomSheet extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 50),
                           // Rating Bars
                           _buildRatingBar(5, 120, 0.9),
                           _buildRatingBar(4, 84, 0.7),

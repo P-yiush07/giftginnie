@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/icons.dart';
+import 'package:giftginnie_ui/views/tabs/cart_tab.dart';
 import 'package:provider/provider.dart';
 import '../../constants/colors.dart';
 import '../../controllers/main/home_controller.dart';
 import 'tabs/home_tab.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
-// import 'tabs/cart_tab.dart';
+import 'package:giftginnie_ui/views/search_screen.dart';
 // import 'tabs/search_tab.dart';
 // import 'tabs/orders_tab.dart';
 // import 'tabs/profile_tab.dart';
@@ -147,8 +148,8 @@ class HomeView extends StatelessWidget {
               index: controller.currentIndex,
               children: [
                 HomeTab(),
-                const Center(child: Text('Cart')),
-                const Center(child: Text('Search')),
+                CartTab(),
+                const SearchScreen(showCancelButton: false),
                 const Center(child: Text('Orders')),
                 const Center(child: Text('Profile')),
               ],
