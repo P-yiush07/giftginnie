@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/icons.dart';
 import 'package:giftginnie_ui/views/tabs/cart_tab.dart';
+import 'package:giftginnie_ui/views/tabs/order_tab.dart';
 import 'package:provider/provider.dart';
 import '../../constants/colors.dart';
 import '../../controllers/main/home_controller.dart';
@@ -35,32 +36,35 @@ class HomeView extends StatelessWidget {
   }) {
     final color = isActive ? AppColors.primary : Colors.grey;
     
-    return SizedBox(
-      width: 70,
-      height: 50,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 6), 
-          SvgPicture.asset(
-            icon,
-            colorFilter: ColorFilter.mode(
-              color,
-              BlendMode.srcIn,
+    return Material(
+      type: MaterialType.transparency,
+      child: SizedBox(
+        width: 70,
+        height: 50,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 6), 
+            SvgPicture.asset(
+              icon,
+              colorFilter: ColorFilter.mode(
+                color,
+                BlendMode.srcIn,
+              ),
+              height: 28,
+              width: 28,
             ),
-            height: 28,
-            width: 28,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -150,7 +154,10 @@ class HomeView extends StatelessWidget {
                 HomeTab(),
                 CartTab(),
                 const SearchScreen(showCancelButton: false),
-                const Center(child: Text('Orders')),
+                ChangeNotifierProvider.value(
+                  value: controller.ordersController,
+                  child: const OrdersTab(),
+                ),
                 const Center(child: Text('Profile')),
               ],
             ),
@@ -165,17 +172,26 @@ class HomeView extends StatelessWidget {
                   ),
                 ],
               ),
-              child: BottomNavigationBar(
-                elevation: 0,
-                currentIndex: controller.currentIndex,
-                onTap: controller.setCurrentIndex,
-                type: BottomNavigationBarType.fixed,
-                backgroundColor: Colors.white,
-                selectedItemColor: AppColors.primary,
-                unselectedItemColor: Colors.grey,
-                selectedFontSize: 0,
-                unselectedFontSize: 0,
-                items: _navigationItems,
+              child: Theme(
+                data: ThemeData(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                ),
+                child: BottomNavigationBar(
+                  elevation: 0,
+                  currentIndex: controller.currentIndex,
+                  onTap: controller.setCurrentIndex,
+                  type: BottomNavigationBarType.fixed,
+                  backgroundColor: Colors.white,
+                  selectedItemColor: AppColors.primary,
+                  unselectedItemColor: Colors.grey,
+                  selectedFontSize: 0,
+                  unselectedFontSize: 0,
+                  showSelectedLabels: false,
+                  showUnselectedLabels: false,
+                  enableFeedback: false,
+                  items: _navigationItems,
+                ),
               ),
             ),
           ),
