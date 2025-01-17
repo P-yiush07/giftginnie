@@ -387,7 +387,7 @@ class SignInView extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: isEnabled ? Colors.white : Colors.grey[300],
+                  color: isEnabled ? Colors.white : Colors.grey,
                 ),
               ),
       ),

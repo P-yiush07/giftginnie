@@ -18,5 +18,5 @@ abstract class ApiEndpoints {
   static const String orders = '/orders';
   
   // Add this line with the other endpoints
-  static const String dummyToken = '/users/dummyToken/';
+  static const String dummyToken = '/users/dummyToken/user/';
 }

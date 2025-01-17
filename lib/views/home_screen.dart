@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/icons.dart';
 import 'package:giftginnie_ui/views/tabs/cart_tab.dart';
 import 'package:giftginnie_ui/views/tabs/order_tab.dart';
+import 'package:giftginnie_ui/views/tabs/profile_tab.dart';
 import 'package:provider/provider.dart';
 import '../../constants/colors.dart';
 import '../../controllers/main/home_controller.dart';
@@ -9,9 +10,7 @@ import 'tabs/home_tab.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/views/search_screen.dart';
-// import 'tabs/search_tab.dart';
-// import 'tabs/orders_tab.dart';
-// import 'tabs/profile_tab.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -158,7 +157,7 @@ class HomeView extends StatelessWidget {
                   value: controller.ordersController,
                   child: const OrdersTab(),
                 ),
-                const Center(child: Text('Profile')),
+                const ProfileTab(),
               ],
             ),
             bottomNavigationBar: Container(
