@@ -32,6 +32,7 @@ class _SearchScreenState extends State<SearchScreen> {
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: AppColors.white,
         statusBarBrightness: Brightness.light,
       ),
       child: Scaffold(
@@ -58,7 +59,6 @@ class _SearchScreenState extends State<SearchScreen> {
                             ),
                             child: TextField(
                               controller: _searchController,
-                              autofocus: true,
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,

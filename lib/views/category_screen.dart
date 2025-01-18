@@ -11,13 +11,11 @@ import '../widgets/product_detail_bottom_sheet.dart';
 import '../widgets/shimmer/category_shimmer.dart';
 
 class CategoryScreen extends StatefulWidget {
-  final String categoryName;
-  final String categoryIcon;
+  final CategoryModel category;
 
   const CategoryScreen({
     super.key,
-    required this.categoryName,
-    required this.categoryIcon,
+    required this.category,
   });
 
   @override
@@ -30,14 +28,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = CategoryController(widget.categoryName, widget.categoryIcon);
+    _controller = CategoryController(widget.category);
     // Load data silently in background
     _loadData();
   }
 
   Future<void> _loadData() async {
-    await _controller.loadCategoryData(
-        widget.categoryName, widget.categoryIcon);
+    await _controller.loadCategoryData(widget.category);
   }
 
   @override

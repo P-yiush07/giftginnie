@@ -13,6 +13,11 @@ import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/views/search_screen.dart';
 import 'package:giftginnie_ui/views/category_screen.dart';
 import 'package:giftginnie_ui/constants/categories.dart';
+import '../../../controllers/main/home_controller.dart';
+import 'package:giftginnie_ui/models/category_model.dart';
+import 'package:giftginnie_ui/widgets/shimmer/home_tab_category_shimmer.dart';
+import 'package:giftginnie_ui/services/image_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class OfferBanner {
   final String title;
@@ -182,7 +187,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                           color: AppColors.black,
                         ),
                         onPressed: () {
-                          // Handle settings tap
+                          // Get the HomeController instance and set the index to 4 (Profile tab)
+                          Provider.of<HomeController>(context, listen: false).setCurrentIndex(4);
                         },
                       ),
                     ],
@@ -445,26 +451,31 @@ class _HomeTabViewState extends State<HomeTabView> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      height: 100,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemCount: mockCategories.length,
-                        itemBuilder: (context, index) {
-                          final category = mockCategories[index];
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              right: index != mockCategories.length - 1 ? 16.0 : 0,
-                            ),
-                            child: _buildCategoryItem(
-                              icon: category['icon'] as String,
-                              label: category['name'] as String,
-                            ),
-                          );
-                        },
-                      ),
+                    Consumer<HomeTabController>(
+                      builder: (context, controller, _) {
+                        if (controller.isLoading) {
+                          return const HomeTabCategoryShimmer();
+                        }
+                        
+                        return SizedBox(
+                          height: 100,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            itemCount: controller.categories.length,
+                            itemBuilder: (context, index) {
+                              final category = controller.categories[index];
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  right: index != controller.categories.length - 1 ? 16.0 : 0,
+                                ),
+                                child: _buildCategoryItem(category: category),
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
@@ -704,7 +715,7 @@ class _HomeTabViewState extends State<HomeTabView> {
     super.dispose();
   }
 
-  Widget _buildCategoryItem({required String icon, required String label}) {
+  Widget _buildCategoryItem({required CategoryModel category}) {
     return Column(
       children: [
         Material(
@@ -715,8 +726,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                 context,
                 SlidePageRoute(
                   page: CategoryScreen(
-                    categoryName: label,
-                    categoryIcon: icon,
+                    category: category,
                   ),
                   direction: SlideDirection.right
                 ),
@@ -731,10 +741,11 @@ class _HomeTabViewState extends State<HomeTabView> {
               child: Container(
                 width: 64,
                 height: 64,
-                child: Center(
-                  child: Text(
-                    icon,
-                    style: const TextStyle(fontSize: 32),
+                child: ClipOval(
+                  child: ImageService.getNetworkImage(
+                    imageUrl: category.image,
+                    width: 64,
+                    height: 64,
                   ),
                 ),
               ),
@@ -743,7 +754,7 @@ class _HomeTabViewState extends State<HomeTabView> {
         ),
         const SizedBox(height: 8),
         Text(
-          label,
+          category.categoryName,
           style: AppFonts.paragraph.copyWith(
             fontSize: 12,
             color: AppColors.labelGrey,

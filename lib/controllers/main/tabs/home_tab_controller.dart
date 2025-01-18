@@ -1,15 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/home_tab_model.dart';
+import 'package:giftginnie_ui/models/category_model.dart';
+import 'package:giftginnie_ui/services/category_service.dart';
 
 class HomeTabController extends ChangeNotifier {
+  final CategoryService _categoryService = CategoryService();
   final HomeTabModel _model = HomeTabModel();
   bool _isLoading = false;
   String? _error;
+  List<CategoryModel> _categories = [];
 
   // Getters
   HomeTabModel get model => _model;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  List<CategoryModel> get categories => _categories;
+
+  HomeTabController() {
+    _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _categories = await _categoryService.getCategories();
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   // Setters
   set isLoading(bool value) {
@@ -45,11 +68,6 @@ class HomeTabController extends ChangeNotifier {
     } finally {
       isLoading = false;
     }
-  }
-
-  Future<void> _fetchCategories() async {
-    // TODO: Implement category fetching
-    await Future.delayed(const Duration(seconds: 1));
   }
 
   Future<void> _fetchFeaturedProducts() async {

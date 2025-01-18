@@ -1,29 +1,38 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import '../constants/categories.dart';
+import '../config/api.dart';
 import '../models/category_model.dart';
+import '../services/cache_service.dart';
 
 class CategoryService {
   final Dio _dio;
+  final CacheService _cacheService = CacheService();
+  static const String _accessTokenKey = 'auth_token';
 
-  CategoryService() : _dio = Dio();
+  CategoryService() : _dio = Dio() {
+    _initializeDio();
+  }
+
+  void _initializeDio() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Get the access token from cache
+          final accessToken = await _cacheService.getString(_accessTokenKey);
+          if (accessToken != null) {
+            options.headers['Authorization'] = 'Bearer $accessToken';
+          }
+          return handler.next(options);
+        },
+      ),
+    );
+  }
 
   Future<List<CategoryModel>> getCategories() async {
     try {
-      // TODO: Implement API call when backend is ready
-      // final response = await _dio.get('${ApiConstants.baseUrl}/categories');
-      // return (response.data['data'] as List)
-      //     .map((json) => CategoryModel.fromJson(json))
-      //     .toList();
-
-      // Using mock data for now
-      await Future.delayed(const Duration(milliseconds: 800)); // Simulate network delay
-      return mockCategories.map((json) => CategoryModel(
-            categoryName: json['name'] as String,
-            categoryIcon: json['icon'] as String,
-            description: json['description'] as String,
-            gifts: [], // Initially empty, will be populated when category is selected
-          )).toList();
+      final response = await _dio.get('${ApiConstants.baseUrl}${ApiEndpoints.categories}');
+      final data = response.data['data'] as List;
+      return data.map((json) => CategoryModel.fromJson(json)).toList();
     } catch (e) {
       debugPrint('Error fetching categories: $e');
       throw Exception('Failed to load categories');

@@ -34,7 +34,7 @@ class CouponScreenView extends StatelessWidget {
             statusBarColor: Colors.transparent,
             statusBarIconBrightness: Brightness.dark,
             statusBarBrightness: Brightness.light,
-            systemNavigationBarColor: Colors.white,
+            systemNavigationBarColor: Colors.transparent,
             systemNavigationBarIconBrightness: Brightness.dark,
           ),
           child: Scaffold(

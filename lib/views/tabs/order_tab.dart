@@ -112,6 +112,7 @@ class _OrderCard extends StatelessWidget {
                     style: AppFonts.paragraph.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
+                      color: AppColors.authSocialButtonText
                     ),
                   ),
                   _buildStatusChip(order.status),
@@ -123,6 +124,7 @@ class _OrderCard extends StatelessWidget {
                 style: AppFonts.paragraph.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: AppColors.authSocialButtonText
                 ),
               ),
               const SizedBox(height: 8),

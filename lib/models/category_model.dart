@@ -1,21 +1,24 @@
 class CategoryModel {
+  final int id;
   final String categoryName;
-  final String categoryIcon;
   final String description;
+  final String image;
   final List<GiftItem> gifts;
 
   CategoryModel({
+    required this.id,
     required this.categoryName,
-    required this.categoryIcon,
     required this.description,
+    required this.image,
     required this.gifts,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      categoryName: json['categoryName'] ?? '',
-      categoryIcon: json['categoryIcon'] ?? '',
-      description: json['description'] ?? '',
+      id: json['id'] as int,
+      categoryName: json['name'] as String,
+      description: json['description'] as String,
+      image: json['image'] as String,
       gifts: (json['gifts'] as List?)
               ?.map((gift) => GiftItem.fromJson(gift))
               .toList() ??

@@ -1,5 +1,5 @@
 abstract class ApiConstants {
-  static const String baseUrl = 'http://10.0.2.2:8000/api/v1';
+  static const String baseUrl = 'http://18.218.49.219:8000/api/v1';
 }
 
 abstract class ApiEndpoints {
@@ -13,6 +13,7 @@ abstract class ApiEndpoints {
   
   // Product endpoints
   static const String products = '/products';
+  static const String categories = '/products/categories/';
   
   // Order endpoints
   static const String orders = '/orders';
