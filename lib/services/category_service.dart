@@ -7,6 +7,7 @@ import '../services/cache_service.dart';
 class CategoryService {
   final Dio _dio;
   final CacheService _cacheService = CacheService();
+  final Map<String, CategoryModel> _categoryCache = {};
   static const String _accessTokenKey = 'auth_token';
 
   CategoryService() : _dio = Dio() {
@@ -36,6 +37,34 @@ class CategoryService {
     } catch (e) {
       debugPrint('Error fetching categories: $e');
       throw Exception('Failed to load categories');
+    }
+  }
+
+  Future<CategoryModel> getCategoryData(String categoryId) async {
+    // Check cache first
+    if (_categoryCache.containsKey(categoryId)) {
+      return _categoryCache[categoryId]!;
+    }
+
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}${ApiEndpoints.categories}/$categoryId');
+      final categoryData = CategoryModel.fromJson(response.data['data']);
+      
+      // Cache the result
+      _categoryCache[categoryId] = categoryData;
+      
+      return categoryData;
+    } catch (e) {
+      debugPrint('Error fetching category data: $e');
+      throw Exception('Failed to load category data');
+    }
+  }
+
+  void clearCache(String? categoryId) {
+    if (categoryId != null) {
+      _categoryCache.remove(categoryId);
+    } else {
+      _categoryCache.clear();
     }
   }
 }

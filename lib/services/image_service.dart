@@ -10,16 +10,35 @@ class ImageService {
     required double height,
     BoxFit fit = BoxFit.cover,
     Widget? errorWidget,
+    Key? key,
   }) {
+    // Check if the imageUrl is a network URL
+    final bool isNetworkImage = imageUrl.startsWith('http');
+    
+    if (!isNetworkImage) {
+      return Image.asset(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: fit,
+        key: key,
+      );
+    }
+
+    // Only set cache dimensions if they are finite
+    final int? cacheWidth = width.isFinite ? width.toInt() : null;
+    final int? cacheHeight = height.isFinite ? height.toInt() : null;
+
     return CachedNetworkImage(
+      key: key,
       imageUrl: imageUrl,
       width: width,
       height: height,
       fit: fit,
-      memCacheWidth: width.toInt(),
-      memCacheHeight: height.toInt(),
+      memCacheWidth: cacheWidth,
+      memCacheHeight: cacheHeight,
       cacheKey: imageUrl,
-      maxWidthDiskCache: width.toInt() * 2, // For higher resolution devices
+      maxWidthDiskCache: cacheWidth != null ? cacheWidth * 2 : null,
       useOldImageOnUrlChange: true,
       placeholder: (context, url) => Shimmer.fromColors(
         baseColor: Colors.grey[300]!,

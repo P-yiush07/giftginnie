@@ -13,7 +13,7 @@ class AddressSelectionScreen extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: AppColors.white,
+        systemNavigationBarColor: Colors.transparent,
       ),
       child: Scaffold(
         backgroundColor: const Color(0xFFF9F9F9),

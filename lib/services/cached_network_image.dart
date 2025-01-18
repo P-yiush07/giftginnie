@@ -10,8 +10,10 @@ class ImageService {
     BoxFit fit = BoxFit.cover,
     Widget? placeholder,
     Widget? errorWidget,
+    Key? key,
   }) {
     return CachedNetworkImage(
+      key: key,
       imageUrl: imageUrl,
       width: width,
       height: height,

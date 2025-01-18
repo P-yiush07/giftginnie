@@ -16,4 +16,7 @@ abstract class AppIcons {
   
   // New heart icon
   static const String svg_heartIcon = 'assets/images/wishlist.png';
+
+  // No Data Icon
+  static const String svg_noData = 'assets/images/nomouth.svg';
 }

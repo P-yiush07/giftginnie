@@ -2,14 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
+import 'package:giftginnie_ui/services/image_service.dart';
 
-class ProductDetailBottomSheet extends StatelessWidget {
+class ProductDetailBottomSheet extends StatefulWidget {
   final Product product;
 
   const ProductDetailBottomSheet({
     super.key,
     required this.product,
   });
+
+  @override
+  State<ProductDetailBottomSheet> createState() => _ProductDetailBottomSheetState();
+}
+
+class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
+  final PageController _imageController = PageController();
+  int _currentImageIndex = 0;
+
+  @override
+  void dispose() {
+    _imageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,76 +40,122 @@ class ProductDetailBottomSheet extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Content
               Expanded(
                 child: CustomScrollView(
                   controller: scrollController,
                   slivers: [
-                    // Product Image with proper padding and rounded corners
                     SliverToBoxAdapter(
                       child: Stack(
                         children: [
-                          // Image with rounded corners
+                          // Image slider
                           ClipRRect(
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                             child: Container(
-                              width: MediaQuery.of(context).size.width,
                               height: 300,
-                              color: Colors.white,
-                              child: Image.asset(
-                                product.image,
-                                width: double.infinity,
-                                height: 300,
-                                fit: BoxFit.cover,
+                              color: Colors.grey[200],
+                              child: PageView.builder(
+                                controller: _imageController,
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    _currentImageIndex = index;
+                                  });
+                                },
+                                itemCount: widget.product.images.length,
+                                itemBuilder: (context, index) {
+                                  return ImageService.getNetworkImage(
+                                    imageUrl: widget.product.images[index],
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 300,
+                                    fit: BoxFit.cover,
+                                    errorWidget: Image.asset(
+                                      'assets/images/placeholder.png',
+                                      width: double.infinity,
+                                      height: 300,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),
-                          // Drag handle on top of image
+                          // Close button and heart icon
                           Positioned(
-                            top: 8,
+                            top: 16,
+                            right: 16,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      widget.product.isLiked ? Icons.favorite : Icons.favorite_border,
+                                      color: AppColors.primaryRed,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      // TODO: Implement like functionality
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.close,
+                                      color: Colors.black,
+                                      size: 20,
+                                    ),
+                                    onPressed: () => Navigator.pop(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Image indicator dots
+                          Positioned(
+                            bottom: 16,
                             left: 0,
                             right: 0,
-                            child: Center(
-                              child: Container(
-                                width: 40,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(2),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                widget.product.images.length,
+                                (index) => Container(
+                                  width: 8,
+                                  height: 8,
+                                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _currentImageIndex == index
+                                        ? AppColors.primaryRed
+                                        : Colors.white.withOpacity(0.5),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ),
-                          // Close button
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.close, size: 20),
-                              ),
-                            ),
-                          ),
-                          // Favorite button
-                          Positioned(
-                            top: 8,
-                            right: 56,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                product.isLiked ? Icons.favorite : Icons.favorite_border,
-                                color: product.isLiked ? AppColors.primaryRed : Colors.grey,
-                                size: 20,
                               ),
                             ),
                           ),
@@ -107,7 +168,7 @@ class ProductDetailBottomSheet extends StatelessWidget {
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
                           Text(
-                            product.name,
+                            widget.product.name,
                             style: AppFonts.heading1.copyWith(
                               fontSize: 24,
                               color: Colors.black,
@@ -115,7 +176,7 @@ class ProductDetailBottomSheet extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'INR ${product.price.toStringAsFixed(2)}',
+                            'INR ${widget.product.price.toStringAsFixed(2)}',
                             style: AppFonts.heading1.copyWith(
                               fontSize: 20,
                               color: AppColors.primaryRed,
@@ -140,9 +201,9 @@ class ProductDetailBottomSheet extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                _buildHighlightRow('Brand', product.brand),
+                                _buildHighlightRow('Brand', widget.product.brand),
                                 const SizedBox(height: 12),
-                                _buildHighlightRow('Product Type', product.productType),
+                                _buildHighlightRow('Product Type', widget.product.productType),
                                 const SizedBox(height: 16),
                                 Text(
                                   'Information',
@@ -153,7 +214,7 @@ class ProductDetailBottomSheet extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  product.description,
+                                  widget.product.description,
                                   style: AppFonts.paragraph.copyWith(
                                     color: AppColors.textGrey,
                                     height: 1.5,
@@ -222,7 +283,7 @@ class ProductDetailBottomSheet extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          product.rating.toStringAsFixed(1),
+                                          widget.product.rating.toStringAsFixed(1),
                                           style: AppFonts.heading1.copyWith(
                                             fontSize: 28,
                                             color: Colors.black,

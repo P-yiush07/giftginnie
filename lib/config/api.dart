@@ -20,4 +20,7 @@ abstract class ApiEndpoints {
   
   // Add this line with the other endpoints
   static const String dummyToken = '/users/dummyToken/user/';
+  
+  // Add this new endpoint
+  static String categoryProducts(String categoryId) => '/products/categories/$categoryId/';
 }

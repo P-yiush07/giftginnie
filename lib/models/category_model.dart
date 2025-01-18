@@ -30,6 +30,7 @@ class CategoryModel {
 class GiftItem {
   final String name;
   final String image;
+  final List<String>? images;
   final String? subtitle;
   final String? category;
   final double rating;
@@ -41,6 +42,7 @@ class GiftItem {
   GiftItem({
     required this.name,
     required this.image,
+    this.images,
     this.subtitle,
     this.category,
     required this.rating,
@@ -54,6 +56,7 @@ class GiftItem {
     return GiftItem(
       name: json['name'] ?? '',
       image: json['image'] ?? '',
+      images: (json['images'] as List?)?.map((img) => img['image'].toString()).toList(),
       subtitle: json['subtitle'],
       category: json['category'],
       rating: (json['rating'] ?? 0.0).toDouble(),

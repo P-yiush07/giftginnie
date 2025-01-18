@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import '../models/product_model.dart';
 import '../widgets/product_detail_bottom_sheet.dart';
 import '../widgets/shimmer/category_shimmer.dart';
+import '../services/image_service.dart';
+import '../views/no_products_view.dart';
 
 class CategoryScreen extends StatefulWidget {
   final CategoryModel category;
@@ -29,12 +31,23 @@ class _CategoryScreenState extends State<CategoryScreen> {
   void initState() {
     super.initState();
     _controller = CategoryController(widget.category);
-    // Load data silently in background
-    _loadData();
+    _controller.loadCategoryData(widget.category);
   }
 
   Future<void> _loadData() async {
-    await _controller.loadCategoryData(widget.category);
+    debugPrint('Loading data for category: ${widget.category.id}');
+    try {
+      await _controller.loadCategoryData(widget.category);
+      debugPrint('Data loaded successfully');
+    } catch (e) {
+      debugPrint('Error loading category data: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -61,7 +74,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ),
               surfaceTintColor: Colors.white,
             ),
-            body: const CategoryShimmer(),
+            body: _controller.isLoading 
+                ? const CategoryShimmer()
+                : _controller.hasError || (_controller.categoryData?.gifts.isEmpty ?? true)
+                    ? NoProductsView(
+                        onExplore: () => Navigator.pop(context),
+                      )
+                    : const CategoryShimmer(),
           );
         }
 
@@ -192,7 +211,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               name: gift.name,
               description: 'Experience luxury and style with this premium ${gift.name.toLowerCase()}. Perfect for any occasion, this item combines elegant design with practical functionality.',
               price: gift.price,
-              image: gift.image,
+              images: gift.images ?? [gift.image],
               brand: gift.subtitle ?? 'Premium Brand',
               productType: gift.category ?? 'Gift Item',
               isLiked: gift.isLiked,
@@ -212,11 +231,18 @@ class _CategoryScreenState extends State<CategoryScreen> {
             ),
             child: Stack(
               children: [
-                Image.asset(
-                  gift.image,
-                  width: double.infinity,
+                ImageService.getNetworkImage(
+                  key: ValueKey('product_image_${gift.name}'),
+                  imageUrl: gift.images?.isNotEmpty == true ? gift.images![0] : 'assets/images/placeholder.png',
+                  width: MediaQuery.of(context).size.width / 2 - 24,
                   height: 240,
                   fit: BoxFit.cover,
+                  errorWidget: Image.asset(
+                    'assets/images/placeholder.png',
+                    width: MediaQuery.of(context).size.width / 2 - 24,
+                    height: 240,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 // Heart icon in top-right
                 Positioned(
@@ -230,8 +256,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     ),
                     child: Icon(
                       gift.isLiked ? Icons.favorite : Icons.favorite_border,
-                      color:
-                          gift.isLiked ? const Color(0xFFFF7643) : Colors.grey,
+                      color: gift.isLiked ? const Color(0xFFFF7643) : Colors.grey,
                       size: 14,
                     ),
                   ),

@@ -345,6 +345,8 @@ class SignInView extends StatelessWidget {
       builder: (context) => FilledButton(
         onPressed: isEnabled
             ? () async {
+                // Dismiss keyboard
+                FocusScope.of(context).unfocus();
                 final success = await controller.handlePhoneLogin();
                 if (success && context.mounted) {
                   Navigator.pushReplacement(
@@ -498,28 +500,34 @@ class SignInView extends StatelessWidget {
   }
 
   Widget _buildVerifyButton(SignInController controller) {
-    final bool isEnabled = controller.phoneController.text.length == 10;
-    return FilledButton(
-      onPressed: isEnabled ? () async {
-        await controller.verifyPhone();
-      } : null,
-      style: FilledButton.styleFrom(
-        backgroundColor: isEnabled ? AppColors.primary : Colors.grey,
-        minimumSize: const Size(double.infinity, 56),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
-      ),
-      child: controller.isLoading
-          ? const CircularProgressIndicator(color: Colors.white)
-          : Text(
-              'Verify Phone',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: isEnabled ? Colors.white : Colors.grey,
-              ),
+    return Builder(
+      builder: (context) {
+        final bool isEnabled = controller.phoneController.text.length == 10;
+        return FilledButton(
+          onPressed: isEnabled ? () async {
+            // Dismiss keyboard
+            FocusScope.of(context).unfocus();
+            await controller.verifyPhone();
+          } : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: isEnabled ? AppColors.primary : Colors.grey,
+            minimumSize: const Size(double.infinity, 56),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
             ),
+          ),
+          child: controller.isLoading
+              ? const CircularProgressIndicator(color: Colors.white)
+              : Text(
+                  'Verify Phone',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: isEnabled ? Colors.white : Colors.grey,
+                  ),
+                ),
+        );
+      }
     );
   }
 }
