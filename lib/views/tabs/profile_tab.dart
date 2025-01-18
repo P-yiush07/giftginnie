@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
+import 'package:giftginnie_ui/views/address_selection_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/profile_tab_controller.dart';
 import '../../../views/edit_profile_screen.dart';
@@ -208,18 +209,13 @@ class ProfileTabView extends StatelessWidget {
                       title: 'Addresses',
                       subtitle: 'Share, edit and add a new Address.',
                       onTap: () {
-                        // Handle addresses
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: const Divider(height: 1, thickness: 0.5),
-                    ),
-                    _buildProfileOption(
-                      title: 'Orders',
-                      subtitle: 'Manage your ongoing and past orders.',
-                      onTap: () {
-                        // Handle orders
+                        Navigator.push(
+                          context,
+                          SlidePageRoute(
+                            page: const AddressSelectionScreen(),
+                            direction: SlideDirection.right,
+                          ),
+                        );
                       },
                     ),
                     Padding(

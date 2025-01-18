@@ -1,23 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/home_tab_model.dart';
 import 'package:giftginnie_ui/models/category_model.dart';
+import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/category_service.dart';
+import 'package:giftginnie_ui/services/product_service.dart';
 
 class HomeTabController extends ChangeNotifier {
+  final ProductService _productService = ProductService();
   final CategoryService _categoryService = CategoryService();
   final HomeTabModel _model = HomeTabModel();
   bool _isLoading = false;
   String? _error;
   List<CategoryModel> _categories = [];
+  List<Product> _popularProducts = [];
 
   // Getters
   HomeTabModel get model => _model;
   bool get isLoading => _isLoading;
   String? get error => _error;
   List<CategoryModel> get categories => _categories;
+  List<Product> get popularProducts => _popularProducts;
 
   HomeTabController() {
-    _fetchCategories();
+    _fetchInitialData();
+  }
+
+  Future<void> _fetchInitialData() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await Future.wait([
+        _fetchCategories(),
+        _fetchPopularProducts(),
+      ]);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> _fetchCategories() async {
@@ -31,6 +53,14 @@ class HomeTabController extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> _fetchPopularProducts() async {
+    try {
+      _popularProducts = await _productService.getPopularProducts();
+    } catch (e) {
+      debugPrint('Error fetching popular products: $e');
     }
   }
 

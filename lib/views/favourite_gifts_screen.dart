@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/constants/icons.dart';
+import 'package:giftginnie_ui/models/product_model.dart';
+import 'package:giftginnie_ui/services/image_service.dart';
+import 'package:giftginnie_ui/widgets/product_detail_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import '../controllers/main/favourite_gifts_controller.dart';
 import '../widgets/shimmer/favourite_gifts_shimmer.dart';
@@ -128,13 +131,132 @@ class FavouriteGiftsView extends StatelessWidget {
   }
 
   Widget _buildGiftsList(FavouriteGiftsController controller) {
-    return ListView.builder(
+    return GridView.builder(
+      padding: const EdgeInsets.all(16.0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16.0,
+        mainAxisSpacing: 16.0,
+        childAspectRatio: 0.53,
+      ),
       itemCount: controller.favouriteGifts.length,
       itemBuilder: (context, index) {
-        final gift = controller.favouriteGifts[index];
-        // TODO: Implement gift list item widget
-        return Container();
+        final product = controller.favouriteGifts[index];
+        return _buildGiftItem(context, product, controller);
       },
+    );
+  }
+
+  Widget _buildGiftItem(BuildContext context, Product product, FavouriteGiftsController controller) {
+    return GestureDetector(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => ProductDetailBottomSheet(product: product),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+            child: Stack(
+              children: [
+                ImageService.getNetworkImage(
+                  key: ValueKey('favourite_product_${product.id}'),
+                  imageUrl: product.images.isNotEmpty ? product.images[0] : 'assets/images/placeholder.png',
+                  width: MediaQuery.of(context).size.width / 2 - 24,
+                  height: 240,
+                  fit: BoxFit.cover,
+                  errorWidget: Image.asset(
+                    'assets/images/placeholder.png',
+                    width: MediaQuery.of(context).size.width / 2 - 24,
+                    height: 240,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => controller.removeFromFavourites(product.id),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.favorite,
+                        color: Color(0xFFFF7643),
+                        size: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.name,
+                  style: AppFonts.paragraph.copyWith(
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  product.productType,
+                  style: AppFonts.paragraph.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      '\$${product.price.toStringAsFixed(2)}',
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryRed,
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    const Icon(
+                      Icons.star,
+                      size: 14,
+                      color: Colors.amber,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      product.rating.toStringAsFixed(1),
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

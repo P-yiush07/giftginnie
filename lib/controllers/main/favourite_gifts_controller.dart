@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
+import 'package:giftginnie_ui/services/wishlist_service.dart';
 
 class FavouriteGiftsController extends ChangeNotifier {
+  final WishlistService _wishlistService = WishlistService();
   bool _isLoading = false;
   List<Product> _favouriteGifts = [];
 
@@ -14,9 +16,7 @@ class FavouriteGiftsController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // TODO: Implement API call to fetch favourite gifts
-      await Future.delayed(const Duration(seconds: 1)); // Simulate API call
-      _favouriteGifts = []; // Empty for now
+      _favouriteGifts = await _wishlistService.getFavouriteProducts();
     } catch (e) {
       debugPrint('Error loading favourite gifts: $e');
     } finally {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/constants/images.dart';
+import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/views/address_selection_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/home_tab_controller.dart';
@@ -18,6 +19,10 @@ import 'package:giftginnie_ui/models/category_model.dart';
 import 'package:giftginnie_ui/widgets/shimmer/home_tab_category_shimmer.dart';
 import 'package:giftginnie_ui/services/image_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:giftginnie_ui/widgets/shimmer/home_tab_products_shimmer.dart';
+import 'package:giftginnie_ui/services/product_service.dart';
+import 'package:giftginnie_ui/widgets/product_detail_bottom_sheet.dart';
+import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 
 class OfferBanner {
   final String title;
@@ -548,36 +553,46 @@ class _HomeTabViewState extends State<HomeTabView> {
                       const SizedBox(height: 24),
                       SizedBox(
                         height: 380,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          clipBehavior: Clip.none,
-                          physics: const BouncingScrollPhysics(),
-                          padding: EdgeInsets.zero,
-                          children: [
-                            _buildProductCard(
-                              image: 'assets/images/top_product.webp',
-                              title: 'Premium Gift Box',
-                              deliveryDays: 3,
-                              rating: 4.5,
-                              index: 0,
-                            ),
-                            const SizedBox(width: 16),
-                            _buildProductCard(
-                              image: 'assets/images/office_gift.webp',
-                              title: 'Corporate Gift Set',
-                              deliveryDays: 4,
-                              rating: 4.8,
-                              index: 1,
-                            ),
-                            const SizedBox(width: 16),
-                            _buildProductCard(
-                              image: 'assets/images/birthday_gift.webp',
-                              title: 'Special Birthday Bundle',
-                              deliveryDays: 2,
-                              rating: 4.7,
-                              index: 2,
-                            ),
-                          ],
+                        child: Consumer<HomeTabController>(
+                          builder: (context, controller, _) {
+                            if (controller.isLoading) {
+                              return const HomeTabProductsShimmer();
+                            }
+
+                            if (controller.popularProducts.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  'No popular products available',
+                                  style: AppFonts.paragraph.copyWith(
+                                    color: AppColors.textGrey,
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              clipBehavior: Clip.none,
+                              physics: const BouncingScrollPhysics(),
+                              padding: EdgeInsets.zero,
+                              itemCount: controller.popularProducts.length,
+                              itemBuilder: (context, index) {
+                                final product = controller.popularProducts[index];
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    right: index != controller.popularProducts.length - 1 ? 16.0 : 0,
+                                  ),
+                                  child: _buildProductCard(
+                                    image: product.images.first,
+                                    title: product.name,
+                                    deliveryDays: 3, // You might want to add this to your product model
+                                    rating: product.rating,
+                                    index: index,
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -772,12 +787,25 @@ class _HomeTabViewState extends State<HomeTabView> {
     required int index,
   }) {
     bool isLiked = _likedProducts.contains(index);
+    final product = context.read<HomeTabController>().popularProducts[index];
 
     return GestureDetector(
       onTap: () {
-        // Handle product tap
-        print('Product tapped: $title');
-        // Add your navigation or detail view logic here
+        // Show bottom sheet immediately with shimmer
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => FutureBuilder<Product>(
+            future: ProductService().getProductById(product.id),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ProductDetailBottomSheet(product: snapshot.data!);
+              }
+              return const ProductDetailShimmer();
+            },
+          ),
+        );
       },
       child: Container(
         width: 280,
@@ -787,10 +815,10 @@ class _HomeTabViewState extends State<HomeTabView> {
             // Background Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                image,
-                height: double.infinity,
+              child: ImageService.getNetworkImage(
+                imageUrl: image,
                 width: double.infinity,
+                height: double.infinity,
                 fit: BoxFit.cover,
               ),
             ),
@@ -811,7 +839,7 @@ class _HomeTabViewState extends State<HomeTabView> {
               ),
             ),
             
-            // Updated Heart Icon with tap handler
+            // Heart Icon
             Positioned(
               top: 12,
               right: 12,
@@ -837,7 +865,7 @@ class _HomeTabViewState extends State<HomeTabView> {
               ),
             ),
             
-            // Bottom Content
+            // Content
             Positioned(
               left: 12,
               right: 12,
@@ -849,44 +877,40 @@ class _HomeTabViewState extends State<HomeTabView> {
                     title,
                     style: AppFonts.heading1.copyWith(
                       color: Colors.white,
-                      fontSize: 16, // Decreased from 24
+                      fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      // Clock Icon
                       SvgPicture.asset(
                         'assets/images/alarm-clock.svg',
-                        width: 16, // Decreased from 24
-                        height: 16, // Decreased from 24
+                        width: 16,
+                        height: 16,
                         colorFilter: ColorFilter.mode(
                           AppColors.successGreen,
                           BlendMode.srcIn,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      // Delivery Text
                       Text(
                         '$deliveryDays Days Delivery',
                         style: AppFonts.paragraph.copyWith(
-                          fontSize: 14, // Decreased from 20
+                          fontSize: 14,
                           color: Colors.white,
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Star Icon
                       Icon(
                         Icons.star_rounded,
-                        size: 16, // Decreased from 24
+                        size: 16,
                         color: AppColors.ratingAmber,
                       ),
                       const SizedBox(width: 4),
-                      // Rating Text
                       Text(
-                        rating.toString(),
+                        rating.toStringAsFixed(1),
                         style: AppFonts.paragraph.copyWith(
-                          fontSize: 14, // Decreased from 20
+                          fontSize: 14,
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
                         ),

@@ -87,6 +87,70 @@ class ProductService {
     }
   }
 
+  Future<List<Product>> getPopularProducts() async {
+    try {
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}${ApiEndpoints.popularProducts}',
+      );
+
+      debugPrint('Popular products response received: ${response.data}');
+
+      if (response.data['data'] == null) {
+        debugPrint('No popular products found in response');
+        return [];
+      }
+
+      return (response.data['data'] as List).map((json) => Product(
+        id: json['id'].toString(),
+        name: json['name'] as String,
+        description: json['description'] as String,
+        price: 0.0, // Add default price since it's not in the response
+        images: (json['images'] as List?)?.isNotEmpty == true 
+            ? (json['images'] as List).map((img) => img['image'].toString()).toList()
+            : ['assets/images/placeholder.png'],
+        brand: 'Unknown Brand', // Add default brand since it's not in the response
+        productType: 'Gift Item', // Add default type since it's not in the response
+        isLiked: false,
+        rating: 0.0, // Add default rating since it's not in the response
+      )).toList();
+    } catch (e) {
+      debugPrint('Error fetching popular products: $e');
+      throw Exception('Failed to load popular products');
+    }
+  }
+
+  Future<Product> getProductById(String productId) async {
+    try {
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}${ApiEndpoints.productById(productId)}',
+      );
+
+      debugPrint('Product detail response received: ${response.data}');
+
+      if (response.data['data'] == null) {
+        throw Exception('No product data found');
+      }
+
+      final json = response.data['data'];
+      return Product(
+        id: json['id'].toString(),
+        name: json['name'] as String,
+        description: json['description'] as String,
+        price: double.parse(json['price'].toString()),
+        images: (json['images'] as List?)?.isNotEmpty == true 
+            ? (json['images'] as List).map((img) => img['image'].toString()).toList()
+            : ['assets/images/placeholder.png'],
+        brand: json['brand']?.toString() ?? 'Unknown Brand',
+        productType: json['product_type']?.toString() ?? 'Gift Item',
+        isLiked: false,
+        rating: json['rating']?.toDouble() ?? 0.0,
+      );
+    } catch (e) {
+      debugPrint('Error fetching product by ID: $e');
+      throw Exception('Failed to load product details');
+    }
+  }
+
   void clearCache([String? categoryId]) {
     if (categoryId != null) {
       _productCache.remove(categoryId);

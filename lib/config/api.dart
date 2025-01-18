@@ -18,9 +18,17 @@ abstract class ApiEndpoints {
   // Order endpoints
   static const String orders = '/orders';
   
-  // Add this line with the other endpoints
+  // dummy auth
   static const String dummyToken = '/users/dummyToken/user/';
   
-  // Add this new endpoint
+  // category product 
   static String categoryProducts(String categoryId) => '/products/categories/$categoryId/';
+  
+  // favourite products (get, post)
+  static const String favouriteProducts = '/products/favourite/';
+  static String productById(String productId) => '/products/$productId/';
+  
+  // Popular products endpoint
+  static const String popularProducts = '/products/popular-products/';
+  
 }
