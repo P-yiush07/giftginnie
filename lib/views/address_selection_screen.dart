@@ -15,10 +15,7 @@ class AddressSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AddressController(),
-      child: const AddressSelectionView(),
-    );
+    return const AddressSelectionView();
   }
 }
 
@@ -169,158 +166,171 @@ class AddressSelectionView extends StatelessWidget {
     required String distance,
     required int addressId,
   }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFF6B6B),
-                borderRadius: BorderRadius.circular(20),
+    final addressModel = controller.addresses.firstWhere((a) => a.id == addressId);
+    final isSelected = controller.isAddressSelected(addressModel);
+
+    return GestureDetector(
+      onTap: () {
+        controller.selectAddress(addressModel);
+        Navigator.pop(context); // Return to previous screen after selection
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF6B6B),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.location_on,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
-              child: const Icon(
-                Icons.location_on,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          distance,
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 14,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '|',
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 14,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          label,
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 14,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      address,
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuButton<String>(
+                icon: const Icon(
+                  Icons.more_vert,
+                  color: Color(0xFF656565),
+                ),
                 color: Colors.white,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        distance,
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: AppColors.textGrey,
+                offset: const Offset(-10, 5),
+                elevation: 8,
+                shadowColor: Colors.black.withOpacity(0.2),
+                shape: TooltipShape(arrowArc: 0.0),
+                position: PopupMenuPosition.under,
+                constraints: const BoxConstraints(
+                  minWidth: 120,
+                  maxWidth: 150,
+                ),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () => Navigator.pop(context, 'edit'),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.edit,
+                              color: Color(0xFF656565),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Edit',
+                              style: AppFonts.paragraph.copyWith(
+                                fontSize: 14,
+                                color: const Color(0xFF656565),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '|',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        label,
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    address,
-                    style: AppFonts.paragraph.copyWith(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black,
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () => Navigator.pop(context, 'delete'),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.delete,
+                              color: Color(0xFF656565),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Delete',
+                              style: AppFonts.paragraph.copyWith(
+                                fontSize: 14,
+                                color: const Color(0xFF656565),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
+                onSelected: (value) {
+                  // Handle menu item selection
+                  if (value == 'edit') {
+                    // Handle edit action
+                  } else if (value == 'delete') {
+                    // Handle delete action
+                  }
+                },
               ),
-            ),
-            PopupMenuButton<String>(
-              icon: const Icon(
-                Icons.more_vert,
-                color: Color(0xFF656565),
-              ),
-              color: Colors.white,
-              offset: const Offset(-10, 5),
-              elevation: 8,
-              shadowColor: Colors.black.withOpacity(0.2),
-              shape: TooltipShape(arrowArc: 0.0),
-              position: PopupMenuPosition.under,
-              constraints: const BoxConstraints(
-                minWidth: 120,
-                maxWidth: 150,
-              ),
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () => Navigator.pop(context, 'edit'),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.edit,
-                            color: Color(0xFF656565),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Edit',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 14,
-                              color: const Color(0xFF656565),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () => Navigator.pop(context, 'delete'),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.delete,
-                            color: Color(0xFF656565),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Delete',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 14,
-                              color: const Color(0xFF656565),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-              onSelected: (value) {
-                // Handle menu item selection
-                if (value == 'edit') {
-                  // Handle edit action
-                } else if (value == 'delete') {
-                  // Handle delete action
-                }
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

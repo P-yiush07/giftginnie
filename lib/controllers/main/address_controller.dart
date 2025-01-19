@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/address_model.dart';
 import '../../services/user_service.dart';
 
@@ -7,9 +8,21 @@ class AddressController extends ChangeNotifier {
   List<AddressModel> addresses = [];
   bool isLoading = true;
   String? error;
+  AddressModel? selectedAddress;
+  static const String _selectedAddressKey = 'selected_address_id';
 
   AddressController() {
     loadAddresses();
+  }
+
+  void selectAddress(AddressModel address) {
+    selectedAddress = address;
+    _saveSelectedAddressId(address.id);
+    notifyListeners();
+  }
+
+  bool isAddressSelected(AddressModel address) {
+    return selectedAddress?.id == address.id;
   }
 
   Future<void> loadAddresses() async {
@@ -21,6 +34,10 @@ class AddressController extends ChangeNotifier {
       final fetchedAddresses = await _userService.getUserAddresses();
       addresses = fetchedAddresses;
       isLoading = false;
+      
+      // Load saved address after fetching addresses
+      await loadSavedAddress();
+      
       notifyListeners();
     } catch (e) {
       error = 'Failed to load addresses. Please try again.';
@@ -61,5 +78,28 @@ class AddressController extends ChangeNotifier {
     if (address.addressLine1.toLowerCase().contains('work')) return 'Work';
     if (address.addressLine1.toLowerCase().contains('office')) return 'Office';
     return 'Other';
+  }
+
+  Future<void> _saveSelectedAddressId(int? addressId) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (addressId != null) {
+      await prefs.setInt(_selectedAddressKey, addressId);
+    } else {
+      await prefs.remove(_selectedAddressKey);
+    }
+  }
+
+  Future<void> loadSavedAddress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedAddressId = prefs.getInt(_selectedAddressKey);
+    
+    if (savedAddressId != null && addresses.isNotEmpty) {
+      final savedAddress = addresses.firstWhere(
+        (address) => address.id == savedAddressId,
+        orElse: () => addresses.first,
+      );
+      selectedAddress = savedAddress;
+      notifyListeners();
+    }
   }
 }

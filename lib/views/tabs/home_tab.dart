@@ -26,6 +26,7 @@ import 'package:giftginnie_ui/services/product_service.dart';
 import 'package:giftginnie_ui/widgets/product_detail_bottom_sheet.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../controllers/main/address_controller.dart';
 
 class OfferBanner {
   final String title;
@@ -155,7 +156,9 @@ class _HomeTabViewState extends State<HomeTabView> {
                                       ),
                                     )
                                   : CachedNetworkImage(
-                                      imageUrl: userController.userProfile?.profileImage ?? '',
+                                      imageUrl: userController.userProfile?.profileImage?.isNotEmpty == true 
+                                          ? userController.userProfile!.profileImage! 
+                                          : 'https://static.vecteezy.com/system/resources/thumbnails/036/594/092/small_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg',
                                       width: 40,
                                       height: 40,
                                       fit: BoxFit.cover,
@@ -181,55 +184,65 @@ class _HomeTabViewState extends State<HomeTabView> {
                       ),
                       const SizedBox(width: 12),
                       // Location Info
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              SlidePageRoute(
-                                page: const AddressSelectionScreen(),
-                                direction: SlideDirection.bottom,
-                              )
-                            );
-                          },
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'HomeTown',
-                                style: AppFonts.paragraph.copyWith(
-                                  fontSize: 14,
-                                  color: AppColors.textGrey,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.location_on,
-                                    size: 18,
-                                    color: AppColors.primaryRed,
+                      Consumer<AddressController>(
+                        builder: (context, addressController, _) {
+                          return Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  SlidePageRoute(
+                                    page: const AddressSelectionScreen(),
+                                    direction: SlideDirection.bottom,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '6391 Elgin St, Delaware 10299',
-                                    style: AppFonts.paragraph.copyWith(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.black,
+                                );
+                              },
+                              child: addressController.isLoading
+                                  ? _buildAddressShimmer()
+                                  : Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          addressController.selectedAddress?.getAddressLabel() ?? 'Select Address',
+                                          style: AppFonts.paragraph.copyWith(
+                                            fontSize: 14,
+                                            color: AppColors.textGrey,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.location_on,
+                                              size: 18,
+                                              color: AppColors.primaryRed,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                addressController.selectedAddress?.fullAddress ?? 'Tap to select delivery address',
+                                                style: AppFonts.paragraph.copyWith(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: AppColors.black,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const Icon(
+                                              Icons.keyboard_arrow_down,
+                                              color: AppColors.black,
+                                              size: 20,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const Icon(
-                                    Icons.keyboard_arrow_down,
-                                    color: AppColors.black,
-                                    size: 20,
-                                  ),
-                                ],
-                              ),
-                              ],
                             ),
-                          ),
-                        ),
+                          );
+                        },
+                      ),
                       // Settings Icon
                       IconButton(
                         icon: Icon(
@@ -1164,6 +1177,56 @@ class _HomeTabViewState extends State<HomeTabView> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAddressShimmer() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Shimmer.fromColors(
+          baseColor: AppColors.grey300,
+          highlightColor: AppColors.grey100,
+          child: Container(
+            width: 80,
+            height: 14,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Icon(
+              Icons.location_on,
+              size: 18,
+              color: AppColors.grey300,
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Shimmer.fromColors(
+                baseColor: AppColors.grey300,
+                highlightColor: AppColors.grey100,
+                child: Container(
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: AppColors.grey300,
+              size: 20,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

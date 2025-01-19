@@ -35,7 +35,7 @@ abstract class ApiEndpoints {
   static const String popularCategories = '/products/popular-categories/';
 
   // User address endpoints
-  static const String userAddresses = '/users/profile/address';
+  static const String userAddresses = '/users/profile/address/';
 
   // profile update endpoint
   static const String updateUserProfile = '/users/profile/update/';

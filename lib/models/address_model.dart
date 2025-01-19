@@ -52,4 +52,11 @@ class AddressModel {
     ];
     return parts.where((part) => part.isNotEmpty).join(', ');
   }
+
+  String getAddressLabel() {
+    if (addressLine1.toLowerCase().contains('home')) return 'Home';
+    if (addressLine1.toLowerCase().contains('work')) return 'Work';
+    if (addressLine1.toLowerCase().contains('office')) return 'Office';
+    return 'Other';
+  }
 }
