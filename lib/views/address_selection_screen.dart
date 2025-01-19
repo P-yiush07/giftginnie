@@ -2,131 +2,172 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 import '../constants/fonts.dart';
+import '../models/address_model.dart';
+import '../services/user_service.dart';
 import 'add_address_screen.dart';
 import '../config/route_transitions.dart';
+import '../controllers/main/address_controller.dart';
+import 'package:provider/provider.dart';
+import '../widgets/shimmer/address_shimmer.dart';
 
 class AddressSelectionScreen extends StatelessWidget {
   const AddressSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-      ),
-      child: Scaffold(
-        backgroundColor: const Color(0xFFF9F9F9),
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.pop(context),
+    return ChangeNotifierProvider(
+      create: (_) => AddressController(),
+      child: const AddressSelectionView(),
+    );
+  }
+}
+
+class AddressSelectionView extends StatelessWidget {
+  const AddressSelectionView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AddressController>(
+      builder: (context, controller, _) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
           ),
-          title: Text(
-            'Select an Address',
-            style: AppFonts.paragraph.copyWith(
-              fontSize: 18,
-              color: Colors.black,
+          child: Scaffold(
+            backgroundColor: const Color(0xFFF9F9F9),
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                'Select an Address',
+                style: AppFonts.paragraph.copyWith(
+                  fontSize: 18,
+                  color: Colors.black,
+                ),
+              ),
             ),
-          ),
-        ),
-        body: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: InkWell(
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    SlidePageRoute(
-                      page: const AddAddressScreen(),
-                      direction: SlideDirection.right,
-                    ),
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.add,
-                          color: const Color(0xFFFF6B6B),
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Add Address',
-                          style: AppFonts.paragraph.copyWith(
-                            fontSize: 16,
-                            color: const Color(0xFFFF6B6B),
-                            fontWeight: FontWeight.w500,
+            body: RefreshIndicator(
+              onRefresh: controller.loadAddresses,
+              child: controller.isLoading
+                  ? const AddressShimmer()
+                  : controller.error != null
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                controller.error!,
+                                style: AppFonts.paragraph.copyWith(
+                                  color: Colors.red,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              TextButton(
+                                onPressed: controller.loadAddresses,
+                                child: const Text('Retry'),
+                              ),
+                            ],
                           ),
+                        )
+                      : ListView(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          children: [
+                            _buildAddAddressButton(context),
+                            const SizedBox(height: 24),
+                            if (controller.addresses.isNotEmpty) ...[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Text(
+                                  'Saved Address',
+                                  style: AppFonts.heading1.copyWith(
+                                    fontSize: 16,
+                                    color: const Color(0xFF656565),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              ...controller.addresses.map((address) => _buildAddressItem(
+                                    context,
+                                    controller,
+                                    label: controller.getAddressLabel(address),
+                                    address: address.fullAddress,
+                                    addressId: address.id,
+                                    distance: '2km',
+                                  )),
+                            ],
+                          ],
                         ),
-                        const Spacer(),
-                        const Icon(
-                          Icons.chevron_right,
-                          color: Color(0xFF656565),
-                          size: 24,
-                        ),
-                      ],
-                    ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAddAddressButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: InkWell(
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onTap: () async {
+          await Navigator.push(
+            context,
+            SlidePageRoute(
+              page: const AddAddressScreen(),
+              direction: SlideDirection.right,
+            ),
+          );
+          // Refresh addresses when returning from add address screen
+          context.read<AddressController>().loadAddresses();
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.add,
+                  color: const Color(0xFFFF6B6B),
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Add Address',
+                  style: AppFonts.paragraph.copyWith(
+                    fontSize: 16,
+                    color: const Color(0xFFFF6B6B),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Saved Address',
-                style: AppFonts.heading1.copyWith(
-                  fontSize: 16,
-                  color: const Color(0xFF656565),
+                const Spacer(),
+                const Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFF656565),
+                  size: 24,
                 ),
-              ),
+              ],
             ),
-            const SizedBox(height: 16),
-            _buildAddressItem(
-              label: 'HomeTown',
-              address: '6391 Elgin St, Delaware 10299',
-              distance: '8km',
-            ),
-            _buildAddressItem(
-              label: 'Other',
-              address: '2464 Royal Ln, New Jersey 45463',
-              distance: '2km',
-            ),
-            _buildAddressItem(
-              label: 'Work',
-              address: '4517 Washington, Kentucky 39495',
-              distance: '8km',
-            ),
-            _buildAddressItem(
-              label: 'Office',
-              address: '4140 Parker Rd, Allentown, New Mexico 31134',
-              distance: '4km',
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildAddressItem({
+  Widget _buildAddressItem(BuildContext context, AddressController controller, {
     required String label,
     required String address,
     required String distance,
-    bool isSelected = false,
+    required int addressId,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

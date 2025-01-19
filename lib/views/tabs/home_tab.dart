@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/constants/images.dart';
+import 'package:giftginnie_ui/controllers/main/user_controller.dart';
 import 'package:giftginnie_ui/models/popular_category_model.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/views/address_selection_screen.dart';
@@ -24,6 +25,7 @@ import 'package:giftginnie_ui/widgets/shimmer/home_tab_products_shimmer.dart';
 import 'package:giftginnie_ui/services/product_service.dart';
 import 'package:giftginnie_ui/widgets/product_detail_bottom_sheet.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
+import 'package:shimmer/shimmer.dart';
 
 class OfferBanner {
   final String title;
@@ -102,6 +104,17 @@ class _HomeTabViewState extends State<HomeTabView> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  void _loadProfile() async {
+    final userController = context.read<UserController>();
+    await userController.loadUserProfile();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
@@ -118,22 +131,53 @@ class _HomeTabViewState extends State<HomeTabView> {
                   child: Row(
                     children: [
                       // Profile Image
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.grey300,
-                            width: 1,
-                          ),
-                        ),
-                        child: ClipOval(
-                          child: Image.network(
-                            'https://img-cdn.pixlr.com/image-generator/history/65bb506dcb310754719cf81f/ede935de-1138-4f66-8ed7-44bd16efc709/medium.webp',
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                      Consumer<UserController>(
+                        builder: (context, userController, _) {
+                          return Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.grey300,
+                                width: 1,
+                              ),
+                            ),
+                            child: ClipOval(
+                              child: userController.isLoading
+                                  ? Shimmer.fromColors(
+                                      baseColor: AppColors.grey300,
+                                      highlightColor: AppColors.grey100,
+                                      child: Container(
+                                        width: 40,
+                                        height: 40,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : CachedNetworkImage(
+                                      imageUrl: userController.userProfile?.profileImage ?? '',
+                                      width: 40,
+                                      height: 40,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => Shimmer.fromColors(
+                                        baseColor: AppColors.grey300,
+                                        highlightColor: AppColors.grey100,
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) => Image.asset(
+                                        'assets/images/placeholder.png',
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(width: 12),
                       // Location Info

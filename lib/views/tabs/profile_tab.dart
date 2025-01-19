@@ -8,6 +8,10 @@ import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/profile_tab_controller.dart';
 import '../../../views/edit_profile_screen.dart';
 import '../../../views/favourite_gifts_screen.dart';
+import '../../../controllers/main/user_controller.dart';
+import '../../../services/image_service.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -28,52 +32,95 @@ class ProfileTab extends StatelessWidget {
   }
 }
 
-class ProfileTabView extends StatelessWidget {
+class ProfileTabView extends StatefulWidget {
   const ProfileTabView({super.key});
+
+  @override
+  State<ProfileTabView> createState() => _ProfileTabViewState();
+}
+
+class _ProfileTabViewState extends State<ProfileTabView> {
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  void _loadProfile() async {
+    final userController = Provider.of<UserController>(context, listen: false);
+    await userController.loadUserProfile();
+  }
 
   Widget _buildProfileOption({
     required String title,
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppFonts.paragraph.copyWith(
-                      fontSize: 16,
-                      color: AppColors.black,
-                      fontWeight: FontWeight.w500,
-                    ),
+    return Consumer<UserController>(
+      builder: (context, userController, _) {
+        return InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppFonts.paragraph.copyWith(
+                          fontSize: 16,
+                          color: AppColors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      userController.isLoading
+                          ? Shimmer.fromColors(
+                              baseColor: AppColors.grey300,
+                              highlightColor: AppColors.grey100,
+                              child: Container(
+                                width: 180,
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            )
+                          : Text(
+                              subtitle,
+                              style: AppFonts.paragraph.copyWith(
+                                fontSize: 14,
+                                color: AppColors.textGrey,
+                              ),
+                            ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: AppFonts.paragraph.copyWith(
-                      fontSize: 14,
-                      color: AppColors.textGrey,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textGrey,
+                  size: 24,
+                ),
+              ],
             ),
-            Icon(
-              Icons.chevron_right,
-              color: AppColors.textGrey,
-              size: 24,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
+  }
+
+  String _formatJoinDate(DateTime date) {
+    // Format date as "Joined January 16, 2025"
+    final months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    return 'Joined ${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
   @override
@@ -127,34 +174,82 @@ class ProfileTabView extends StatelessWidget {
                           width: 1,
                         ),
                       ),
-                      child: ClipOval(
-                        child: Image.network(
-                          'https://img-cdn.pixlr.com/image-generator/history/65bb506dcb310754719cf81f/ede935de-1138-4f66-8ed7-44bd16efc709/medium.webp',
-                          fit: BoxFit.cover,
-                        ),
+                      child: Consumer<UserController>(
+                        builder: (context, userController, _) {
+                          return ClipOval(
+                            child: userController.isLoading
+                                ? Shimmer.fromColors(
+                                    baseColor: AppColors.grey300,
+                                    highlightColor: AppColors.grey100,
+                                    child: Container(
+                                      width: 64,
+                                      height: 64,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : userController.userProfile?.profileImage != null
+                                    ? CachedNetworkImage(
+                                        imageUrl: userController.userProfile!.profileImage!,
+                                        width: 64,
+                                        height: 64,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Shimmer.fromColors(
+                                          baseColor: AppColors.grey300,
+                                          highlightColor: AppColors.grey100,
+                                          child: Container(
+                                            width: 64,
+                                            height: 64,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        errorWidget: (context, url, error) => Image.asset(
+                                          'assets/images/placeholder.png',
+                                          width: 64,
+                                          height: 64,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : Image.asset(
+                                        'assets/images/placeholder.png',
+                                        width: 64,
+                                        height: 64,
+                                        fit: BoxFit.cover,
+                                      ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(width: 16),
                     // User Info
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Albert Flores',
-                            style: AppFonts.heading1.copyWith(
-                              fontSize: 18,
-                              color: AppColors.black,
-                            ),
-                          ),
-                          Text(
-                            '6391 Elgin St, Delaware 10299',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 14,
-                              color: AppColors.textGrey,
-                            ),
-                          ),
-                        ],
+                      child: Consumer<UserController>(
+                        builder: (context, userController, _) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              userController.isLoading
+                                  ? Shimmer.fromColors(
+                                      baseColor: AppColors.grey300,
+                                      highlightColor: AppColors.grey100,
+                                      child: Container(
+                                        width: 120,
+                                        height: 20,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                      ),
+                                    )
+                                  : Text(
+                                      userController.userProfile?.fullName ?? '',
+                                      style: AppFonts.heading1.copyWith(
+                                        fontSize: 18,
+                                        color: AppColors.black,
+                                      ),
+                                    ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                     // Edit Button
@@ -275,6 +370,27 @@ class ProfileTabView extends StatelessWidget {
               ),
               
               const SizedBox(height: 24),
+
+              // Join Date
+              Consumer<UserController>(
+                builder: (context, userController, _) {
+                  if (userController.userProfile?.dateJoined != null) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 24),
+                        child: Text(
+                          _formatJoinDate(userController.userProfile!.dateJoined),
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 14,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ],
           ),
         ),

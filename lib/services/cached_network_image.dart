@@ -12,12 +12,21 @@ class ImageService {
     Widget? errorWidget,
     Key? key,
   }) {
+    if (imageUrl.isEmpty) {
+      return errorWidget ?? Container(
+        color: AppColors.grey300,
+        child: Icon(Icons.error, color: AppColors.textGrey),
+      );
+    }
+
     return CachedNetworkImage(
       key: key,
       imageUrl: imageUrl,
       width: width,
       height: height,
       fit: fit,
+      fadeInDuration: const Duration(milliseconds: 300),
+      fadeOutDuration: const Duration(milliseconds: 300),
       placeholder: (context, url) => placeholder ?? Container(
         color: AppColors.grey300,
         child: Center(

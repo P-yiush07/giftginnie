@@ -6,6 +6,7 @@ import 'constants/colors.dart';
 import 'utils/global.dart';
 import 'package:provider/provider.dart';
 import 'services/cache_service.dart';
+import 'controllers/main/user_controller.dart';
 
 void main() async {
   try {
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProvider(create: (_) => UserController()),
         // Add other global providers
         // ChangeNotifierProvider(create: (_) => CartController()),
         // ChangeNotifierProvider(create: (_) => UserController()),
