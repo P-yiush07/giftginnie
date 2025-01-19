@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/home_tab_model.dart';
 import 'package:giftginnie_ui/models/category_model.dart';
+import 'package:giftginnie_ui/models/popular_category_model.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/category_service.dart';
 import 'package:giftginnie_ui/services/product_service.dart';
@@ -13,6 +14,7 @@ class HomeTabController extends ChangeNotifier {
   String? _error;
   List<CategoryModel> _categories = [];
   List<Product> _popularProducts = [];
+  List<PopularCategory> _popularCategories = [];
 
   // Getters
   HomeTabModel get model => _model;
@@ -20,6 +22,7 @@ class HomeTabController extends ChangeNotifier {
   String? get error => _error;
   List<CategoryModel> get categories => _categories;
   List<Product> get popularProducts => _popularProducts;
+  List<PopularCategory> get popularCategories => _popularCategories;
 
   HomeTabController() {
     _fetchInitialData();
@@ -33,6 +36,7 @@ class HomeTabController extends ChangeNotifier {
       await Future.wait([
         _fetchCategories(),
         _fetchPopularProducts(),
+        _fetchPopularCategories(),
       ]);
     } catch (e) {
       _error = e.toString();
@@ -61,6 +65,29 @@ class HomeTabController extends ChangeNotifier {
       _popularProducts = await _productService.getPopularProducts();
     } catch (e) {
       debugPrint('Error fetching popular products: $e');
+    }
+  }
+
+  Future<void> _fetchPopularCategories() async {
+    try {
+      _popularCategories = await _categoryService.getPopularCategories();
+      
+      // Debug logging
+      debugPrint('Popular Categories Response:');
+      for (var category in _popularCategories) {
+        debugPrint('''
+          Category ID: ${category.categoryId}
+          Name: ${category.categoryName}
+          Image URL: ${category.image}
+          Rating: ${category.averageRating}
+          Description: ${category.categoryDescription}
+          ----------------------------------------
+        ''');
+      }
+      
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error fetching popular categories: $e');
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../config/api.dart';
 import '../models/category_model.dart';
 import '../services/cache_service.dart';
+import '../models/popular_category_model.dart';
 
 class CategoryService {
   final Dio _dio;
@@ -65,6 +66,17 @@ class CategoryService {
       _categoryCache.remove(categoryId);
     } else {
       _categoryCache.clear();
+    }
+  }
+
+  Future<List<PopularCategory>> getPopularCategories() async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}${ApiEndpoints.popularCategories}');
+      final data = response.data['data'] as List;
+      return data.map((json) => PopularCategory.fromJson(json)).toList();
+    } catch (e) {
+      debugPrint('Error fetching popular categories: $e');
+      throw Exception('Failed to load popular categories');
     }
   }
 }

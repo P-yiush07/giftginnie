@@ -31,4 +31,6 @@ abstract class ApiEndpoints {
   // Popular products endpoint
   static const String popularProducts = '/products/popular-products/';
   
+  // Popular categories endpoint
+  static const String popularCategories = '/products/popular-categories/';
 }

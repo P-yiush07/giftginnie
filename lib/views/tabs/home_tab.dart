@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/constants/images.dart';
+import 'package:giftginnie_ui/models/popular_category_model.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/views/address_selection_screen.dart';
 import 'package:provider/provider.dart';
@@ -639,39 +640,36 @@ class _HomeTabViewState extends State<HomeTabView> {
                 ),
                 // After the Popular Categories section
                 const SizedBox(height: 16),
-                SizedBox(
-                  height: 280,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    children: [
-                      _buildGiftCategoryCard(
-                        image: AppImages.webp_giftCat1,
-                        rating: 4.5,
-                        title: 'Gift Categories 1',
-                        categories: ['Birthday', 'Anniversary'],
-                        isBestDeal: true,
+                Consumer<HomeTabController>(
+                  builder: (context, controller, _) {
+                    if (controller.popularCategories.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return SizedBox(
+                      height: 280,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        itemCount: controller.popularCategories.length,
+                        itemBuilder: (context, index) {
+                          final category = controller.popularCategories[index];
+                          return Padding(
+                            padding: EdgeInsets.only(right: 16.0),
+                            child: _buildGiftCategoryCard(
+                              image: category.image,
+                              rating: category.averageRating,
+                              title: category.categoryName,
+                              categories: [category.categoryDescription],
+                              isBestDeal: false,
+                              category: category,
+                            ),
+                          );
+                        },
                       ),
-                      const SizedBox(width: 16), // Add spacing between cards
-                      _buildGiftCategoryCard(
-                        image: AppImages.webp_giftCat2,
-                        rating: 3.5,
-                        title: 'Gift Categories 2',
-                        categories: ['Birthday', 'Anniversary'],
-                        isBestDeal: false,
-                      ),
-                      const SizedBox(width: 16), // Add spacing between cards
-                      _buildGiftCategoryCard(
-                        image: AppImages.webp_giftCat1,
-                        rating: 4.5,
-                        title: 'Gift Categories 3',
-                        categories: ['Birthday', 'Anniversary'],
-                        isBestDeal: true,
-                      ),
-                      // Add more cards as needed
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 // After the gift category ListView,
                 const SizedBox(height: 24),
@@ -973,128 +971,154 @@ class _HomeTabViewState extends State<HomeTabView> {
     required String title,
     required List<String> categories,
     required bool isBestDeal,
+    required PopularCategory category,
   }) {
-    return Container(
-      width: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          SlidePageRoute(
+            page: CategoryScreen(
+              category: CategoryModel(
+                id: category.categoryId,
+                categoryName: category.categoryName,
+                description: category.categoryDescription,
+                image: category.image,
+                gifts: [], // Initially empty, will be populated by CategoryScreen
+              ),
+            ),
+            direction: SlideDirection.right,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              // Image
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Image.asset(
-                  image,
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              // Dark Gradient Overlay
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Container(
-                  height: 180,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.2),
-                        Colors.black.withOpacity(0.6),
-                      ],
-                      stops: const [0.0, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-              // Best Deal Badge
-              if (isBestDeal)
-                Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryRed,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      'Best Deal',
-                      style: AppFonts.paragraph.copyWith(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              // Rating
-              Positioned(
-                bottom: 12,
-                left: 12,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.star_rounded,
-                      size: 16,
-                      color: AppColors.ratingAmber,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      rating.toString(),
-                      style: AppFonts.paragraph.copyWith(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        );
+      },
+      child: Container(
+        width: 200,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                Text(
-                  title,
-                  style: AppFonts.paragraph.copyWith(
-                    color: AppColors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                // Image - Changed from Image.asset to ImageService.getNetworkImage
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: ImageService.getNetworkImage(
+                    imageUrl: image,
+                    width: double.infinity,
+                    height: 180,
+                    fit: BoxFit.cover,
+                    errorWidget: Image.asset(
+                      'assets/images/placeholder.png',
+                      height: 180,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  categories.join(', '),
-                  style: AppFonts.heading1.copyWith(
-                    fontSize: 14,
-                    color: AppColors.primaryRed,
+                // Dark Gradient Overlay
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Container(
+                    height: 180,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.2),
+                          Colors.black.withOpacity(0.6),
+                        ],
+                        stops: const [0.0, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+                // Best Deal Badge
+                if (isBestDeal)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryRed,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        'Best Deal',
+                        style: AppFonts.paragraph.copyWith(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                // Rating
+                Positioned(
+                  bottom: 12,
+                  left: 12,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.star_rounded,
+                        size: 16,
+                        color: AppColors.ratingAmber,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        rating.toString(),
+                        style: AppFonts.paragraph.copyWith(
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppFonts.paragraph.copyWith(
+                      color: AppColors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    categories.join(', '),
+                    style: AppFonts.heading1.copyWith(
+                      fontSize: 14,
+                      color: AppColors.primaryRed,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
