@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/address_model.dart';
 import '../../services/user_service.dart';
+import '../../services/cache_service.dart';
 
 class AddressController extends ChangeNotifier {
   final UserService _userService = UserService();
+  final CacheService _cacheService = CacheService();
   List<AddressModel> addresses = [];
   bool isLoading = true;
   String? error;
@@ -81,17 +83,15 @@ class AddressController extends ChangeNotifier {
   }
 
   Future<void> _saveSelectedAddressId(int? addressId) async {
-    final prefs = await SharedPreferences.getInstance();
     if (addressId != null) {
-      await prefs.setInt(_selectedAddressKey, addressId);
+      await _cacheService.saveInt(_selectedAddressKey, addressId);
     } else {
-      await prefs.remove(_selectedAddressKey);
+      await _cacheService.remove(_selectedAddressKey);
     }
   }
 
   Future<void> loadSavedAddress() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedAddressId = prefs.getInt(_selectedAddressKey);
+    final savedAddressId = await _cacheService.getInt(_selectedAddressKey);
     
     if (savedAddressId != null && addresses.isNotEmpty) {
       final savedAddress = addresses.firstWhere(

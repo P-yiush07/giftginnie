@@ -315,11 +315,16 @@ class _CartTabViewState extends State<CartTabView> {
               ],
               Text(
                 amount,
-                style: AppFonts.paragraph.copyWith(
-                  fontSize: 14,
-                  color: isTotal ? AppColors.primaryRed : AppColors.black,
-                  fontWeight: isTotal ? FontWeight.w500 : FontWeight.normal,
-                ),
+                style: isTotal 
+                  ? AppFonts.heading1.copyWith(
+                      fontSize: 16,
+                      color: AppColors.primaryRed,
+                    )
+                  : AppFonts.paragraph.copyWith(
+                      fontSize: 14,
+                      color: AppColors.black,
+                      fontWeight: FontWeight.normal,
+                    ),
               ),
             ],
           ),
@@ -329,24 +334,83 @@ class _CartTabViewState extends State<CartTabView> {
   }
 
   Widget _buildCheckoutButton() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ElevatedButton(
-        onPressed: () {
-          // Handle checkout
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryRed,
-          shape: const StadiumBorder(),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-        ),
-        child: Text(
-          'Proceed to checkout',
-          style: AppFonts.paragraph.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      decoration: BoxDecoration(
+        color: AppColors.primaryRed,
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.05),
+            offset: Offset(0, -4),
+            blurRadius: 16,
           ),
-        ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Pay Via',
+                  style: AppFonts.paragraph.copyWith(
+                    fontSize: 12,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.currency_rupee,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Phone Pay',
+                      style: AppFonts.heading1.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.keyboard_arrow_up,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Handle payment
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+            ),
+            child: Text(
+              'Pay Now',
+              style: AppFonts.paragraph.copyWith(
+                color: AppColors.primaryRed,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

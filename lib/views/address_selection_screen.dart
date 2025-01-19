@@ -15,15 +15,6 @@ class AddressSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AddressSelectionView();
-  }
-}
-
-class AddressSelectionView extends StatelessWidget {
-  const AddressSelectionView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
     return Consumer<AddressController>(
       builder: (context, controller, _) {
         return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -253,8 +244,9 @@ class AddressSelectionView extends StatelessWidget {
                 color: Colors.white,
                 offset: const Offset(-10, 5),
                 elevation: 8,
-                shadowColor: Colors.black.withOpacity(0.2),
-                shape: TooltipShape(arrowArc: 0.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 position: PopupMenuPosition.under,
                 constraints: const BoxConstraints(
                   minWidth: 120,
@@ -335,48 +327,4 @@ class AddressSelectionView extends StatelessWidget {
       ),
     );
   }
-}
-
-class TooltipShape extends ShapeBorder {
-  final double arrowWidth = 12.0;
-  final double arrowHeight = 6.0;
-  final double arrowArc;
-  final double radius = 8.0;
-
-  const TooltipShape({this.arrowArc = 0.0});
-
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.only(top: arrowHeight);
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path();
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    rect = Rect.fromPoints(
-      rect.topLeft + Offset(0, arrowHeight),
-      rect.bottomRight,
-    );
-    
-    double x = rect.right - 15;
-    
-    return Path()
-      ..moveTo(x - arrowWidth / 2, rect.top)
-      ..lineTo(x, rect.top - arrowHeight)
-      ..lineTo(x + arrowWidth / 2, rect.top)
-      ..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)))
-      ..close();
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
-    Paint shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.2)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 3);
-    
-    canvas.drawPath(getOuterPath(rect), shadowPaint);
-  }
-
-  @override
-  ShapeBorder scale(double t) => this;
 }
