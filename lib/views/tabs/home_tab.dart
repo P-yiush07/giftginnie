@@ -267,9 +267,11 @@ class _HomeTabViewState extends State<HomeTabView> {
                   Navigator.push(
                     context,
                     SlidePageRoute(
-                      page: const SearchScreen(),
-                      direction: SlideDirection.right
-                    )
+                      direction: SlideDirection.right,
+                      page: const SearchScreen(
+                        autoFocus: true,
+                      ),
+                    ),
                   );
                 },
                 child: Container(

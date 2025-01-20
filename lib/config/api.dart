@@ -39,4 +39,7 @@ abstract class ApiEndpoints {
 
   // profile update endpoint
   static const String updateUserProfile = '/users/profile/update/';
+
+  // Cart endpoints
+  static const String cart = '/cart/';
 }

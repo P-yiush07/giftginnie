@@ -7,10 +7,12 @@ import 'package:flutter/services.dart';
 
 class SearchScreen extends StatefulWidget {
   final bool showCancelButton;
+  final bool autoFocus;
   
   const SearchScreen({
     super.key, 
-    this.showCancelButton = true
+    this.showCancelButton = true,
+    this.autoFocus = false,
   });
 
   @override
@@ -19,12 +21,41 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  bool _allowKeyboardShow = true;
   final List<String> _searchHistory = [
     'Restaurant Near me',
     'Thai Rise',
     'Chhole Kulche',
     'Pav bhaji'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _allowKeyboardShow = true;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.autoFocus && _allowKeyboardShow) {
+      _searchFocusNode.requestFocus();
+    }
+  }
+
+  @override
+  void didUpdateWidget(SearchScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.autoFocus && !oldWidget.autoFocus) {
+      setState(() {
+        _allowKeyboardShow = true;
+      });
+      _searchFocusNode.requestFocus();
+    } else if (!widget.autoFocus && oldWidget.autoFocus) {
+      _searchFocusNode.unfocus();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +90,20 @@ class _SearchScreenState extends State<SearchScreen> {
                             ),
                             child: TextField(
                               controller: _searchController,
+                              focusNode: _searchFocusNode,
+                              autofocus: widget.autoFocus && _allowKeyboardShow,
+                              textInputAction: TextInputAction.done,
+                              onSubmitted: (_) {
+                                _searchFocusNode.unfocus();
+                                setState(() {
+                                  _allowKeyboardShow = false;
+                                });
+                              },
+                              onTap: () {
+                                setState(() {
+                                  _allowKeyboardShow = true;
+                                });
+                              },
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -274,6 +319,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
+    _searchFocusNode.dispose();
     _searchController.dispose();
     super.dispose();
   }

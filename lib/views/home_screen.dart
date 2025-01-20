@@ -152,7 +152,12 @@ class HomeView extends StatelessWidget {
               children: [
                 HomeTab(),
                 CartTab(),
-                const SearchScreen(showCancelButton: false),
+                Consumer<HomeController>(
+                  builder: (context, controller, _) => SearchScreen(
+                    showCancelButton: false,
+                    autoFocus: controller.currentIndex == 2,
+                  ),
+                ),
                 ChangeNotifierProvider.value(
                   value: controller.ordersController,
                   child: const OrdersTab(),

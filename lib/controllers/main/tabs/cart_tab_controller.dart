@@ -1,33 +1,90 @@
 import 'package:flutter/material.dart';
+import '../../../models/cart_model.dart';
+import '../../../services/cart_service.dart';
+import '../../../controllers/main/home_controller.dart';
 
 class CartTabController extends ChangeNotifier {
+  final CartService _cartService = CartService();
+  final HomeController _homeController;
   bool _isLoading = false;
   String? _error;
+  CartModel? _cartData;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
+  CartModel? get cartData => _cartData;
 
-  set isLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
+  CartTabController(this._homeController) {
+    // Listen to tab changes
+    _homeController.addListener(_onTabChange);
+    initializeData();
   }
 
-  set error(String? value) {
-    _error = value;
-    notifyListeners();
+  void _onTabChange() {
+    // Refresh data when returning to cart tab (index 1)
+    if (_homeController.currentIndex == 1) {
+      initializeData();
+    }
   }
 
   Future<void> initializeData() async {
-    isLoading = true;
-    error = null;
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
     try {
-      // TODO: Fetch cart data
-      await Future.delayed(const Duration(seconds: 1));
+      _cartData = await _cartService.getCart();
     } catch (e) {
-      error = 'Failed to load cart data: ${e.toString()}';
+      _error = 'Failed to load cart data: ${e.toString()}';
     } finally {
-      isLoading = false;
+      _isLoading = false;
+      notifyListeners();
     }
+  }
+
+  // Future<void> updateItemQuantity(String itemId, int quantity) async {
+  //   try {
+  //     await _cartService.updateItemQuantity(itemId, quantity);
+  //     await initializeData(); // Refresh cart data
+  //   } catch (e) {
+  //     _error = 'Failed to update quantity: ${e.toString()}';
+  //     notifyListeners();
+  //   }
+  // }
+
+  // Future<void> removeItem(String itemId) async {
+  //   try {
+  //     await _cartService.removeItem(itemId);
+  //     await initializeData(); // Refresh cart data
+  //   } catch (e) {
+  //     _error = 'Failed to remove item: ${e.toString()}';
+  //     notifyListeners();
+  //   }
+  // }
+
+  Future<void> addItem(String productId, int quantity) async {
+    try {
+      await _cartService.addItem(productId, quantity);
+      await initializeData(); // Refresh cart data
+    } catch (e) {
+      _error = 'Failed to add item: ${e.toString()}';
+      notifyListeners();
+    }
+  }
+
+  // Future<void> applyCoupon(String couponCode) async {
+  //   try {
+  //     await _cartService.applyCoupon(couponCode);
+  //     await initializeData(); // Refresh cart data
+  //   } catch (e) {
+  //     _error = 'Failed to apply coupon: ${e.toString()}';
+  //     notifyListeners();
+  //   }
+  // }
+
+  @override
+  void dispose() {
+    _homeController.removeListener(_onTabChange);
+    super.dispose();
   }
 }

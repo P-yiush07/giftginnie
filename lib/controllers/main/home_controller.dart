@@ -4,6 +4,7 @@ import './tabs/orders_tab_controller.dart';
 class HomeController extends ChangeNotifier {
   final OrdersTabController ordersController = OrdersTabController();
   int _currentIndex = 0;
+  DateTime? _lastCartRefresh;
 
   int get currentIndex => _currentIndex;
 
