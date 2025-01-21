@@ -154,8 +154,9 @@ class HomeView extends StatelessWidget {
                 CartTab(),
                 Consumer<HomeController>(
                   builder: (context, controller, _) => SearchScreen(
-                    showCancelButton: false,
+                    showSearchButton: true,
                     autoFocus: controller.currentIndex == 2,
+                    isFromBottomTab: true,
                   ),
                 ),
                 ChangeNotifierProvider.value(

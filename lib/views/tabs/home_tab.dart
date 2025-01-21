@@ -27,6 +27,7 @@ import 'package:giftginnie_ui/widgets/product_detail_bottom_sheet.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../controllers/main/address_controller.dart';
+import 'package:giftginnie_ui/widgets/shimmer/carousel_shimmer.dart';
 
 class OfferBanner {
   final String title;
@@ -113,6 +114,16 @@ class _HomeTabViewState extends State<HomeTabView> {
   void _loadProfile() async {
     final userController = context.read<UserController>();
     await userController.loadUserProfile();
+  }
+
+  String _convertImageUrl(String url) {
+    if (url.toLowerCase().endsWith('.avif')) {
+      // Try WebP format first
+      return url.replaceAll('.avif', '.webp');
+      // Or if you want to directly use JPEG:
+      // return url.replaceAll('.avif', '.jpg');
+    }
+    return url;
   }
 
   @override
@@ -315,466 +326,378 @@ class _HomeTabViewState extends State<HomeTabView> {
               ),
             ),
             // Carousel Section
-            Column(
-              children: [
-                SizedBox(
-                  height: 210,
-                  child: PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: (int page) {
-                      setState(() {
-                        _currentPage = page;
-                      });
-                    },
-                    itemCount: _offers.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              // Background Image
-                              Image.asset(
-                                _offers[index].imageUrl,
+            Consumer<HomeTabController>(
+              builder: (context, controller, _) {
+                if (controller.isLoading) {
+                  return const CarouselShimmer();
+                }
+
+                if (controller.carouselItems.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: 210,
+                      child: PageView.builder(
+                        controller: _pageController,
+                        onPageChanged: (int page) {
+                          setState(() {
+                            _currentPage = page;
+                          });
+                        },
+                        itemCount: controller.carouselItems.length,
+                        itemBuilder: (context, index) {
+                          final item = controller.carouselItems[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: CachedNetworkImage(
+                                imageUrl: _convertImageUrl(item.image),
+                                width: double.infinity,
+                                height: 210,
                                 fit: BoxFit.cover,
-                              ),
-                              // Gradient Overlay
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                    colors: [
-                                      AppColors.black.withOpacity(0.8),
-                                      AppColors.black.withOpacity(0.5),
-                                      AppColors.black.withOpacity(0.3),
-                                    ],
-                                    stops: const [0.0, 0.5, 1.0],
+                                placeholder: (context, url) => Shimmer.fromColors(
+                                  baseColor: AppColors.grey300,
+                                  highlightColor: AppColors.grey100,
+                                  child: Container(
+                                    width: double.infinity,
+                                    height: 210,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.grey100,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              // Content
-                              Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (_offers[index].isLimitedTime)
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFFFFFFF),
-                                          borderRadius: BorderRadius.circular(16),
-                                        ),
-                                        child: Text(
-                                          'Limited Time',
-                                          style: AppFonts.paragraph.copyWith(
-                                            color: Color(0xFFED6E61),
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    const Spacer(),
-                                    Text(
-                                      _offers[index].title,
-                                      style: AppFonts.paragraph.copyWith(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                      ),
+                                errorWidget: (context, url, error) {
+                                  debugPrint('Carousel Image Error: $error for URL: $url');
+                                  return Container(
+                                    width: double.infinity,
+                                    height: 210,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.grey100,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                    Row(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          'upto ',
-                                          style: AppFonts.paragraph.copyWith(
-                                            color: Colors.white,
-                                            fontSize: 32,
-                                          ),
+                                        Icon(
+                                          Icons.image_not_supported,
+                                          color: AppColors.grey300,
+                                          size: 48,
                                         ),
+                                        const SizedBox(height: 8),
                                         Text(
-                                          '${_offers[index].discount}',
-                                          style: const TextStyle(
-                                            color: Color(0xFFED6E61),
-                                            fontSize: 32,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          ' off',
+                                          'Image not available',
                                           style: AppFonts.paragraph.copyWith(
-                                            color: Colors.white,
-                                            fontSize: 32,
+                                            color: AppColors.textGrey,
+                                            fontSize: 14,
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              _offers[index].description,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            const Text(
-                                              '|',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w200,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 8),
-                                            const Text(
-                                              'T&C applied',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        FilledButton(
-                                          onPressed: () {
-                                            // Handle claim button tap
-                                            print('Claim button tapped for offer ${index + 1}');
-                                            // Add your claim logic here
-                                          },
-                                          style: FilledButton.styleFrom(
-                                            backgroundColor: AppColors.primaryRed,
-                                            minimumSize: Size.zero,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 8,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(20),
-                                            ),
-                                            elevation: 0, // No shadow
-                                          ),
-                                          child: Text(
-                                            _offers[index].buttonText,
-                                            style: AppFonts.paragraph.copyWith(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                  );
+                                },
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                // Dots Indicator
-                const SizedBox(height: 16),
-                Center(
-                  child: DotsIndicator(
-                    dotsCount: _offers.length,
-                    position: _currentPage,
-                    decorator: DotsDecorator(
-                      color: AppColors.grey500.withOpacity(0.5),
-                      activeColor: AppColors.primaryRed,
-                      size: const Size(8, 8),
-                      activeSize: const Size(8, 8),
-                      spacing: const EdgeInsets.all(4),
-                    ),
-                  ),
-                ),
-                // Categories Section
-                const SizedBox(height: 24),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'Categories',
-                        style: AppFonts.heading1.copyWith(
-                          fontSize: 18,
-                          color: AppColors.black,
-                        ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Consumer<HomeTabController>(
-                      builder: (context, controller, _) {
-                        if (controller.isLoading) {
-                          return const HomeTabCategoryShimmer();
-                        }
-                        
-                        return SizedBox(
-                          height: 100,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                            itemCount: controller.categories.length,
-                            itemBuilder: (context, index) {
-                              final category = controller.categories[index];
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  right: index != controller.categories.length - 1 ? 16.0 : 0,
-                                ),
-                                child: _buildCategoryItem(category: category),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      height: 100,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // First row
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildProductCategoryChip('Diary'),
-                                  const SizedBox(width: 12),
-                                  _buildProductCategoryChip('Water Bottle'),
-                                  const SizedBox(width: 12),
-                                  _buildProductCategoryChip('Wooden Calender'),
-                                  const SizedBox(width: 12),
-                                  _buildProductCategoryChip('Wooden Frame'),
-                                  const SizedBox(width: 12),
-                                  _buildProductCategoryChip('Photo Frame'),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              // Second row
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildProductCategoryChip('Mug'),
-                                  const SizedBox(width: 12),
-                                  _buildProductCategoryChip('T-Shirt'),
-                                  const SizedBox(width: 12),
-                                  _buildProductCategoryChip('Custom Gift'),
-                                ],
-                              ),
-                            ],
-                          ),
+                    Center(
+                      child: DotsIndicator(
+                        dotsCount: controller.carouselItems.length,
+                        position: _currentPage,
+                        decorator: DotsDecorator(
+                          color: AppColors.grey500.withOpacity(0.5),
+                          activeColor: AppColors.primaryRed,
+                          size: const Size(8, 8),
+                          activeSize: const Size(8, 8),
+                          spacing: const EdgeInsets.all(4),
                         ),
                       ),
                     ),
                   ],
-                ),
-                // Increased spacing before Top Products
-                const SizedBox(height: 40),
-                // Top Products Section
+                );
+              },
+            ),
+            // Categories Section
+            const SizedBox(height: 24),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Top Products',
-                        style: AppFonts.heading1.copyWith(
-                          fontSize: 18,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Gift your loved ones the best products',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        height: 380,
-                        child: Consumer<HomeTabController>(
-                          builder: (context, controller, _) {
-                            if (controller.isLoading) {
-                              return const HomeTabProductsShimmer();
-                            }
-
-                            if (controller.popularProducts.isEmpty) {
-                              return Center(
-                                child: Text(
-                                  'No popular products available',
-                                  style: AppFonts.paragraph.copyWith(
-                                    color: AppColors.textGrey,
-                                  ),
-                                ),
-                              );
-                            }
-
-                            return ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              clipBehavior: Clip.none,
-                              physics: const BouncingScrollPhysics(),
-                              padding: EdgeInsets.zero,
-                              itemCount: controller.popularProducts.length,
-                              itemBuilder: (context, index) {
-                                final product = controller.popularProducts[index];
-                                return Padding(
-                                  padding: EdgeInsets.only(
-                                    right: index != controller.popularProducts.length - 1 ? 16.0 : 0,
-                                  ),
-                                  child: _buildProductCard(
-                                    image: product.images.first,
-                                    title: product.name,
-                                    deliveryDays: 3, // You might want to add this to your product model
-                                    rating: product.rating,
-                                    index: index,
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // After the Top Products section, add:
-                const SizedBox(height: 40),
-                
-                // Popular Categories Section
-                Container(
-                  width: double.infinity,
-                  height: 125,
-                  padding: const EdgeInsets.fromLTRB(16.0, 28.0, 16.0, 16.0),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xFFFFF1EB),
-                        const Color(0xFFF7F5CA),
-                      ],
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    'Categories',
+                    style: AppFonts.heading1.copyWith(
+                      fontSize: 18,
+                      color: AppColors.black,
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Popular Categories',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 18,
-                          color: AppColors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Start your day with the right mind',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
-                // After the Popular Categories section
                 const SizedBox(height: 16),
                 Consumer<HomeTabController>(
                   builder: (context, controller, _) {
-                    if (controller.popularCategories.isEmpty) {
-                      return const SizedBox.shrink();
+                    if (controller.isLoading) {
+                      return const HomeTabCategoryShimmer();
                     }
-
+                    
                     return SizedBox(
-                      height: 280,
+                      height: 100,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         physics: const BouncingScrollPhysics(),
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemCount: controller.popularCategories.length,
+                        itemCount: controller.categories.length,
                         itemBuilder: (context, index) {
-                          final category = controller.popularCategories[index];
+                          final category = controller.categories[index];
                           return Padding(
-                            padding: EdgeInsets.only(right: 16.0),
-                            child: _buildGiftCategoryCard(
-                              image: category.image,
-                              rating: category.averageRating,
-                              title: category.categoryName,
-                              categories: [category.categoryDescription],
-                              isBestDeal: false,
-                              category: category,
+                            padding: EdgeInsets.only(
+                              right: index != controller.categories.length - 1 ? 16.0 : 0,
                             ),
+                            child: _buildCategoryItem(category: category),
                           );
                         },
                       ),
                     );
                   },
                 ),
-                // After the gift category ListView,
                 const SizedBox(height: 24),
-                Material(
-                  color: Colors.white,
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      image: DecorationImage(
-                        image: AssetImage(AppImages.webp_cta),
-                        fit: BoxFit.fitHeight,
-                        alignment: Alignment.centerRight,
-                      ),
-                    ),
+                SizedBox(
+                  height: 100,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 24.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'For Bulk Orders',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 14,
-                              color: AppColors.textDarkGrey.withOpacity(0.8),
-                            ),
+                          // First row
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildProductCategoryChip('Diary'),
+                              const SizedBox(width: 12),
+                              _buildProductCategoryChip('Water Bottle'),
+                              const SizedBox(width: 12),
+                              _buildProductCategoryChip('Wooden Calender'),
+                              const SizedBox(width: 12),
+                              _buildProductCategoryChip('Wooden Frame'),
+                              const SizedBox(width: 12),
+                              _buildProductCategoryChip('Photo Frame'),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'CONNECT\nOVER\nWHATSAPP',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 24,
-                              height: 1.2,
-                              color: AppColors.textDarkGrey,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          const SizedBox(height: 12),
+                          // Second row
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              _buildProductCategoryChip('Mug'),
+                              const SizedBox(width: 12),
+                              _buildProductCategoryChip('T-Shirt'),
+                              const SizedBox(width: 12),
+                              _buildProductCategoryChip('Custom Gift'),
+                            ],
                           ),
                         ],
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),  // Added bottom spacing
               ],
             ),
+            // Increased spacing before Top Products
+            const SizedBox(height: 40),
+            // Top Products Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Top Products',
+                    style: AppFonts.heading1.copyWith(
+                      fontSize: 18,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Gift your loved ones the best products',
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 14,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    height: 380,
+                    child: Consumer<HomeTabController>(
+                      builder: (context, controller, _) {
+                        if (controller.isLoading) {
+                          return const HomeTabProductsShimmer();
+                        }
+
+                        if (controller.popularProducts.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'No popular products available',
+                              style: AppFonts.paragraph.copyWith(
+                                color: AppColors.textGrey,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          clipBehavior: Clip.none,
+                          physics: const BouncingScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: controller.popularProducts.length,
+                          itemBuilder: (context, index) {
+                            final product = controller.popularProducts[index];
+                            bool isLiked = product.isLiked;
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                right: index != controller.popularProducts.length - 1 ? 16.0 : 0,
+                              ),
+                              child: _buildProductCard(
+                                image: product.images.first,
+                                title: product.name,
+                                deliveryDays: 3, // You might want to add this to your product model
+                                rating: product.rating,
+                                index: index,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // After the Top Products section, add:
+            const SizedBox(height: 40),
+            
+            // Popular Categories Section
+            Container(
+              width: double.infinity,
+              height: 125,
+              padding: const EdgeInsets.fromLTRB(16.0, 28.0, 16.0, 16.0),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFFFFF1EB),
+                    const Color(0xFFF7F5CA),
+                  ],
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Popular Categories',
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 18,
+                      color: AppColors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Start your day with the right mind',
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 14,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // After the Popular Categories section
+            const SizedBox(height: 16),
+            Consumer<HomeTabController>(
+              builder: (context, controller, _) {
+                if (controller.popularCategories.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return SizedBox(
+                  height: 280,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    itemCount: controller.popularCategories.length,
+                    itemBuilder: (context, index) {
+                      final category = controller.popularCategories[index];
+                      return Padding(
+                        padding: EdgeInsets.only(right: 16.0),
+                        child: _buildGiftCategoryCard(
+                          image: category.image,
+                          rating: category.averageRating,
+                          title: category.categoryName,
+                          categories: [category.categoryDescription],
+                          isBestDeal: false,
+                          category: category,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+            // After the gift category ListView,
+            const SizedBox(height: 24),
+            Material(
+              color: Colors.white,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  image: DecorationImage(
+                    image: AssetImage(AppImages.webp_cta),
+                    fit: BoxFit.fitHeight,
+                    alignment: Alignment.centerRight,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 24.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'For Bulk Orders',
+                        style: AppFonts.paragraph.copyWith(
+                          fontSize: 14,
+                          color: AppColors.textDarkGrey.withOpacity(0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'CONNECT\nOVER\nWHATSAPP',
+                        style: AppFonts.paragraph.copyWith(
+                          fontSize: 24,
+                          height: 1.2,
+                          color: AppColors.textDarkGrey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),  // Added bottom spacing
           ],
         ),
       ),
@@ -843,8 +766,8 @@ class _HomeTabViewState extends State<HomeTabView> {
     required double rating,
     required int index,
   }) {
-    bool isLiked = _likedProducts.contains(index);
     final product = context.read<HomeTabController>().popularProducts[index];
+    bool isLiked = product.isLiked;
 
     return GestureDetector(
       onTap: () {
@@ -896,27 +819,28 @@ class _HomeTabViewState extends State<HomeTabView> {
               ),
             ),
             
-            // Heart Icon
+            // Updated Heart Icon
             Positioned(
               top: 12,
               right: 12,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (isLiked) {
-                      _likedProducts.remove(index);
-                    } else {
-                      _likedProducts.add(index);
-                    }
-                  });
-                },
-                child: SvgPicture.asset(
-                  'assets/images/like.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: ColorFilter.mode(
-                    isLiked ? AppColors.primaryRed : Colors.white,
-                    BlendMode.srcIn,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      final controller = context.read<HomeTabController>();
+                      final product = controller.popularProducts[index];
+                      product.isLiked = !product.isLiked;
+                    });
+                  },
+                  child: Icon(
+                    isLiked ? Icons.favorite : Icons.favorite_border,
+                    color: isLiked ? AppColors.primaryRed : Colors.grey,
+                    size: 14,
                   ),
                 ),
               ),

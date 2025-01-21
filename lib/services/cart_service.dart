@@ -27,44 +27,50 @@ class CartService {
     );
   }
 
-  Future<CartModel> getCart() async {
+  Future<CartModel?> getCart() async {
     try {
       final response = await _dio.get(
         '${ApiConstants.baseUrl}${ApiEndpoints.cart}',
       );
 
-      if (response.statusCode == 200 && response.data['data'] != null) {
-        return CartModel.fromJson(response.data['data']);
+      if (response.statusCode == 200) {
+        if (response.data['data'] != null) {
+          return CartModel.fromJson(response.data['data']);
+        }
+        return null;
       }
       throw Exception('Failed to load cart data');
     } catch (e) {
+      if (e is DioException && e.response?.statusCode == 404) {
+        return null; // Return null for empty cart
+      }
       debugPrint('Error fetching cart: $e');
       throw Exception('Failed to load cart data');
     }
   }
 
-  // Future<void> updateItemQuantity(String itemId, int quantity) async {
-  //   try {
-  //     await _dio.patch(
-  //       '${ApiConstants.baseUrl}${ApiEndpoints.cartItem(itemId)}',
-  //       data: {'quantity': quantity},
-  //     );
-  //   } catch (e) {
-  //     debugPrint('Error updating cart item quantity: $e');
-  //     throw Exception('Failed to update item quantity');
-  //   }
-  // }
+  Future<void> updateItemQuantity(int itemId, int quantity) async {
+    try {
+      await _dio.patch(
+        '${ApiConstants.baseUrl}${ApiEndpoints.cartItem(itemId)}',
+        data: {'quantity': quantity},
+      );
+    } catch (e) {
+      debugPrint('Error updating cart item quantity: $e');
+      throw Exception('Failed to update item quantity');
+    }
+  }
 
-  // Future<void> removeItem(String itemId) async {
-  //   try {
-  //     await _dio.delete(
-  //       '${ApiConstants.baseUrl}${ApiEndpoints.cartItem(itemId)}',
-  //     );
-  //   } catch (e) {
-  //     debugPrint('Error removing cart item: $e');
-  //     throw Exception('Failed to remove item from cart');
-  //   }
-  // }
+  Future<void> removeItem(int itemId) async {
+    try {
+      await _dio.delete(
+        '${ApiConstants.baseUrl}${ApiEndpoints.cartItem(itemId)}',
+      );
+    } catch (e) {
+      debugPrint('Error removing cart item: $e');
+      throw Exception('Failed to remove item from cart');
+    }
+  }
 
   Future<void> addItem(String productId, int quantity) async {
     try {
@@ -81,15 +87,28 @@ class CartService {
     }
   }
 
-  // Future<void> applyCoupon(String couponCode) async {
-  //   try {
-  //     await _dio.post(
-  //       '${ApiConstants.baseUrl}${ApiEndpoints.cartApplyCoupon}',
-  //       data: {'code': couponCode},
-  //     );
-  //   } catch (e) {
-  //     debugPrint('Error applying coupon: $e');
-  //     throw Exception('Failed to apply coupon');
-  //   }
-  // }
+  Future<bool> applyCoupon(String couponCode) async {
+    try {
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}${ApiEndpoints.cartApplyCoupon}',
+        data: {'code': couponCode},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Error applying coupon: $e');
+      throw Exception('Failed to apply coupon');
+    }
+  }
+
+  Future<bool> removeCoupon() async {
+    try {
+      final response = await _dio.delete(
+        '${ApiConstants.baseUrl}${ApiEndpoints.cartApplyCoupon}',
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Error removing coupon: $e');
+      throw Exception('Failed to remove coupon');
+    }
+  }
 }

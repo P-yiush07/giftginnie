@@ -116,9 +116,9 @@ class CouponScreenView extends StatelessWidget {
                                   final coupon = controller.coupons[index];
                                   return _buildCouponItem(
                                     context,
-                                    discount: coupon.discount,
-                                    description: coupon.description,
-                                    condition: coupon.condition,
+                                    discount: coupon.displayTitle,
+                                    description: coupon.displayDescription,
+                                    condition: coupon.displayCondition,
                                     code: coupon.code,
                                   );
                                 },
@@ -141,93 +141,112 @@ class CouponScreenView extends StatelessWidget {
     required String condition,
     required String code,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey[200]!,
-          width: 1,
+    return GestureDetector(
+      onTap: () => context.read<CouponController>().applyCoupon(context, code),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.grey[200]!,
+            width: 1,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              SvgPicture.asset(
-                AppIcons.svg_couponIcon,
-                width: 20,
-                height: 20,
-                colorFilter: ColorFilter.mode(
-                  AppColors.primaryRed,
-                  BlendMode.srcIn,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title Row with Icon
+            Row(
+              children: [
+                SvgPicture.asset(
+                  AppIcons.svg_couponIcon,
+                  width: 20,
+                  height: 20,
+                  colorFilter: ColorFilter.mode(
+                    AppColors.primaryRed,
+                    BlendMode.srcIn,
+                  ),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    discount,
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 16,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            // Description
+            Text(
+              description,
+              style: AppFonts.paragraph.copyWith(
+                fontSize: 14,
+                color: Colors.black54,
               ),
-              const SizedBox(width: 8),
-              Text(
-                discount + description,
+            ),
+            const SizedBox(height: 4),
+            // Validity
+            Text(
+              condition,
+              style: AppFonts.paragraph.copyWith(
+                color: Colors.grey[600],
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Coupon Code Container
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: AppColors.primaryRed,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.white,
+              ),
+              child: Text(
+                code,
                 style: AppFonts.paragraph.copyWith(
-                  fontSize: 16,
-                  color: Colors.black87,
+                  color: AppColors.primaryRed,
+                  fontSize: 14,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            condition,
-            style: AppFonts.paragraph.copyWith(
-              color: Colors.grey[600],
-              fontSize: 13,
             ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
+            const SizedBox(height: 16),
+            // Dotted Separator
+            Row(
+              children: [
+                Expanded(
+                  child: CustomPaint(
+                    painter: DottedLinePainter(color: Colors.grey[300]!),
+                    child: const SizedBox(height: 1),
+                  ),
+                ),
+              ],
             ),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: AppColors.primaryRed,
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
-            ),
-            child: Text(
-              code,
-              style: AppFonts.paragraph.copyWith(
-                color: AppColors.primaryRed,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Dotted Separator and Tap To Apply
-          Row(
-            children: [
-              Expanded(
-                child: CustomPaint(
-                  painter: DottedLinePainter(color: Colors.grey[300]!),
-                  child: const SizedBox(height: 1),
+            const SizedBox(height: 16),
+            // Tap To Apply
+            Center(
+              child: Text(
+                'Tap To Apply',
+                style: AppFonts.paragraph.copyWith(
+                  color: AppColors.primaryRed,
+                  fontSize: 14,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              'Tap To Apply',
-              style: AppFonts.paragraph.copyWith(
-                color: AppColors.primaryRed,
-                fontSize: 14,
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

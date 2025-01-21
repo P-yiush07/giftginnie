@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:giftginnie_ui/config/api.dart';
 import 'package:giftginnie_ui/constants/products.dart';
+import 'package:giftginnie_ui/models/CarouselItem_model.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/cache_service.dart';
 
@@ -24,7 +25,6 @@ class ProductService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Get the access token from cache
           final accessToken = await _cacheService.getString(_accessTokenKey);
           if (accessToken != null) {
             options.headers['Authorization'] = 'Bearer $accessToken';
@@ -62,14 +62,16 @@ class ProductService {
         id: json['id'].toString(),
         name: json['name'] as String,
         description: json['description'] as String,
-        price: double.parse(json['price'].toString()),
+        originalPrice: double.parse(json['original_price'].toString()),
+        sellingPrice: double.parse(json['selling_price'].toString()),
         images: (json['images'] as List?)?.isNotEmpty == true 
             ? (json['images'] as List).map((img) => img['image'].toString()).toList()
             : ['assets/images/placeholder.png'],
         brand: json['brand']?.toString() ?? 'Unknown Brand',
         productType: json['product_type']?.toString() ?? 'Gift Item',
-        isLiked: false,
-        rating: json['rating']?.toDouble() ?? 0.0,
+        inStock: json['in_stock'] as bool? ?? true,
+        isLiked: json['is_liked'] as bool? ?? false,
+        rating: (json['rating'] ?? 0.0).toDouble(),
       )).toList();
 
       // Cache the results
@@ -104,14 +106,16 @@ class ProductService {
         id: json['id'].toString(),
         name: json['name'] as String,
         description: json['description'] as String,
-        price: 0.0, // Add default price since it's not in the response
+        originalPrice: double.parse(json['original_price']?.toString() ?? '0.0'),
+        sellingPrice: double.parse(json['selling_price']?.toString() ?? '0.0'),
         images: (json['images'] as List?)?.isNotEmpty == true 
             ? (json['images'] as List).map((img) => img['image'].toString()).toList()
             : ['assets/images/placeholder.png'],
-        brand: 'Unknown Brand', // Add default brand since it's not in the response
-        productType: 'Gift Item', // Add default type since it's not in the response
-        isLiked: false,
-        rating: 0.0, // Add default rating since it's not in the response
+        brand: json['brand']?.toString() ?? 'Unknown Brand',
+        productType: json['product_type']?.toString() ?? 'Gift Item',
+        inStock: json['in_stock'] as bool? ?? true,
+        isLiked: json['is_liked'] as bool? ?? false,
+        rating: (json['rating'] ?? 0.0).toDouble(),
       )).toList();
     } catch (e) {
       debugPrint('Error fetching popular products: $e');
@@ -136,14 +140,16 @@ class ProductService {
         id: json['id'].toString(),
         name: json['name'] as String,
         description: json['description'] as String,
-        price: double.parse(json['price'].toString()),
+        originalPrice: double.parse(json['original_price'].toString()),
+        sellingPrice: double.parse(json['selling_price'].toString()),
         images: (json['images'] as List?)?.isNotEmpty == true 
             ? (json['images'] as List).map((img) => img['image'].toString()).toList()
             : ['assets/images/placeholder.png'],
         brand: json['brand']?.toString() ?? 'Unknown Brand',
         productType: json['product_type']?.toString() ?? 'Gift Item',
-        isLiked: false,
-        rating: json['rating']?.toDouble() ?? 0.0,
+        inStock: json['in_stock'] as bool? ?? true,
+        isLiked: json['is_liked'] as bool? ?? false,
+        rating: (json['rating'] ?? 0.0).toDouble(),
       );
     } catch (e) {
       debugPrint('Error fetching product by ID: $e');
@@ -158,6 +164,28 @@ class ProductService {
     } else {
       _productCache.clear();
       _cacheTimestamps.clear();
+    }
+  }
+
+  Future<List<CarouselItem>> getCarouselItems() async {
+    try {
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}${ApiEndpoints.carouselItems}',
+        options: Options(
+          headers: {
+            'Accept': 'image/webp,image/jpeg,image/*,*/*;q=0.8',
+          },
+        ),
+      );
+      
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'];
+        return data.map((item) => CarouselItem.fromJson(item)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching carousel items: $e');
+      return [];
     }
   }
 }

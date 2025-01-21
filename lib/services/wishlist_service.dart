@@ -43,14 +43,13 @@ class WishlistService {
           id: productData['id'].toString(),
           name: productData['name'],
           description: productData['description'],
-          price: double.parse(productData['price']),
-          images: (productData['images'] as List)
-              .map((img) => img['image'].toString())
-              .toList(),
-          brand: productData['brand'],
-          productType: productData['product_type'],
-          isLiked: true,
-          rating: productData['rating']?.toDouble() ?? 0.0,
+          originalPrice: double.parse(productData['original_price'] ?? '0.0'),
+          sellingPrice: double.parse(productData['selling_price'] ?? '0.0'),
+          images: (productData['images'] as List?)?.map((img) => img['image'].toString()).toList() ?? [],
+          brand: productData['brand'] ?? '',
+          productType: productData['product_type'] ?? '',
+          inStock: productData['in_stock'] ?? true,
+          rating: (productData['rating'] ?? 0.0).toDouble(),
         );
       }).toList();
     } catch (e) {

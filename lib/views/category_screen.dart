@@ -207,15 +207,17 @@ class _CategoryScreenState extends State<CategoryScreen> {
           backgroundColor: Colors.transparent,
           builder: (context) => ProductDetailBottomSheet(
             product: Product(
-              id: index.toString(),
+              id: gift.id,
               name: gift.name,
-              description: 'Experience luxury and style with this premium ${gift.name.toLowerCase()}. Perfect for any occasion, this item combines elegant design with practical functionality.',
-              price: gift.price,
-              images: gift.images ?? [gift.image],
-              brand: gift.subtitle ?? 'Premium Brand',
-              productType: gift.category ?? 'Gift Item',
-              isLiked: gift.isLiked,
+              description: gift.description,
+              originalPrice: gift.originalPrice,
+              sellingPrice: gift.sellingPrice,
+              images: gift.images?.toList() ?? ['assets/images/placeholder.png'],
+              brand: gift.brand,
+              productType: gift.productType,
+              inStock: gift.inStock,
               rating: gift.rating,
+              isLiked: gift.isLiked,
             ),
           ),
         );
@@ -235,16 +237,16 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   key: ValueKey('product_image_${gift.name}'),
                   imageUrl: gift.images?.isNotEmpty == true ? gift.images![0] : 'assets/images/placeholder.png',
                   width: MediaQuery.of(context).size.width / 2 - 24,
-                  height: 240,
+                  height: 200,
                   fit: BoxFit.cover,
                   errorWidget: Image.asset(
                     'assets/images/placeholder.png',
                     width: MediaQuery.of(context).size.width / 2 - 24,
-                    height: 240,
+                    height: 200,
                     fit: BoxFit.cover,
                   ),
                 ),
-                // Heart icon in top-right
+                // Heart icon
                 Positioned(
                   top: 8,
                   right: 8,
@@ -256,7 +258,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     ),
                     child: Icon(
                       gift.isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: gift.isLiked ? const Color(0xFFFF7643) : Colors.grey,
+                      color: gift.isLiked ? AppColors.primaryRed : Colors.grey,
                       size: 14,
                     ),
                   ),
@@ -264,55 +266,71 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ],
             ),
           ),
-          // Details Section - adjusted top padding to accommodate larger image
+          // Details Section
           Padding(
-            padding: const EdgeInsets.only(top: 12.0),
+            padding: const EdgeInsets.only(top: 8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   gift.name,
                   style: AppFonts.paragraph.copyWith(
-                    fontSize: 16,
+                    fontSize: 14,
                     color: Colors.black,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
-                  'Diary',
+                  gift.brand,
                   style: AppFonts.paragraph.copyWith(
                     fontSize: 12,
                     color: Colors.grey[600],
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      '\$${gift.price.toStringAsFixed(2)}',
-                      style: AppFonts.paragraph.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryRed,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '₹${gift.sellingPrice.toStringAsFixed(2)}',
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryRed,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '₹${gift.originalPrice.toStringAsFixed(2)}',
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 20),
-                    const Icon(
-                      Icons.star,
-                      size: 14,
-                      color: Colors.amber,
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.star,
+                          size: 12,
+                          color: Colors.amber,
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          gift.rating.toStringAsFixed(1),
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 2),
-                    Text(
-                      gift.rating.toStringAsFixed(1),
-                      style: AppFonts.paragraph.copyWith(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const Spacer(),
                   ],
                 ),
               ],

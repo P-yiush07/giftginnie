@@ -28,41 +28,44 @@ class CategoryModel {
 }
 
 class GiftItem {
+  final String id;
   final String name;
-  final String image;
+  final String description;
   final List<String>? images;
-  final String? subtitle;
-  final String? category;
+  final String brand;
+  final String productType;
   final double rating;
-  final String duration;
-  final String discount;
-  final double price;
+  final double originalPrice;
+  final double sellingPrice;
+  final bool inStock;
   bool isLiked;
 
   GiftItem({
+    required this.id,
     required this.name,
-    required this.image,
+    required this.description,
     this.images,
-    this.subtitle,
-    this.category,
+    required this.brand,
+    required this.productType,
     required this.rating,
-    required this.duration,
-    required this.discount,
-    required this.price,
+    required this.originalPrice,
+    required this.sellingPrice,
+    required this.inStock,
     this.isLiked = false,
   });
 
   factory GiftItem.fromJson(Map<String, dynamic> json) {
     return GiftItem(
+      id: json['id'].toString(),
       name: json['name'] ?? '',
-      image: json['image'] ?? '',
+      description: json['description'] ?? '',
       images: (json['images'] as List?)?.map((img) => img['image'].toString()).toList(),
-      subtitle: json['subtitle'],
-      category: json['category'],
+      brand: json['brand'] ?? '',
+      productType: json['product_type'] ?? '',
       rating: (json['rating'] ?? 0.0).toDouble(),
-      duration: json['duration'] ?? '',
-      discount: json['discount'] ?? '',
-      price: (json['price'] ?? 0.0).toDouble(),
+      originalPrice: double.parse(json['original_price']?.toString() ?? '0.0'),
+      sellingPrice: double.parse(json['selling_price']?.toString() ?? '0.0'),
+      inStock: json['in_stock'] ?? true,
       isLiked: json['isLiked'] ?? false,
     );
   }

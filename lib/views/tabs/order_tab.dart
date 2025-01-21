@@ -32,45 +32,47 @@ class OrdersTabView extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: SafeArea(
-        child: Consumer<OrdersTabController>(
-          builder: (context, controller, _) {
-            if (controller.isLoading) {
-              return const OrdersShimmer();
-            }
-
-            if (controller.error != null) {
-              return Center(child: Text(controller.error!));
-            }
-
-            return CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'My Orders',
-                          style: AppFonts.paragraph.copyWith(
-                            fontSize: 24,
-                            color: AppColors.black,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'View the details and status of your past and current orders.',
-                          style: AppFonts.paragraph.copyWith(
-                            fontSize: 14,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                      ],
+        child: CustomScrollView(
+          slivers: [
+            // Static header that doesn't shimmer
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'My Orders',
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 24,
+                        color: AppColors.black,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'View the details and status of your past and current orders.',
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 14,
+                        color: AppColors.textGrey,
+                      ),
+                    ),
+                  ],
                 ),
-                SliverToBoxAdapter(
-                  child: Container(
+              ),
+            ),
+            // Dynamic content with shimmer
+            SliverToBoxAdapter(
+              child: Consumer<OrdersTabController>(
+                builder: (context, controller, _) {
+                  if (controller.isLoading) {
+                    return const OrdersShimmer();
+                  }
+
+                  if (controller.error != null) {
+                    return Center(child: Text(controller.error!));
+                  }
+
+                  return Container(
                     color: Colors.white,
                     child: Column(
                       children: List.generate(
@@ -78,11 +80,11 @@ class OrdersTabView extends StatelessWidget {
                         (index) => _OrderCard(order: controller.orders[index]),
                       ),
                     ),
-                  ),
-                ),
-              ],
-            );
-          },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

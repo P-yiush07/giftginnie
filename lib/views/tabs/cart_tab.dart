@@ -11,6 +11,8 @@ import 'package:giftginnie_ui/config/route_transitions.dart';
 import '../../../controllers/main/address_controller.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../controllers/main/home_controller.dart';
+import '../../../widgets/error_widget.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CartTab extends StatelessWidget {
   const CartTab({super.key});
@@ -47,257 +49,299 @@ class _CartTabViewState extends State<CartTabView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Consumer<CartTabController>(
-            builder: (context, controller, _) {
-              if (controller.isLoading) {
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header section
-                      Column(
+      body: Stack(
+        children: [
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 100),
+              child: Consumer<CartTabController>(
+                builder: (context, controller, _) {
+                  if (controller.isLoading) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'My Cart',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 24,
-                              color: AppColors.black,
+                          // Header section
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'My Cart',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 24,
+                                  color: AppColors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Review and manage the items in your cart before proceeding to checkout.',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 15,
+                                  color: AppColors.textGrey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          
+                          // Address shimmer
+                          Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              height: 80,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Review and manage the items in your cart before proceeding to checkout.',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 15,
-                              color: AppColors.textGrey,
+                          const SizedBox(height: 24),
+                          
+                          // Cart items shimmer
+                          const CartItemsShimmer(),
+                          const SizedBox(height: 16),
+                          
+                          // Offers section shimmer
+                          Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              height: 80,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          
+                          // Bill details shimmer
+                          Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              height: 200,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
-                      
-                      // Address shimmer
-                      Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          height: 80,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // Cart items shimmer
-                      const CartItemsShimmer(),
-                      const SizedBox(height: 16),
-                      
-                      // Offers section shimmer
-                      Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          height: 80,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // Bill details shimmer
-                      Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          height: 200,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
+                    );
+                  }
 
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header section
-                    Column(
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'My Cart',
-                          style: AppFonts.paragraph.copyWith(
-                            fontSize: 24,
-                            color: AppColors.black,
-                          ),
+                        // Header section
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'My Cart',
+                              style: AppFonts.paragraph.copyWith(
+                                fontSize: 24,
+                                color: AppColors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Review and manage the items in your cart before proceeding to checkout.',
+                              style: AppFonts.paragraph.copyWith(
+                                fontSize: 15,
+                                color: AppColors.textGrey,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Review and manage the items in your cart before proceeding to checkout.',
-                          style: AppFonts.paragraph.copyWith(
-                            fontSize: 15,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    // Address Selection Section
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Consumer<AddressController>(
-                        builder: (context, addressController, _) {
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                SlidePageRoute(
-                                  page: const AddressSelectionScreen(),
-                                  direction: SlideDirection.bottom,
-                                ),
-                              );
-                            },
-                            child: addressController.isLoading
-                                ? _buildAddressShimmer()
-                                : Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        addressController.selectedAddress?.getAddressLabel() ?? 'Select Address',
-                                        style: AppFonts.paragraph.copyWith(
-                                          fontSize: 14,
-                                          color: AppColors.textGrey,
+                        const SizedBox(height: 24),
+                        
+                        if (controller.error != null)
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height - 300,
+                            child: ErrorState(
+                              message: controller.error!,
+                              onRetry: () => controller.initializeData(),
+                            ),
+                          )
+                        else if (controller.cartData == null || controller.cartData!.items.isEmpty)
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height - 300,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.shopping_cart_outlined,
+                                    size: 64,
+                                    color: AppColors.grey300,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Your cart is empty',
+                                    style: AppFonts.paragraph.copyWith(
+                                      fontSize: 18,
+                                      color: AppColors.textGrey,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        else
+                          Column(
+                            children: [
+                              Consumer<AddressController>(
+                                builder: (context, addressController, _) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        SlidePageRoute(
+                                          page: const AddressSelectionScreen(),
+                                          direction: SlideDirection.bottom,
                                         ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.location_on,
-                                            size: 18,
-                                            color: AppColors.primaryRed,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Expanded(
-                                            child: Text(
-                                              addressController.selectedAddress?.fullAddress ?? 'Tap to select delivery address',
-                                              style: AppFonts.paragraph.copyWith(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColors.black,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          const Icon(
-                                            Icons.keyboard_arrow_down,
-                                            color: AppColors.black,
-                                            size: 20,
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.05),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                          );
-                        },
-                      ),
+                                      child: addressController.isLoading
+                                          ? _buildAddressShimmer()
+                                          : Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  addressController.selectedAddress?.getAddressLabel() ?? 'Select Address',
+                                                  style: AppFonts.paragraph.copyWith(
+                                                    fontSize: 14,
+                                                    color: AppColors.textGrey,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.location_on,
+                                                      size: 18,
+                                                      color: AppColors.primaryRed,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Expanded(
+                                                      child: Text(
+                                                        addressController.selectedAddress?.fullAddress ?? 'Tap to select delivery address',
+                                                        style: AppFonts.paragraph.copyWith(
+                                                          fontSize: 15,
+                                                          fontWeight: FontWeight.w500,
+                                                          color: AppColors.black,
+                                                        ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                    const Icon(
+                                                      Icons.keyboard_arrow_down,
+                                                      color: AppColors.black,
+                                                      size: 20,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 24),
+                              ...controller.cartData!.items.map((item) => 
+                                _buildCartItem(
+                                  id: item.id,
+                                  name: item.product.name,
+                                  brand: item.product.brand,
+                                  originalPrice: item.product.originalPrice,
+                                  sellingPrice: item.product.sellingPrice,
+                                  quantity: item.quantity,
+                                  imageUrl: item.product.images.isNotEmpty ? item.product.images.first : null,
+                                )
+                              ).toList(),
+                              const SizedBox(height: 16),
+                              _buildOffersSection(),
+                              const SizedBox(height: 24),
+                              _buildBillDetails(),
+                            ],
+                          ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                    
-                    if (controller.error != null)
-                      Text(controller.error!)
-                    else if (controller.cartData == null || controller.cartData!.items.isEmpty)
-                      const Text('Your cart is empty')
-                    else
-                      Column(
-                        children: [
-                          ...controller.cartData!.items.map((item) => 
-                            _buildCartItem(
-                              name: item.product.name,
-                              description: item.product.description,
-                              price: item.price,
-                              quantity: item.quantity,
-                              imageUrl: item.product.images.isNotEmpty ? item.product.images.first : null,
-                            )
-                          ).toList(),
-                          const SizedBox(height: 16),
-                          _buildOffersSection(),
-                          const SizedBox(height: 24),
-                          _buildBillDetails(),
-                        ],
-                      ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
-        child: SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: Consumer<CartTabController>(
-            builder: (context, controller, _) {
-              final price = controller.cartData?.items.isNotEmpty == true 
-                ? controller.cartData!.items.first.price 
-                : 0.0;
-              
-              return ElevatedButton(
-                onPressed: () {
-                  // Handle checkout
+                  );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryRed,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+          ),
+          Consumer<CartTabController>(
+            builder: (context, controller, _) {
+              if (controller.isLoading || controller.error != null || controller.cartData?.items.isEmpty != false) {
+                return const SizedBox.shrink();
+              }
+
+              return Positioned(
+                left: 16,
+                right: 16,
+                bottom: 24,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Handle checkout
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryRed,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    minimumSize: const Size(double.infinity, 48),
                   ),
-                ),
-                child: Text(
-                  'Proceed to Pay (\$${price.toStringAsFixed(2)})',
-                  style: AppFonts.paragraph.copyWith(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                  child: Text(
+                    'Proceed to Pay (₹${controller.cartData?.discountedPrice.toStringAsFixed(2) ?? "0.00"})',
+                    style: AppFonts.paragraph.copyWith(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               );
             },
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildCartItem({
+    required int id,
     required String name,
-    required String description,
-    required double price,
+    required String brand,
+    required double originalPrice,
+    required double sellingPrice,
     required int quantity,
     String? imageUrl,
   }) {
@@ -359,22 +403,33 @@ class _CartTabViewState extends State<CartTabView> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      description,
+                      brand,
                       style: AppFonts.paragraph.copyWith(
                         fontSize: 14,
                         color: AppColors.textGrey,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      '\$' + price.toStringAsFixed(2),
-                      style: AppFonts.paragraph.copyWith(
-                        fontSize: 14,
-                        color: AppColors.primaryRed,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '₹${sellingPrice.toStringAsFixed(2)}',
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 14,
+                            color: AppColors.primaryRed,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '₹${originalPrice.toStringAsFixed(2)}',
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -388,7 +443,17 @@ class _CartTabViewState extends State<CartTabView> {
                   children: [
                     IconButton(
                       icon: Icon(Icons.remove, size: 16, color: AppColors.primaryRed),
-                      onPressed: () {},
+                      onPressed: quantity <= 1 ? null : () async {
+                        try {
+                          await context.read<CartTabController>().updateItemQuantity(id, quantity - 1);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
+                        }
+                      },
                     ),
                     Text(
                       quantity.toString(),
@@ -398,7 +463,17 @@ class _CartTabViewState extends State<CartTabView> {
                     ),
                     IconButton(
                       icon: Icon(Icons.add, size: 16, color: AppColors.primaryRed),
-                      onPressed: () {},
+                      onPressed: () async {
+                        try {
+                          await context.read<CartTabController>().updateItemQuantity(id, quantity + 1);
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
+                        }
+                      },
                     ),
                   ],
                 ),
@@ -423,16 +498,24 @@ class _CartTabViewState extends State<CartTabView> {
           ),
           const SizedBox(height: 16),
           InkWell(
-            onTap: () {
-              // Handle add item
+            onTap: () async {
+              try {
+                await context.read<CartTabController>().removeItem(id);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
+              }
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add, color: AppColors.primaryRed),
+                Icon(Icons.delete_outline, color: AppColors.primaryRed),
                 const SizedBox(width: 8),
                 Text(
-                  'Add Item',
+                  'Remove Item',
                   style: AppFonts.paragraph.copyWith(
                     color: AppColors.primaryRed,
                     fontWeight: FontWeight.w500,
@@ -447,82 +530,195 @@ class _CartTabViewState extends State<CartTabView> {
   }
 
   Widget _buildOffersSection() {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          SlidePageRoute(
-            page: const CouponScreen(),
-            direction: SlideDirection.right,
-          ),
+    return Consumer<CartTabController>(
+      builder: (context, controller, _) {
+        // Show coupon only if not in loading state and coupon exists
+        final cartData = controller.cartData;
+        final hasCoupon = !controller.isLoading && cartData?.coupon != null;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Offers and Benefits',
+              style: AppFonts.paragraph.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.authSocialButtonText,
+              ),
+            ),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: hasCoupon ? null : () async {
+                final result = await Navigator.push(
+                  context,
+                  SlidePageRoute(
+                    page: const CouponScreen(),
+                    direction: SlideDirection.right,
+                  ),
+                );
+                
+                if (result == true) {
+                  await context.read<CartTabController>().initializeData();
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: hasCoupon
+                  ? Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/coupon.svg',
+                          width: 20,
+                          height: 20,
+                          color: AppColors.primaryRed,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${cartData!.coupon!.code} Applied',
+                            style: AppFonts.paragraph.copyWith(
+                              color: AppColors.primaryRed,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            try {
+                              await controller.removeCoupon();
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(e.toString())),
+                                );
+                              }
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            'Remove',
+                            style: AppFonts.paragraph.copyWith(
+                              color: AppColors.primaryRed,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/coupon.svg',
+                          width: 20,
+                          height: 20,
+                          color: AppColors.primaryRed,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Apply Coupon',
+                            style: AppFonts.paragraph.copyWith(
+                              color: AppColors.black,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Apply',
+                          style: AppFonts.paragraph.copyWith(
+                            color: AppColors.primaryRed,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.chevron_right,
+                          color: AppColors.primaryRed,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+              ),
+            ),
+          ],
         );
       },
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Offers and Benefits',
+    );
+  }
+
+  Widget _buildBillDetails() {
+    return Consumer<CartTabController>(
+      builder: (context, controller, _) {
+        final cartData = controller.cartData;
+        if (cartData == null) return const SizedBox.shrink();
+
+        final double originalPrice = cartData.originalPrice;
+        final double discountedPrice = cartData.discountedPrice;
+        final double discount = originalPrice - discountedPrice;
+        
+        // Get discount display text based on coupon type
+        String discountLabel = 'Discount';
+        if (cartData.coupon != null) {
+          if (cartData.coupon!.discountType == 'FLAT') {
+            discountLabel = 'Discount (₹${cartData.coupon!.discountValue.toStringAsFixed(0)} OFF)';
+          } else {
+            discountLabel = 'Discount (${cartData.coupon!.discountValue.toStringAsFixed(0)}% OFF)';
+          }
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Bill Details',
                 style: AppFonts.paragraph.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: AppColors.authSocialButtonText
                 ),
               ),
-            ),
-            Text(
-              'Apply Coupon',
-              style: AppFonts.paragraph.copyWith(
-                color: AppColors.primaryRed,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: 16),
+              _buildBillRow('Item Total', '₹${originalPrice.toStringAsFixed(2)}'),
+              if (discount > 0)
+                _buildBillRow(
+                  discountLabel,
+                  '-₹${discount.toStringAsFixed(2)}',
+                ),
+              const Divider(height: 32),
+              _buildBillRow(
+                'Total Pay', 
+                '₹${discountedPrice.toStringAsFixed(2)}',
+                isTotal: true
               ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: AppColors.primaryRed,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBillDetails() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Bill Details',
-            style: AppFonts.paragraph.copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.authSocialButtonText
-            ),
+            ],
           ),
-          const SizedBox(height: 16),
-          _buildBillRow('Item Total', '\$14.86'),
-          _buildBillRow('Delivery Cost', '\$5.00'),
-          _buildBillRow('Platform Fee', '\$1.14', originalPrice: '\$2.00'),
-          _buildBillRow('GST and Other Charges', '\$9.00'),
-          const Divider(height: 32),
-          _buildBillRow('Total Pay', '\$165.00', isTotal: true),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildBillRow(String label, String amount, {String? originalPrice, bool isTotal = false}) {
+  Widget _buildBillRow(String label, String amount, {bool isTotal = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -536,33 +732,18 @@ class _CartTabViewState extends State<CartTabView> {
               fontWeight: isTotal ? FontWeight.w500 : FontWeight.normal,
             ),
           ),
-          Row(
-            children: [
-              if (originalPrice != null) ...[
-                Text(
-                  originalPrice,
-                  style: AppFonts.paragraph.copyWith(
-                    fontSize: 14,
-                    color: AppColors.textGrey,
-                    decoration: TextDecoration.lineThrough,
-                  ),
+          Text(
+            amount,
+            style: isTotal 
+              ? AppFonts.heading1.copyWith(
+                  fontSize: 16,
+                  color: AppColors.primaryRed,
+                )
+              : AppFonts.paragraph.copyWith(
+                  fontSize: 14,
+                  color: AppColors.black,
+                  fontWeight: FontWeight.normal,
                 ),
-                const SizedBox(width: 4),
-              ],
-              Text(
-                amount,
-                style: isTotal 
-                  ? AppFonts.heading1.copyWith(
-                      fontSize: 16,
-                      color: AppColors.primaryRed,
-                    )
-                  : AppFonts.paragraph.copyWith(
-                      fontSize: 14,
-                      color: AppColors.black,
-                      fontWeight: FontWeight.normal,
-                    ),
-              ),
-            ],
           ),
         ],
       ),

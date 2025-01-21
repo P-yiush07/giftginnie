@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/coupon_model.dart';
 import 'package:giftginnie_ui/services/coupon_service.dart';
+import 'package:giftginnie_ui/services/cart_service.dart';
+import 'package:provider/provider.dart';
+import 'package:giftginnie_ui/widgets/coupon_success_dialog.dart';
 
 class CouponController extends ChangeNotifier {
+  final CartService _cartService = CartService();
   final CouponService _couponService = CouponService();
-  List<CouponModel> _allCoupons = [];
+  List<CouponModel> _coupons = [];
   List<CouponModel> _filteredCoupons = [];
-  List<CouponModel> get coupons => _filteredCoupons;
-  
   bool _isLoading = true;
+  String? _error;
+
+  List<CouponModel> get coupons => _filteredCoupons;
   bool get isLoading => _isLoading;
-  
-  String _searchQuery = '';
-  String get searchQuery => _searchQuery;
+  String? get error => _error;
 
   CouponController() {
     _loadCoupons();
@@ -22,43 +25,74 @@ class CouponController extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      
-      _allCoupons = await _couponService.getCoupons();
-      _filteredCoupons = List.from(_allCoupons);
-      
-      _isLoading = false;
-      notifyListeners();
+
+      _coupons = await _couponService.getCoupons();
+      _filteredCoupons = _coupons;
+      _error = null;
     } catch (e) {
+      _error = e.toString();
+    } finally {
       _isLoading = false;
       notifyListeners();
-      debugPrint('Error loading coupons: $e');
     }
   }
 
   void searchCoupons(String query) {
-    _searchQuery = query;
     if (query.isEmpty) {
-      _filteredCoupons = List.from(_allCoupons);
+      _filteredCoupons = _coupons;
     } else {
-      _filteredCoupons = _allCoupons
+      _filteredCoupons = _coupons
           .where((coupon) =>
               coupon.code.toLowerCase().contains(query.toLowerCase()) ||
-              coupon.description.toLowerCase().contains(query.toLowerCase()))
+              (coupon.displayDescription.toLowerCase().contains(query.toLowerCase())))
           .toList();
     }
     notifyListeners();
   }
 
-  Future<bool> applyCoupon(BuildContext context, String code) async {
+  Future<void> applyCoupon(BuildContext context, String code) async {
+    // Show loading state in dialog
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => CouponSuccessDialog(
+          code: code,
+          savedAmount: 0, // Placeholder value while loading
+          isLoading: true,
+        ),
+      );
+    }
+
     try {
-      final success = await _couponService.applyCoupon(code);
-      if (success) {
-        Navigator.pop(context, code);
+      final success = await _cartService.applyCoupon(code);
+      
+      if (success && context.mounted) {
+        final coupon = _coupons.firstWhere((c) => c.code == code);
+        
+        // Replace loading dialog with success dialog
+        Navigator.of(context).pop(); // Remove loading dialog
+        final result = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => CouponSuccessDialog(
+            code: code,
+            savedAmount: coupon.discountValue,
+            isLoading: false,
+          ),
+        );
+        
+        if (result == true && context.mounted) {
+          Navigator.of(context).pop(true);
+        }
       }
-      return success;
     } catch (e) {
-      debugPrint('Error applying coupon: $e');
-      return false;
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Remove loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to apply coupon: ${e.toString()}')),
+        );
+      }
     }
   }
 }

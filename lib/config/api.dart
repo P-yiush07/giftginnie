@@ -42,4 +42,15 @@ abstract class ApiEndpoints {
 
   // Cart endpoints
   static const String cart = '/cart/';
+
+  // Carousel items endpoint
+  static const String carouselItems = '/products/carausel-items/';
+
+  // Coupon Fetch
+  static const String coupons = '/coupon/';
+
+  static const String cartApplyCoupon = '/cart/applyCoupon/';
+
+  // Cart item removal endpoint
+  static String cartItem(int itemId) => '/cart/item/$itemId/';
 }

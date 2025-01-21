@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/models/CarouselItem_model.dart';
 import 'package:giftginnie_ui/models/home_tab_model.dart';
 import 'package:giftginnie_ui/models/category_model.dart';
 import 'package:giftginnie_ui/models/popular_category_model.dart';
@@ -15,6 +16,7 @@ class HomeTabController extends ChangeNotifier {
   List<CategoryModel> _categories = [];
   List<Product> _popularProducts = [];
   List<PopularCategory> _popularCategories = [];
+  List<CarouselItem> _carouselItems = [];
 
   // Getters
   HomeTabModel get model => _model;
@@ -23,6 +25,7 @@ class HomeTabController extends ChangeNotifier {
   List<CategoryModel> get categories => _categories;
   List<Product> get popularProducts => _popularProducts;
   List<PopularCategory> get popularCategories => _popularCategories;
+  List<CarouselItem> get carouselItems => _carouselItems;
 
   HomeTabController() {
     _fetchInitialData();
@@ -33,6 +36,10 @@ class HomeTabController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Fetch carousel items first for faster appearance
+      await _fetchCarouselItems();
+      
+      // Then fetch the rest in parallel
       await Future.wait([
         _fetchCategories(),
         _fetchPopularProducts(),
@@ -88,6 +95,15 @@ class HomeTabController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error fetching popular categories: $e');
+    }
+  }
+
+  Future<void> _fetchCarouselItems() async {
+    try {
+      _carouselItems = await _productService.getCarouselItems();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error fetching carousel items: $e');
     }
   }
 

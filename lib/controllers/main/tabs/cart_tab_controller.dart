@@ -29,38 +29,52 @@ class CartTabController extends ChangeNotifier {
 
   Future<void> initializeData() async {
     _isLoading = true;
-    _error = null;
     notifyListeners();
-
+    
     try {
       _cartData = await _cartService.getCart();
+      _error = null; // Clear any previous errors
     } catch (e) {
-      _error = 'Failed to load cart data: ${e.toString()}';
+      _error = e.toString().replaceAll('Exception: ', '');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  // Future<void> updateItemQuantity(String itemId, int quantity) async {
-  //   try {
-  //     await _cartService.updateItemQuantity(itemId, quantity);
-  //     await initializeData(); // Refresh cart data
-  //   } catch (e) {
-  //     _error = 'Failed to update quantity: ${e.toString()}';
-  //     notifyListeners();
-  //   }
-  // }
+  Future<void> updateItemQuantity(int itemId, int quantity) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      
+      await _cartService.updateItemQuantity(itemId, quantity);
+      await initializeData(); // Refresh cart data
+    } catch (e) {
+      _error = 'Failed to update quantity: ${e.toString()}';
+      notifyListeners();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
-  // Future<void> removeItem(String itemId) async {
-  //   try {
-  //     await _cartService.removeItem(itemId);
-  //     await initializeData(); // Refresh cart data
-  //   } catch (e) {
-  //     _error = 'Failed to remove item: ${e.toString()}';
-  //     notifyListeners();
-  //   }
-  // }
+  Future<void> removeItem(int itemId) async {
+    try {
+      _isLoading = true; // Set loading state immediately
+      notifyListeners();
+      
+      await _cartService.removeItem(itemId);
+      await initializeData(); // Refresh cart data
+    } catch (e) {
+      _error = 'Failed to remove item: ${e.toString()}';
+      notifyListeners();
+      rethrow; // Rethrow to handle in UI
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> addItem(String productId, int quantity) async {
     try {
@@ -81,6 +95,19 @@ class CartTabController extends ChangeNotifier {
   //     notifyListeners();
   //   }
   // }
+
+  Future<void> removeCoupon() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      
+      await _cartService.removeCoupon();
+      await initializeData(); // This will refresh the cart data
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    }
+  }
 
   @override
   void dispose() {

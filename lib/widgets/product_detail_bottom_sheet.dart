@@ -101,7 +101,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                   child: IconButton(
                                     icon: Icon(
                                       widget.product.isLiked ? Icons.favorite : Icons.favorite_border,
-                                      color: AppColors.primaryRed,
+                                      color: widget.product.isLiked ? AppColors.primaryRed : Colors.grey,
                                       size: 20,
                                     ),
                                     onPressed: () {
@@ -175,12 +175,27 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text(
-                            'INR ${widget.product.price.toStringAsFixed(2)}',
-                            style: AppFonts.heading1.copyWith(
-                              fontSize: 20,
-                              color: AppColors.primaryRed,
-                            ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                '₹${widget.product.sellingPrice.toStringAsFixed(2)}',
+                                style: AppFonts.heading1.copyWith(
+                                  fontSize: 20,
+                                  color: AppColors.primaryRed,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '₹${widget.product.originalPrice.toStringAsFixed(2)}',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 24),
                           // Highlights Section
