@@ -15,6 +15,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   bool isForSelf = true;
   TextEditingController otherAddressController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
+  TextEditingController stateController = TextEditingController();
+  TextEditingController pincodeController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -142,6 +144,29 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                 _buildTextField(
                   label: 'Landmark',
                   hint: 'Nearby Landmark (Optional)',
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  label: 'State',
+                  hint: 'Enter state',
+                  required: true,
+                  controller: stateController,
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  label: 'Country',
+                  hint: 'India',
+                  enabled: false,
+                  initialValue: 'India',
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  label: 'Pincode',
+                  hint: 'Enter 6-digit pincode',
+                  required: true,
+                  controller: pincodeController,
+                  isPhoneNumber: true,
+                  maxLength: 6,
                 ),
               ],
             ),
@@ -287,6 +312,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     IconData? prefixIcon,
     TextEditingController? controller,
     bool isPhoneNumber = false,
+    int? maxLength,
+    bool enabled = true,
+    String? initialValue,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,15 +328,17 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         ),
         const SizedBox(height: 8),
         TextFormField(
-          controller: controller,
+          controller: initialValue != null ? null : controller,
+          initialValue: initialValue,
+          enabled: enabled,
           keyboardType: isPhoneNumber ? TextInputType.number : TextInputType.text,
-          maxLength: isPhoneNumber ? 10 : null,
+          maxLength: maxLength ?? (isPhoneNumber ? 10 : null),
           inputFormatters: isPhoneNumber ? [
             FilteringTextInputFormatter.digitsOnly,
           ] : null,
           style: AppFonts.paragraph.copyWith(
             fontSize: 14,
-            color:AppColors.black,
+            color: enabled ? AppColors.black : Colors.grey,
           ),
           decoration: InputDecoration(
             hintText: hint,
@@ -317,12 +347,12 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
               color: Colors.grey,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: enabled ? Colors.white : Colors.grey[100],
             counterText: '',
             prefixIcon: prefixIcon != null 
                 ? Icon(prefixIcon, color: Colors.grey, size: 20)
                 : null,
-            prefixText: isPhoneNumber ? '+91 ' : null,
+            prefixText: isPhoneNumber && maxLength == 10 ? '+91 ' : null,
             prefixStyle: AppFonts.paragraph.copyWith(
               fontSize: 14,
               color: Colors.black87,
@@ -335,17 +365,12 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
               borderRadius: BorderRadius.circular(28),
               borderSide: BorderSide.none,
             ),
+            disabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: BorderSide.none,
+            ),
             contentPadding: const EdgeInsets.all(16),
           ),
-          validator: isPhoneNumber ? (value) {
-            if (value == null || value.isEmpty) {
-              return 'Phone number is required';
-            }
-            if (value.length != 10) {
-              return 'Phone number must be 10 digits';
-            }
-            return null;
-          } : null,
         ),
       ],
     );
@@ -355,6 +380,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   void dispose() {
     phoneController.dispose();
     otherAddressController.dispose();
+    stateController.dispose();
+    pincodeController.dispose();
     super.dispose();
   }
 }

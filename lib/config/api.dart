@@ -57,4 +57,7 @@ abstract class ApiEndpoints {
 
   // Add item to cart endpoint
   static const String addToCart = '/cart/item/';
+
+  // Search products endpoint
+  static String searchProducts(String query) => '/products/searchProducts?search=$query';
 }

@@ -4,8 +4,15 @@ import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/constants/icons.dart';
 import 'package:flutter/services.dart';
+import 'package:giftginnie_ui/models/product_model.dart';
+import 'package:giftginnie_ui/services/image_service.dart';
+import 'package:giftginnie_ui/widgets/favourite_button.dart';
+import 'package:giftginnie_ui/widgets/product_detail_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:giftginnie_ui/controllers/main/home_controller.dart';
+import 'package:giftginnie_ui/services/product_service.dart';
+import 'dart:async';
+import 'package:giftginnie_ui/services/cache_service.dart';
 
 class SearchScreen extends StatefulWidget {
   final bool showSearchButton;
@@ -27,17 +34,32 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   bool _allowKeyboardShow = true;
-  final List<String> _searchHistory = [
-    'Restaurant Near me',
-    'Thai Rise',
-    'Chhole Kulche',
-    'Pav bhaji'
-  ];
+  final List<String> _searchHistory = [];
+  final ProductService _productService = ProductService();
+  List<Product> _searchResults = [];
+  bool _isLoading = false;
+  Timer? _debounceTimer;
+  final CacheService _cacheService = CacheService();
 
   @override
   void initState() {
     super.initState();
     _allowKeyboardShow = true;
+    // Load search history asynchronously
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSearchHistory();
+    });
+  }
+
+  Future<void> _loadSearchHistory() async {
+    final List<String>? savedHistory = await _cacheService.getStringList(CacheService.searchHistoryKey);
+    
+    if (savedHistory != null && mounted) {
+      setState(() {
+        _searchHistory.clear();
+        _searchHistory.addAll(savedHistory);
+      });
+    }
   }
 
   @override
@@ -76,6 +98,67 @@ class _SearchScreenState extends State<SearchScreen> {
       return false;
     }
     return true;
+  }
+
+  void _performSearch(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    
+    _debounceTimer = Timer(const Duration(seconds: 1), () async {
+      if (query.isEmpty) {
+        setState(() {
+          _searchResults = [];
+          _isLoading = false;
+        });
+        return;
+      }
+
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final results = await _productService.searchProducts(query);
+        setState(() {
+          _searchResults = results;
+          _isLoading = false;
+        });
+        // Add to search history when search is successful
+        _addToSearchHistory(query);
+      } catch (e) {
+        debugPrint('Error performing search: $e');
+        setState(() {
+          _searchResults = [];
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  void _addToSearchHistory(String query) {
+    if (query.isEmpty) return;
+    
+    setState(() {
+      // Remove if already exists
+      _searchHistory.remove(query);
+      // Add to the beginning of the list
+      _searchHistory.insert(0, query);
+      // Keep only last 10 searches
+      if (_searchHistory.length > 10) {
+        _searchHistory.removeLast();
+      }
+    });
+
+    // Save to cache
+    _cacheService.saveStringList(CacheService.searchHistoryKey, _searchHistory);
+  }
+
+  void _clearSearchHistory() {
+    setState(() {
+      _searchHistory.clear();
+    });
+    
+    // Clear from cache
+    _cacheService.remove(CacheService.searchHistoryKey);
   }
 
   @override
@@ -194,6 +277,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                 ),
                                 onChanged: (value) {
                                   setState(() {});
+                                  _performSearch(value);
                                 },
                               ),
                             ),
@@ -203,8 +287,10 @@ class _SearchScreenState extends State<SearchScreen> {
                             const SizedBox(width: 12),
                             TextButton(
                               onPressed: () {
-                                // Implement search functionality
-                                _searchFocusNode.unfocus();
+                                if (_searchController.text.isNotEmpty) {
+                                  _searchFocusNode.unfocus();
+                                  _performSearch(_searchController.text);
+                                }
                               },
                               child: Text(
                                 'Search',
@@ -225,68 +311,57 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'Categories',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 16,
-                          color: AppColors.black
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 100,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        children: [
-                          _buildCategoryItem(emoji: '🏅', label: 'Prizes'),
-                          _buildCategoryItem(emoji: '🎂', label: 'Birthday'),
-                          _buildCategoryItem(emoji: '💑', label: 'Anniversary'),
-                          _buildCategoryItem(emoji: '🐱', label: 'Pet Gifts'),
-                          _buildCategoryItem(emoji: '👔', label: 'Corporate'),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Search History',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 16,
-                              color: AppColors.black
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _searchHistory.clear();
-                              });
-                            },
-                            child: Text(
-                              'Clear all',
+                    if (_searchController.text.isEmpty) ...[
+                      // Search History Header
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Search History',
                               style: AppFonts.paragraph.copyWith(
-                                color: AppColors.primaryRed,
-                                fontSize: 14,
+                                fontSize: 16,
+                                color: AppColors.black
                               ),
                             ),
-                          ),
-                        ],
+                            TextButton(
+                              onPressed: _clearSearchHistory,
+                              child: Text(
+                                'Clear all',
+                                style: AppFonts.paragraph.copyWith(
+                                  color: AppColors.primaryRed,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _searchHistory.length,
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemBuilder: (context, index) {
-                          return _buildHistoryItem(_searchHistory[index]);
-                        },
+                      // Search History List
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _searchHistory.length,
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () {
+                                _searchController.text = _searchHistory[index];
+                                _performSearch(_searchHistory[index]);
+                              },
+                              child: _buildHistoryItem(_searchHistory[index]),
+                            );
+                          },
+                        ),
                       ),
-                    ),
+                    ] else ...[
+                      // Search Results
+                      Expanded(
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _buildSearchResults(),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -363,6 +438,9 @@ class _SearchScreenState extends State<SearchScreen> {
               setState(() {
                 _searchHistory.remove(text);
               });
+              // Save updated history to cache
+              final CacheService cacheService = CacheService();
+              cacheService.saveStringList(CacheService.searchHistoryKey, _searchHistory);
             },
           ),
         ],
@@ -370,10 +448,153 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  Widget _buildSearchResults() {
+    if (_searchResults.isEmpty) {
+      return Center(
+        child: Text(
+          'No products found',
+          style: AppFonts.paragraph.copyWith(
+            color: AppColors.textGrey,
+          ),
+        ),
+      );
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16.0,
+        mainAxisSpacing: 16.0,
+        childAspectRatio: 0.53,
+      ),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final product = _searchResults[index];
+        return GestureDetector(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => ProductDetailBottomSheet(
+                product: product,
+                onProductUpdated: (updatedProduct) {
+                  setState(() {
+                    _searchResults[index] = updatedProduct;
+                  });
+                },
+              ),
+            );
+          },
+          child: _buildProductCard(product),
+        );
+      },
+    );
+  }
+
+  Widget _buildProductCard(Product product) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+          child: Stack(
+            children: [
+              ImageService.getNetworkImage(
+                key: ValueKey('search_product_${product.id}'),
+                imageUrl: product.images.isNotEmpty ? product.images[0] : 'assets/images/placeholder.png',
+                width: MediaQuery.of(context).size.width / 2 - 24,
+                height: 200,
+                fit: BoxFit.cover,
+                errorWidget: Image.asset(
+                  'assets/images/placeholder.png',
+                  width: MediaQuery.of(context).size.width / 2 - 24,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: FavoriteButton(
+                  productId: product.id,
+                  isLiked: product.isLiked,
+                  onProductUpdated: (updatedProduct) {
+                    setState(() {
+                      final index = _searchResults.indexWhere((p) => p.id == updatedProduct.id);
+                      if (index != -1) {
+                        _searchResults[index] = updatedProduct;
+                      }
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                product.name,
+                style: AppFonts.paragraph.copyWith(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                product.brand,
+                style: AppFonts.paragraph.copyWith(
+                  fontSize: 12,
+                  color: AppColors.textGrey,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Text(
+                    '\$${product.sellingPrice.toStringAsFixed(2)}',
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 16,
+                      color: AppColors.primaryRed,
+                    ),
+                  ),
+                  const Spacer(),
+                  const Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                    size: 16,
+                  ),
+                  Text(
+                    product.rating.toStringAsFixed(1),
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 12,
+                      color: AppColors.textGrey,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _searchFocusNode.dispose();
     _searchController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 }

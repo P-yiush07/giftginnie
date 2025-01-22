@@ -18,6 +18,7 @@ class CacheService {
 
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'user_data';
+  static const String searchHistoryKey = 'search_history';
 
   // Initialize method that needs to be called at app startup
   Future<void> init() async {

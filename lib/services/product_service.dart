@@ -203,4 +203,33 @@ class ProductService {
       throw Exception('Failed to update favorite status');
     }
   }
+
+  Future<List<Product>> searchProducts(String query) async {
+    try {
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}${ApiEndpoints.searchProducts(query)}',
+      );
+
+      if (response.data['results'] == null) {
+        return [];
+      }
+
+      return (response.data['results'] as List).map((json) => Product(
+        id: json['id'].toString(),
+        name: json['name'] as String,
+        description: json['description'] as String,
+        originalPrice: double.parse(json['original_price'].toString()),
+        sellingPrice: double.parse(json['selling_price'].toString()),
+        images: (json['images'] as List).map((img) => img['image'].toString()).toList(),
+        brand: json['brand']?.toString() ?? 'Unknown Brand',
+        productType: json['product_type']?.toString() ?? 'Gift Item',
+        inStock: json['in_stock'] as bool? ?? true,
+        isLiked: json['is_liked'] as bool? ?? false,
+        rating: (json['rating'] ?? 0.0).toDouble(),
+      )).toList();
+    } catch (e) {
+      debugPrint('Error searching products: $e');
+      return [];
+    }
+  }
 }
