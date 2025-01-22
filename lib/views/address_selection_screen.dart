@@ -85,7 +85,6 @@ class AddressSelectionScreen extends StatelessWidget {
                                     label: controller.getAddressLabel(address),
                                     address: address.fullAddress,
                                     addressId: address.id,
-                                    distance: '2km',
                                   )),
                             ],
                           ],
@@ -154,16 +153,29 @@ class AddressSelectionScreen extends StatelessWidget {
   Widget _buildAddressItem(BuildContext context, AddressController controller, {
     required String label,
     required String address,
-    required String distance,
     required int addressId,
   }) {
     final addressModel = controller.addresses.firstWhere((a) => a.id == addressId);
     final isSelected = controller.isAddressSelected(addressModel);
+    
+    // Convert address type code to label
+    String getAddressTypeLabel(String type) {
+      switch (type.toLowerCase()) {
+        case 'h':
+          return 'Home';
+        case 'b':
+          return 'Work';
+        case 'o':
+          return 'Other';
+        default:
+          return 'Other';
+      }
+    }
 
     return GestureDetector(
       onTap: () {
         controller.selectAddress(addressModel);
-        Navigator.pop(context); // Return to previous screen after selection
+        Navigator.pop(context);
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -197,32 +209,12 @@ class AddressSelectionScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          distance,
-                          style: AppFonts.paragraph.copyWith(
-                            fontSize: 14,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '|',
-                          style: AppFonts.paragraph.copyWith(
-                            fontSize: 14,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          label,
-                          style: AppFonts.paragraph.copyWith(
-                            fontSize: 14,
-                            color: AppColors.textGrey,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      getAddressTypeLabel(addressModel.addressType),
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 14,
+                        color: AppColors.textGrey,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(

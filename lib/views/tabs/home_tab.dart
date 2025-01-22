@@ -79,33 +79,6 @@ class _HomeTabViewState extends State<HomeTabView> {
   int _currentPage = 0;
   final Set<int> _likedProducts = {};
 
-  final List<OfferBanner> _offers = [
-    OfferBanner(
-      title: 'Get a Special Discount',
-      discount: '50%',
-      description: 'For all Corporate Labels',
-      buttonText: 'Claim',
-      imageUrl: 'assets/images/gifts.webp',
-      isLimitedTime: true,
-    ),
-    OfferBanner(
-      title: 'Exclusive Offer',
-      discount: '30%',
-      description: 'On Premium Gifts',
-      buttonText: 'Claim',
-      imageUrl: 'assets/images/gifts.webp',
-      isLimitedTime: false,
-    ),
-    OfferBanner(
-      title: 'Special Deal',
-      discount: '40%',
-      description: 'For Bulk Orders',
-      buttonText: 'Claim',
-      imageUrl: 'assets/images/gifts.webp',
-      isLimitedTime: true,
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -126,6 +99,19 @@ class _HomeTabViewState extends State<HomeTabView> {
     }
     return url;
   }
+
+  String getAddressTypeLabel(String type) {
+      switch (type.toLowerCase()) {
+        case 'h':
+          return 'Home';
+        case 'b':
+          return 'Work';
+        case 'o':
+          return 'Other';
+        default:
+          return 'Other';
+      }
+    }
 
   @override
   Widget build(BuildContext context) {

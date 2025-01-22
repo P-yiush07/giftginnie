@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 import '../constants/fonts.dart';
+import '../services/user_service.dart';
 
 class AddAddressScreen extends StatefulWidget {
   const AddAddressScreen({super.key});
@@ -12,11 +13,13 @@ class AddAddressScreen extends StatefulWidget {
 
 class _AddAddressScreenState extends State<AddAddressScreen> {
   String selectedType = 'Home';
-  bool isForSelf = true;
   TextEditingController otherAddressController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
   TextEditingController stateController = TextEditingController();
   TextEditingController pincodeController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController areaController = TextEditingController();
+  TextEditingController landmarkController = TextEditingController();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -52,56 +55,6 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Who are you ordering for?',
-                  style: AppFonts.paragraph.copyWith(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      _buildRadioOption(
-                        value: true,
-                        groupValue: isForSelf,
-                        label: 'My Self',
-                      ),
-                      const SizedBox(width: 24),
-                      _buildRadioOption(
-                        value: false,
-                        groupValue: isForSelf,
-                        label: 'Someone else',
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                if (!isForSelf) ...[
-                  _buildTextField(
-                    label: 'Name',
-                    hint: 'Enter full name',
-                    required: true,
-                    prefixIcon: Icons.person_outline,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildTextField(
-                    label: 'Phone Number',
-                    hint: '12345 67890',
-                    required: true,
-                    prefixIcon: Icons.phone_outlined,
-                    controller: phoneController,
-                    isPhoneNumber: true,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                Text(
                   'Save Address as*',
                   style: AppFonts.paragraph.copyWith(
                     fontSize: 14,
@@ -119,31 +72,25 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                     ],
                   ),
                 ),
-                if (selectedType == 'Other') ...[
-                  const SizedBox(height: 16),
-                  _buildTextField(
-                    label: 'Save as',
-                    hint: 'Enter address type',
-                    required: true,
-                    controller: otherAddressController,
-                  ),
-                ],
                 const SizedBox(height: 24),
                 _buildTextField(
                   label: 'Address',
                   hint: 'Enter Flat / house no / floor / building',
                   required: true,
+                  controller: addressController,
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
                   label: 'Area, Sector, Locality',
                   hint: 'Enter area, sector, locality',
                   required: true,
+                  controller: areaController,
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
                   label: 'Landmark',
                   hint: 'Nearby Landmark (Optional)',
+                  controller: landmarkController,
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
@@ -180,10 +127,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             MediaQuery.of(context).padding.bottom + 16,
           ),
           child: FilledButton(
-            onPressed: () {
-              // Handle save address
-              Navigator.pop(context);
-            },
+            onPressed: isLoading ? null : _handleAddAddress,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
               minimumSize: const Size(double.infinity, 56),
@@ -191,64 +135,24 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                 borderRadius: BorderRadius.circular(28),
               ),
             ),
-            child: Text(
-              'Save Details',
-              style: AppFonts.paragraph.copyWith(
-                fontSize: 16,
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'Save Details',
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRadioOption({
-    required bool value,
-    required bool groupValue,
-    required String label,
-  }) {
-    return InkWell(
-      onTap: () => setState(() => isForSelf = value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: value == groupValue ? AppColors.primary : Colors.grey,
-                  width: 2,
-                ),
-              ),
-              child: value == groupValue
-                  ? Center(
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: AppFonts.paragraph.copyWith(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -376,12 +280,78 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     );
   }
 
+  Future<void> _handleAddAddress() async {
+    final userService = UserService();
+    
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      String addressType = selectedType == 'Home' ? 'H' : 
+                          selectedType == 'Work' ? 'B' : 'O';
+
+      await userService.addAddress(
+        addressLine1: addressController.text,
+        addressLine2: '${areaController.text}${landmarkController.text.isNotEmpty ? ', ${landmarkController.text}' : ''}',
+        city: areaController.text,
+        state: stateController.text,
+        pincode: pincodeController.text,
+        addressType: addressType,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Text(
+                  'Address added successfully',
+                  style: AppFonts.paragraph.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.only(
+              bottom: MediaQuery.of(context).padding.bottom + 16,
+              left: 16,
+              right: 16,
+            ),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
-    phoneController.dispose();
     otherAddressController.dispose();
     stateController.dispose();
     pincodeController.dispose();
+    addressController.dispose();
+    areaController.dispose();
+    landmarkController.dispose();
     super.dispose();
   }
 }

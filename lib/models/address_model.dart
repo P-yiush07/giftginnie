@@ -6,6 +6,7 @@ class AddressModel {
   final String state;
   final String country;
   final String pincode;
+  final String addressType; // Add this field
 
   AddressModel({
     required this.id,
@@ -15,7 +16,9 @@ class AddressModel {
     required this.state,
     required this.country,
     required this.pincode,
+    required this.addressType,
   });
+
 
   factory AddressModel.fromJson(Map<String, dynamic> json) {
     return AddressModel(
@@ -26,6 +29,7 @@ class AddressModel {
       state: json['state'],
       country: json['country'],
       pincode: json['pincode'],
+      addressType: json['address_type'],
     );
   }
 
@@ -38,6 +42,7 @@ class AddressModel {
       'state': state,
       'country': country,
       'pincode': pincode,
+      'address_type': addressType,
     };
   }
 
@@ -54,9 +59,15 @@ class AddressModel {
   }
 
   String getAddressLabel() {
-    if (addressLine1.toLowerCase().contains('home')) return 'Home';
-    if (addressLine1.toLowerCase().contains('work')) return 'Work';
-    if (addressLine1.toLowerCase().contains('office')) return 'Office';
-    return 'Other';
+    switch (addressType.toLowerCase()) {
+      case 'h':
+        return 'Home';
+      case 'b':
+        return 'Work';
+      case 'o':
+        return 'Other';
+      default:
+        return 'Other';
+    }
   }
 }

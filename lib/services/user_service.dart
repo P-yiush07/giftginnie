@@ -109,4 +109,37 @@ class UserService {
       throw Exception('Failed to update profile. Please try again.');
     }
   }
+
+  Future<AddressModel> addAddress({
+    required String addressLine1,
+    required String addressLine2,
+    required String city,
+    required String state,
+    required String pincode,
+    required String addressType,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}${ApiEndpoints.userAddresses}',
+        data: {
+          'address_line_1': addressLine1,
+          'address_line_2': addressLine2,
+          'city': city,
+          'state': state,
+          'country': 'IN',
+          'pincode': pincode,
+          'address_type': addressType,
+        },
+      );
+
+      if (response.statusCode == 201) {
+        return AddressModel.fromJson(response.data['data']);
+      }
+      
+      throw Exception(response.data['message'] ?? 'Failed to add address');
+    } on DioException catch (e) {
+      debugPrint('Error adding address: $e');
+      throw Exception('Failed to add address. Please try again.');
+    }
+  }
 }
