@@ -6,6 +6,9 @@ import 'package:giftginnie_ui/models/popular_category_model.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/category_service.dart';
 import 'package:giftginnie_ui/services/product_service.dart';
+import 'package:giftginnie_ui/utils/global.dart';
+import 'package:provider/provider.dart';
+import 'package:giftginnie_ui/controllers/main/product_controller.dart';
 
 class HomeTabController extends ChangeNotifier {
   final ProductService _productService = ProductService();
@@ -70,6 +73,11 @@ class HomeTabController extends ChangeNotifier {
   Future<void> _fetchPopularProducts() async {
     try {
       _popularProducts = await _productService.getPopularProducts();
+      // Initialize like states in ProductController
+      final productController = Provider.of<ProductController>(navigatorKey.currentContext!, listen: false);
+      for (var product in _popularProducts) {
+        productController.updateProductLikeStatus(product.id, product.isLiked);
+      }
     } catch (e) {
       debugPrint('Error fetching popular products: $e');
     }
@@ -172,6 +180,31 @@ class HomeTabController extends ChangeNotifier {
 
   void handleOfferTap(String offerId) {
     // TODO: Implement offer details navigation
+  }
+
+  Future<void> refreshPopularProducts() async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      _popularProducts = await _productService.getPopularProducts();
+      // Update global product controller with latest like statuses
+      final productController = Provider.of<ProductController>(navigatorKey.currentContext!, listen: false);
+      for (var product in _popularProducts) {
+        productController.updateProductLikeStatus(product.id, product.isLiked);
+      }
+    } catch (e) {
+      debugPrint('Error refreshing popular products: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void updatePopularProduct(int index, Product updatedProduct) {
+    if (index >= 0 && index < _popularProducts.length) {
+      _popularProducts[index] = updatedProduct;
+      notifyListeners();
+    }
   }
 
   @override

@@ -188,4 +188,19 @@ class ProductService {
       return [];
     }
   }
+
+  Future<bool> toggleFavorite(String productId) async {
+    try {
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}${ApiEndpoints.favouriteProducts}',
+        data: {
+          "id": productId
+        },
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('Error toggling favorite: $e');
+      throw Exception('Failed to update favorite status');
+    }
+  }
 }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/controllers/main/product_controller.dart';
+import 'package:giftginnie_ui/utils/global.dart';
 import '../../models/category_model.dart';
 import '../../services/product_service.dart';
 import '../../services/category_service.dart';
+import 'package:provider/provider.dart';
 
 class CategoryController extends ChangeNotifier {
   final ProductService _productService = ProductService();
@@ -69,10 +72,24 @@ class CategoryController extends ChangeNotifier {
   }
 
   Future<void> refreshData() async {
-    _categoryData = null;
-    _hasError = false;
-    notifyListeners();
+    if (_lastLoadTime != null && 
+        DateTime.now().difference(_lastLoadTime!) < _minLoadInterval) {
+      return;
+    }
+    _lastLoadTime = DateTime.now();
     await loadCategoryData(_category);
+  }
+
+  void updateGiftLikeStatus(String giftId, bool isLiked) {
+    if (_categoryData != null) {
+      final giftIndex = _categoryData!.gifts.indexWhere((gift) => gift.id == giftId);
+      if (giftIndex != -1) {
+        _categoryData!.gifts[giftIndex].isLiked = isLiked;
+        final productController = Provider.of<ProductController>(navigatorKey.currentContext!, listen: false);
+        productController.updateProductLikeStatus(giftId, isLiked);
+        notifyListeners();
+      }
+    }
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/constants/icons.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/image_service.dart';
+import 'package:giftginnie_ui/widgets/favourite_button.dart';
 import 'package:giftginnie_ui/widgets/product_detail_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import '../controllers/main/favourite_gifts_controller.dart';
@@ -183,20 +184,14 @@ class FavouriteGiftsView extends StatelessWidget {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: GestureDetector(
-                    onTap: () => controller.removeFromFavourites(product.id),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.favorite,
-                        color: AppColors.primaryRed,
-                        size: 14,
-                      ),
-                    ),
+                  child: FavoriteButton(
+                    productId: product.id,
+                    isLiked: product.isLiked,
+                    onProductUpdated: (updatedProduct) {
+                      if (!updatedProduct.isLiked) {
+                        controller.removeFromFavourites(updatedProduct.id);
+                      }
+                    },
                   ),
                 ),
               ],

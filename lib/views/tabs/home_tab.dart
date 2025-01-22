@@ -6,6 +6,7 @@ import 'package:giftginnie_ui/controllers/main/user_controller.dart';
 import 'package:giftginnie_ui/models/popular_category_model.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/views/address_selection_screen.dart';
+import 'package:giftginnie_ui/widgets/favourite_button.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/home_tab_controller.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -561,19 +562,22 @@ class _HomeTabViewState extends State<HomeTabView> {
                           padding: EdgeInsets.zero,
                           itemCount: controller.popularProducts.length,
                           itemBuilder: (context, index) {
-                            final product = controller.popularProducts[index];
-                            bool isLiked = product.isLiked;
-                            return Padding(
-                              padding: EdgeInsets.only(
-                                right: index != controller.popularProducts.length - 1 ? 16.0 : 0,
-                              ),
-                              child: _buildProductCard(
-                                image: product.images.first,
-                                title: product.name,
-                                deliveryDays: 3, // You might want to add this to your product model
-                                rating: product.rating,
-                                index: index,
-                              ),
+                            return Consumer<HomeTabController>(
+                              builder: (context, controller, _) {
+                                final product = controller.popularProducts[index];
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    right: index != controller.popularProducts.length - 1 ? 16.0 : 0,
+                                  ),
+                                  child: _buildProductCard(
+                                    image: product.images.first,
+                                    title: product.name,
+                                    deliveryDays: 3,
+                                    rating: product.rating,
+                                    index: index,
+                                  ),
+                                );
+                              },
                             );
                           },
                         );
@@ -766,144 +770,144 @@ class _HomeTabViewState extends State<HomeTabView> {
     required double rating,
     required int index,
   }) {
-    final product = context.read<HomeTabController>().popularProducts[index];
-    bool isLiked = product.isLiked;
-
-    return GestureDetector(
-      onTap: () {
-        // Show bottom sheet immediately with shimmer
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => FutureBuilder<Product>(
-            future: ProductService().getProductById(product.id),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return ProductDetailBottomSheet(product: snapshot.data!);
-              }
-              return const ProductDetailShimmer();
-            },
-          ),
-        );
-      },
-      child: Container(
-        width: 280,
-        height: 380,
-        child: Stack(
-          children: [
-            // Background Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: ImageService.getNetworkImage(
-                imageUrl: image,
-                width: double.infinity,
-                height: double.infinity,
-                fit: BoxFit.cover,
+    return Consumer<HomeTabController>(
+      builder: (context, controller, _) {
+        final product = controller.popularProducts[index];
+        return GestureDetector(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => FutureBuilder<Product>(
+                future: ProductService().getProductById(product.id),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ProductDetailBottomSheet(
+                      product: snapshot.data!,
+                      onProductUpdated: (updatedProduct) {
+                        // Update only this specific product in the list
+                        final index = controller.popularProducts.indexWhere((p) => p.id == updatedProduct.id);
+                        if (index != -1) {
+                          controller.updatePopularProduct(index, updatedProduct);
+                        }
+                      },
+                    );
+                  }
+                  return const ProductDetailShimmer();
+                },
               ),
-            ),
-            
-            // Darker Gradient Overlay - Updated opacity values
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.black.withOpacity(0.5),  // Increased from 0.2
-                    AppColors.black.withOpacity(0.9),  // Increased from 0.8
-                  ],
-                  stops: const [0.5, 1.0],
-                ),
-              ),
-            ),
-            
-            // Updated Heart Icon
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      final controller = context.read<HomeTabController>();
-                      final product = controller.popularProducts[index];
-                      product.isLiked = !product.isLiked;
-                    });
-                  },
-                  child: Icon(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    color: isLiked ? AppColors.primaryRed : Colors.grey,
-                    size: 14,
+            );
+          },
+          child: Container(
+            width: 280,
+            height: 380,
+            child: Stack(
+              children: [
+                // Background Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: ImageService.getNetworkImage(
+                    imageUrl: image,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
                   ),
                 ),
-              ),
-            ),
-            
-            // Content
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 12,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppFonts.heading1.copyWith(
-                      color: Colors.white,
-                      fontSize: 16,
+                
+                // Darker Gradient Overlay - Updated opacity values
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppColors.black.withOpacity(0.5),  // Increased from 0.2
+                        AppColors.black.withOpacity(0.9),  // Increased from 0.8
+                      ],
+                      stops: const [0.5, 1.0],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Row(
+                ),
+                
+                // Updated Heart Icon
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: FavoriteButton(
+                    productId: product.id,
+                    isLiked: product.isLiked,
+                    onProductUpdated: (updatedProduct) {
+                      // Update only this specific product in the list
+                      final index = controller.popularProducts.indexWhere((p) => p.id == updatedProduct.id);
+                      if (index != -1) {
+                        controller.updatePopularProduct(index, updatedProduct);
+                      }
+                    },
+                  ),
+                ),
+                
+                // Content
+                Positioned(
+                  left: 12,
+                  right: 12,
+                  bottom: 12,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SvgPicture.asset(
-                        'assets/images/alarm-clock.svg',
-                        width: 16,
-                        height: 16,
-                        colorFilter: ColorFilter.mode(
-                          AppColors.successGreen,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
                       Text(
-                        '$deliveryDays Days Delivery',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
+                        title,
+                        style: AppFonts.heading1.copyWith(
                           color: Colors.white,
+                          fontSize: 16,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Icon(
-                        Icons.star_rounded,
-                        size: 16,
-                        color: AppColors.ratingAmber,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        rating.toStringAsFixed(1),
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/alarm-clock.svg',
+                            width: 16,
+                            height: 16,
+                            colorFilter: ColorFilter.mode(
+                              AppColors.successGreen,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$deliveryDays Days Delivery',
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Icon(
+                            Icons.star_rounded,
+                            size: 16,
+                            color: AppColors.ratingAmber,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            rating.toStringAsFixed(1),
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 14,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

@@ -6,6 +6,9 @@ import 'package:giftginnie_ui/constants/icons.dart';
 import 'package:giftginnie_ui/controllers/main/category_controller.dart';
 import 'package:giftginnie_ui/models/category_model.dart';
 import 'package:flutter/services.dart';
+import 'package:giftginnie_ui/services/product_service.dart';
+import 'package:giftginnie_ui/widgets/favourite_button.dart';
+import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 import '../models/product_model.dart';
 import '../widgets/product_detail_bottom_sheet.dart';
 import '../widgets/shimmer/category_shimmer.dart';
@@ -205,20 +208,19 @@ class _CategoryScreenState extends State<CategoryScreen> {
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
-          builder: (context) => ProductDetailBottomSheet(
-            product: Product(
-              id: gift.id,
-              name: gift.name,
-              description: gift.description,
-              originalPrice: gift.originalPrice,
-              sellingPrice: gift.sellingPrice,
-              images: gift.images?.toList() ?? ['assets/images/placeholder.png'],
-              brand: gift.brand,
-              productType: gift.productType,
-              inStock: gift.inStock,
-              rating: gift.rating,
-              isLiked: gift.isLiked,
-            ),
+          builder: (context) => FutureBuilder<Product>(
+            future: ProductService().getProductById(gift.id),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ProductDetailBottomSheet(
+                  product: snapshot.data!,
+                  onProductUpdated: (Product updatedProduct) {
+                    _controller.updateGiftLikeStatus(gift.id, updatedProduct.isLiked);
+                  },
+                );
+              }
+              return const ProductDetailShimmer();
+            },
           ),
         );
       },
@@ -250,17 +252,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      gift.isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: gift.isLiked ? AppColors.primaryRed : Colors.grey,
-                      size: 14,
-                    ),
+                  child: FavoriteButton(
+                    productId: gift.id,
+                    isLiked: gift.isLiked,
+                    onProductUpdated: (updatedProduct) {
+                      _controller.updateGiftLikeStatus(gift.id, updatedProduct.isLiked);
+                    },
                   ),
                 ),
               ],

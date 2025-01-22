@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/controllers/authHome_controller.dart';
 import 'package:giftginnie_ui/controllers/main/address_controller.dart';
+import 'package:giftginnie_ui/controllers/main/product_controller.dart';
 import 'package:giftginnie_ui/widgets/splash_screen.dart';
 import 'constants/colors.dart';
 import 'utils/global.dart';
@@ -34,11 +35,37 @@ void main() async {
       overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
     );
 
-    runApp(const MyApp());
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => AuthController()),
+          ChangeNotifierProvider(create: (_) => UserController()),
+          ChangeNotifierProvider(create: (_) => AddressController()),
+          ChangeNotifierProvider(create: (_) => ProductController()),
+          // Add other global providers
+          // ChangeNotifierProvider(create: (_) => CartController()),
+          // ChangeNotifierProvider(create: (_) => UserController()),
+        ],
+        child: const MyApp(),
+      ),
+    );
   } catch (e) {
     debugPrint('Initialization Error: $e');
     // run the app even if initialization fails
-    runApp(const MyApp());
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => AuthController()),
+          ChangeNotifierProvider(create: (_) => UserController()),
+          ChangeNotifierProvider(create: (_) => AddressController()),
+          ChangeNotifierProvider(create: (_) => ProductController()),
+          // Add other global providers
+          // ChangeNotifierProvider(create: (_) => CartController()),
+          // ChangeNotifierProvider(create: (_) => UserController()),
+        ],
+        child: const MyApp(),
+      ),
+    );
   }
 }
 
@@ -52,6 +79,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthController()),
         ChangeNotifierProvider(create: (_) => UserController()),
         ChangeNotifierProvider(create: (_) => AddressController()),
+        ChangeNotifierProvider(create: (_) => ProductController()),
         // Add other global providers
         // ChangeNotifierProvider(create: (_) => CartController()),
         // ChangeNotifierProvider(create: (_) => UserController()),

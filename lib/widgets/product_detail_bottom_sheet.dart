@@ -3,13 +3,18 @@ import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/image_service.dart';
+import 'package:giftginnie_ui/services/product_service.dart';
+import 'package:giftginnie_ui/widgets/favourite_button.dart';
+import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 
 class ProductDetailBottomSheet extends StatefulWidget {
   final Product product;
+  final Function(Product)? onProductUpdated;
 
   const ProductDetailBottomSheet({
     super.key,
     required this.product,
+    this.onProductUpdated,
   });
 
   @override
@@ -19,11 +24,27 @@ class ProductDetailBottomSheet extends StatefulWidget {
 class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
   final PageController _imageController = PageController();
   int _currentImageIndex = 0;
+  late Product _product;
+
+  @override
+  void initState() {
+    super.initState();
+    _product = widget.product;
+  }
 
   @override
   void dispose() {
     _imageController.dispose();
     super.dispose();
+  }
+
+  void _updateProduct(Product updatedProduct) {
+    setState(() {
+      _product = updatedProduct;
+    });
+    if (widget.onProductUpdated != null) {
+      widget.onProductUpdated!(updatedProduct);
+    }
   }
 
   @override
@@ -60,10 +81,10 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                     _currentImageIndex = index;
                                   });
                                 },
-                                itemCount: widget.product.images.length,
+                                itemCount: _product.images.length,
                                 itemBuilder: (context, index) {
                                   return ImageService.getNetworkImage(
-                                    imageUrl: widget.product.images[index],
+                                    imageUrl: _product.images[index],
                                     width: MediaQuery.of(context).size.width,
                                     height: 300,
                                     fit: BoxFit.cover,
@@ -84,30 +105,10 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             right: 16,
                             child: Row(
                               children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: IconButton(
-                                    icon: Icon(
-                                      widget.product.isLiked ? Icons.favorite : Icons.favorite_border,
-                                      color: widget.product.isLiked ? AppColors.primaryRed : Colors.grey,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      // TODO: Implement like functionality
-                                    },
-                                  ),
+                                FavoriteButton(
+                                  productId: _product.id,
+                                  isLiked: _product.isLiked,
+                                  onProductUpdated: _updateProduct,
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
@@ -144,7 +145,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(
-                                widget.product.images.length,
+                                _product.images.length,
                                 (index) => Container(
                                   width: 8,
                                   height: 8,
@@ -168,7 +169,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                       sliver: SliverList(
                         delegate: SliverChildListDelegate([
                           Text(
-                            widget.product.name,
+                            _product.name,
                             style: AppFonts.heading1.copyWith(
                               fontSize: 24,
                               color: Colors.black,
@@ -180,7 +181,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             textBaseline: TextBaseline.alphabetic,
                             children: [
                               Text(
-                                '₹${widget.product.sellingPrice.toStringAsFixed(2)}',
+                                '₹${_product.sellingPrice.toStringAsFixed(2)}',
                                 style: AppFonts.heading1.copyWith(
                                   fontSize: 20,
                                   color: AppColors.primaryRed,
@@ -188,7 +189,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                '₹${widget.product.originalPrice.toStringAsFixed(2)}',
+                                '₹${_product.originalPrice.toStringAsFixed(2)}',
                                 style: AppFonts.paragraph.copyWith(
                                   fontSize: 16,
                                   color: Colors.grey,
@@ -216,9 +217,9 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                _buildHighlightRow('Brand', widget.product.brand),
+                                _buildHighlightRow('Brand', _product.brand),
                                 const SizedBox(height: 12),
-                                _buildHighlightRow('Product Type', widget.product.productType),
+                                _buildHighlightRow('Product Type', _product.productType),
                                 const SizedBox(height: 16),
                                 Text(
                                   'Information',
@@ -229,7 +230,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  widget.product.description,
+                                  _product.description,
                                   style: AppFonts.paragraph.copyWith(
                                     color: AppColors.textGrey,
                                     height: 1.5,
@@ -298,7 +299,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          widget.product.rating.toStringAsFixed(1),
+                                          _product.rating.toStringAsFixed(1),
                                           style: AppFonts.heading1.copyWith(
                                             fontSize: 28,
                                             color: Colors.black,

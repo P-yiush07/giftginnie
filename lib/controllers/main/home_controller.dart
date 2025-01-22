@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/models/product_model.dart';
 import './tabs/orders_tab_controller.dart';
 
 class HomeController extends ChangeNotifier {
@@ -25,4 +26,5 @@ class HomeController extends ChangeNotifier {
     ordersController.dispose();
     super.dispose();
   }
+
 }
