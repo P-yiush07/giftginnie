@@ -13,6 +13,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../controllers/main/home_controller.dart';
 import '../../../widgets/error_widget.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:giftginnie_ui/views/checkout_confirmation_screen.dart';
 
 class CartTab extends StatelessWidget {
   const CartTab({super.key});
@@ -310,7 +311,15 @@ class _CartTabViewState extends State<CartTabView> {
                 bottom: 24,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Handle checkout
+                    Navigator.push(
+                      context,
+                      SlidePageRoute(
+                        page: CheckoutConfirmationScreen(
+                          cartData: controller.cartData!,
+                        ),
+                        direction: SlideDirection.right,
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryRed,
