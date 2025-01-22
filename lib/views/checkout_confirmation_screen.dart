@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/fonts.dart';
@@ -9,6 +10,7 @@ import '../views/success_screen.dart';
 import '../services/checkout_service.dart';
 import '../services/image_service.dart';
 import '../controllers/main/address_controller.dart';
+import '../views/address_selection_screen.dart';
 
 class CheckoutConfirmationScreen extends StatefulWidget {
   final CartModel cartData;
@@ -65,7 +67,7 @@ class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen>
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.white,
+        systemNavigationBarColor: Colors.transparent,
         systemNavigationBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
@@ -158,6 +160,7 @@ class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen>
                         style: AppFonts.paragraph.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
+                          color: AppColors.primaryRed
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -193,90 +196,93 @@ class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen>
       builder: (context, addressController, _) {
         final selectedAddress = addressController.selectedAddress;
         
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              SlidePageRoute(
+                page: const AddressSelectionScreen(),
+                direction: SlideDirection.bottom,
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Delivery Address',
-                style: AppFonts.paragraph.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on,
-                    size: 18,
-                    color: AppColors.primaryRed,
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Delivery Address',
+                  style: AppFonts.paragraph.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: selectedAddress != null
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _getAddressTypeLabel(selectedAddress.addressType),
-                                style: AppFonts.paragraph.copyWith(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 18,
+                      color: AppColors.primaryRed,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: selectedAddress != null
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  selectedAddress.getAddressLabel(),
+                                  style: AppFonts.paragraph.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${selectedAddress.addressLine1}, ${selectedAddress.addressLine2}\n${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.pincode}',
-                                style: AppFonts.paragraph.copyWith(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
+                                const SizedBox(height: 4),
+                                Text(
+                                  selectedAddress.fullAddress,
+                                  style: AppFonts.paragraph.copyWith(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
+                              ],
+                            )
+                          : Text(
+                              'Tap to select delivery address',
+                              style: AppFonts.paragraph.copyWith(
+                                fontSize: 14,
+                                color: Colors.grey[600],
                               ),
-                            ],
-                          )
-                        : Text(
-                            'No address selected',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 14,
-                              color: Colors.grey[600],
                             ),
-                          ),
-                  ),
-                ],
-              ),
-            ],
+                    ),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: Color(0xFF656565),
+                      size: 24,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
     );
-  }
-
-  String _getAddressTypeLabel(String type) {
-    switch (type.toLowerCase()) {
-      case 'h':
-        return 'Home';
-      case 'b':
-        return 'Work';
-      case 'o':
-        return 'Other';
-      default:
-        return 'Other';
-    }
   }
 
   Widget _buildPaymentMethod() {
@@ -372,7 +378,22 @@ class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen>
               discountLabel,
               '-₹${discount.toStringAsFixed(2)}',
             ),
-          const Divider(height: 32),
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(vertical: 16),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 50,
+              itemBuilder: (context, index) => Container(
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                width: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+            ),
+          ),
           _buildBillRow(
             'Total Pay',
             '₹${discountedPrice.toStringAsFixed(2)}',

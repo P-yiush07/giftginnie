@@ -714,7 +714,22 @@ class _CartTabViewState extends State<CartTabView> {
                   discountLabel,
                   '-₹${discount.toStringAsFixed(2)}',
                 ),
-              const Divider(height: 32),
+              Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 50,
+                  itemBuilder: (context, index) => Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    width: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.grey300,
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                ),
+              ),
               _buildBillRow(
                 'Total Pay', 
                 '₹${discountedPrice.toStringAsFixed(2)}',

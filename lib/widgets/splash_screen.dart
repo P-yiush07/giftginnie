@@ -3,6 +3,7 @@ import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/services/auth_service.dart';
 import 'package:giftginnie_ui/views/home_screen.dart';
 import 'package:giftginnie_ui/views/onboarding_screen.dart';
+import 'package:giftginnie_ui/constants/fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -47,12 +48,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               'Gift Ginnie',
-              style: TextStyle(
+              style: AppFonts.heading1.copyWith(
                 color: Colors.white,
                 fontSize: 32,
-                fontWeight: FontWeight.w600,
                 letterSpacing: 0.5,
               ),
             ),
