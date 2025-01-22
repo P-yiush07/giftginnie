@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/wishlist_service.dart';
+import 'package:giftginnie_ui/controllers/main/product_controller.dart';
 
 class FavouriteGiftsController extends ChangeNotifier {
   final WishlistService _wishlistService = WishlistService();
+  final ProductController _productController;
   bool _isLoading = false;
   List<Product> _favouriteGifts = [];
+
+  FavouriteGiftsController(this._productController);
 
   bool get isLoading => _isLoading;
   List<Product> get favouriteGifts => _favouriteGifts;
@@ -17,6 +21,10 @@ class FavouriteGiftsController extends ChangeNotifier {
 
     try {
       _favouriteGifts = await _wishlistService.getFavouriteProducts();
+      // Update ProductController with current like states
+      for (var product in _favouriteGifts) {
+        _productController.updateProductLikeStatus(product.id, true);
+      }
     } catch (e) {
       debugPrint('Error loading favourite gifts: $e');
     } finally {

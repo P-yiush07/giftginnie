@@ -6,6 +6,7 @@ import 'package:giftginnie_ui/services/image_service.dart';
 import 'package:giftginnie_ui/services/product_service.dart';
 import 'package:giftginnie_ui/widgets/favourite_button.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
+import 'package:giftginnie_ui/services/cart_service.dart';
 
 class ProductDetailBottomSheet extends StatefulWidget {
   final Product product;
@@ -25,6 +26,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
   final PageController _imageController = PageController();
   int _currentImageIndex = 0;
   late Product _product;
+  bool _isAddingToCart = false;
 
   @override
   void initState() {
@@ -245,8 +247,127 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             width: double.infinity,
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: () {
-                                // Add to cart logic here
+                              onPressed: _isAddingToCart ? null : () async {
+                                setState(() {
+                                  _isAddingToCart = true;
+                                });
+                                
+                                try {
+                                  final cartService = CartService();
+                                  await cartService.addToCart(_product.id, 1);
+                                  
+                                  if (mounted) {
+                                    setState(() {
+                                      _isAddingToCart = false;
+                                    });
+                                    
+                                    if (context.mounted) {
+                                      final overlay = Overlay.of(context);
+                                      final overlayEntry = OverlayEntry(
+                                        builder: (context) => Positioned(
+                                          bottom: MediaQuery.of(context).viewInsets.bottom + 100,
+                                          left: 16,
+                                          right: 16,
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 12,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.primaryRed,
+                                                borderRadius: BorderRadius.circular(12),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(0.1),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.check_circle_outline,
+                                                    color: Colors.white,
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Text(
+                                                    'Item added to cart successfully',
+                                                    style: AppFonts.paragraph.copyWith(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+
+                                      overlay.insert(overlayEntry);
+                                      await Future.delayed(const Duration(seconds: 2));
+                                      overlayEntry.remove();
+                                    }
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    setState(() {
+                                      _isAddingToCart = false;
+                                    });
+                                    
+                                    if (context.mounted) {
+                                      final overlay = Overlay.of(context);
+                                      final overlayEntry = OverlayEntry(
+                                        builder: (context) => Positioned(
+                                          bottom: MediaQuery.of(context).viewInsets.bottom + 100,
+                                          left: 16,
+                                          right: 16,
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 12,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius: BorderRadius.circular(12),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(0.1),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 4),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.error_outline,
+                                                    color: Colors.white,
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Text(
+                                                    'Failed to add item to cart',
+                                                    style: AppFonts.paragraph.copyWith(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+
+                                      overlay.insert(overlayEntry);
+                                      await Future.delayed(const Duration(seconds: 2));
+                                      overlayEntry.remove();
+                                    }
+                                  }
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryRed,
@@ -254,13 +375,22 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                   borderRadius: BorderRadius.circular(28),
                                 ),
                               ),
-                              child: Text(
-                                'Add to Cart',
-                                style: AppFonts.heading1.copyWith(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
-                              ),
+                              child: _isAddingToCart
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    'Add to Cart',
+                                    style: AppFonts.heading1.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                             ),
                           ),
                           const SizedBox(height: 50),

@@ -111,4 +111,19 @@ class CartService {
       throw Exception('Failed to remove coupon');
     }
   }
+
+  Future<void> addToCart(String productId, int quantity) async {
+    try {
+      await _dio.post(
+        '${ApiConstants.baseUrl}${ApiEndpoints.addToCart}',
+        data: {
+          'product_id': productId,
+          'quantity': quantity,
+        },
+      );
+    } catch (e) {
+      debugPrint('Error adding item to cart: $e');
+      throw Exception('Failed to add item to cart');
+    }
+  }
 }

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import '../../models/product_model.dart';
 import '../../services/product_service.dart';
 import '../../services/cache_service.dart';
+import '../../services/wishlist_service.dart';
 import 'dart:convert';
 
 class ProductController extends ChangeNotifier {
   final ProductService _productService = ProductService();
+  final WishlistService _wishlistService = WishlistService();
   final CacheService _cacheService = CacheService();
   final Map<String, bool> _likedProducts = {};
   static const String _likedProductsKey = 'liked_products';
@@ -15,11 +17,23 @@ class ProductController extends ChangeNotifier {
   }
 
   Future<void> _loadLikedProducts() async {
-    final cachedLikes = await _cacheService.getString(_likedProductsKey);
-    if (cachedLikes != null) {
-      final Map<String, dynamic> likesMap = json.decode(cachedLikes);
-      _likedProducts.addAll(Map<String, bool>.from(likesMap));
+    try {
+      // Load from cache first
+      final cachedLikes = await _cacheService.getString(_likedProductsKey);
+      if (cachedLikes != null) {
+        final Map<String, dynamic> likesMap = json.decode(cachedLikes);
+        _likedProducts.addAll(Map<String, bool>.from(likesMap));
+      }
+      
+      // Sync with server
+      final favouriteProducts = await _wishlistService.getFavouriteProducts();
+      for (var product in favouriteProducts) {
+        _likedProducts[product.id] = true;
+      }
+      await _saveLikedProducts();
       notifyListeners();
+    } catch (e) {
+      debugPrint('Error loading liked products: $e');
     }
   }
 
@@ -52,8 +66,10 @@ class ProductController extends ChangeNotifier {
   }
 
   void updateProductLikeStatus(String productId, bool isLiked) {
-    _likedProducts[productId] = isLiked;
-    _saveLikedProducts();
-    notifyListeners();
+    if (_likedProducts[productId] != isLiked) {
+      _likedProducts[productId] = isLiked;
+      _saveLikedProducts();
+      notifyListeners();
+    }
   }
 }

@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../controllers/main/favourite_gifts_controller.dart';
 import '../widgets/shimmer/favourite_gifts_shimmer.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../controllers/main/product_controller.dart';
 
 class FavouriteGiftsScreen extends StatelessWidget {
   const FavouriteGiftsScreen({super.key});
@@ -18,7 +19,9 @@ class FavouriteGiftsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => FavouriteGiftsController()..loadFavouriteGifts(),
+      create: (_) => FavouriteGiftsController(
+        Provider.of<ProductController>(context, listen: false)
+      )..loadFavouriteGifts(),
       child: const FavouriteGiftsView(),
     );
   }

@@ -77,7 +77,25 @@ class CategoryController extends ChangeNotifier {
       return;
     }
     _lastLoadTime = DateTime.now();
+    
+    // Store current like states
+    final likedStates = _categoryData?.gifts
+        .map((gift) => MapEntry(gift.id, gift.isLiked))
+        .toList();
+        
     await loadCategoryData(_category);
+    
+    // Restore like states
+    if (likedStates != null && _categoryData != null) {
+      for (var entry in likedStates) {
+        final giftIndex = _categoryData!.gifts
+            .indexWhere((gift) => gift.id == entry.key);
+        if (giftIndex != -1) {
+          _categoryData!.gifts[giftIndex].isLiked = entry.value;
+        }
+      }
+      notifyListeners();
+    }
   }
 
   void updateGiftLikeStatus(String giftId, bool isLiked) {
@@ -85,7 +103,10 @@ class CategoryController extends ChangeNotifier {
       final giftIndex = _categoryData!.gifts.indexWhere((gift) => gift.id == giftId);
       if (giftIndex != -1) {
         _categoryData!.gifts[giftIndex].isLiked = isLiked;
-        final productController = Provider.of<ProductController>(navigatorKey.currentContext!, listen: false);
+        final productController = Provider.of<ProductController>(
+          navigatorKey.currentContext!, 
+          listen: false
+        );
         productController.updateProductLikeStatus(giftId, isLiked);
         notifyListeners();
       }
