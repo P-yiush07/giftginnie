@@ -142,4 +142,62 @@ class UserService {
       throw Exception('Failed to add address. Please try again.');
     }
   }
+
+  Future<AddressModel> updateAddress({
+    required int addressId,
+    required String addressLine1,
+    required String addressLine2,
+    required String city,
+    required String state,
+    required String pincode,
+    required String addressType,
+  }) async {
+    try {
+      final response = await _dio.patch(
+        '${ApiConstants.baseUrl}${ApiEndpoints.userAddresses}',
+        data: {
+          'id': addressId,
+          'address_line_1': addressLine1,
+          'address_line_2': addressLine2,
+          'city': city,
+          'state': state,
+          'country': 'IN',
+          'pincode': pincode,
+          'address_type': addressType,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return AddressModel.fromJson(response.data['data']);
+      }
+      
+      throw Exception(response.data['message'] ?? 'Failed to update address');
+    } on DioException catch (e) {
+      debugPrint('Error updating address: $e');
+      throw Exception('Failed to update address. Please try again.');
+    }
+  }
+
+  Future<void> deleteAddress(int addressId) async {
+    try {
+      final response = await _dio.delete(
+        '${ApiConstants.baseUrl}${ApiEndpoints.userAddresses}',
+        data: {
+          'id': addressId,
+        },
+      );
+
+      // Consider both 200 and 204 as success status codes for deletion
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception(response.data?['message'] ?? 'Failed to delete address');
+      }
+    } on DioException catch (e) {
+      debugPrint('Error deleting address: $e');
+      // Check if the error response has a 200 status (some APIs return 200 even for errors)
+      if (e.response?.statusCode == 200 || e.response?.statusCode == 204) {
+        return;
+      }
+      throw Exception('Failed to delete address. Please try again.');
+    }
+  }
 }

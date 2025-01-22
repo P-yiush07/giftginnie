@@ -3,24 +3,55 @@ import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 import '../constants/fonts.dart';
 import '../services/user_service.dart';
+import '../models/address_model.dart';
+import 'package:provider/provider.dart';
+import '../controllers/main/address_controller.dart';
 
-class AddAddressScreen extends StatefulWidget {
-  const AddAddressScreen({super.key});
+class UpdateAddressScreen extends StatefulWidget {
+  final AddressModel address;
+  
+  const UpdateAddressScreen({
+    super.key,
+    required this.address,
+  });
 
   @override
-  State<AddAddressScreen> createState() => _AddAddressScreenState();
+  State<UpdateAddressScreen> createState() => _UpdateAddressScreenState();
 }
 
-class _AddAddressScreenState extends State<AddAddressScreen> {
-  String selectedType = 'Home';
-  TextEditingController otherAddressController = TextEditingController();
-  TextEditingController stateController = TextEditingController();
-  TextEditingController pincodeController = TextEditingController();
+class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
+  String selectedType = '';
   TextEditingController addressController = TextEditingController();
   TextEditingController areaController = TextEditingController();
-  TextEditingController landmarkController = TextEditingController();
   TextEditingController cityController = TextEditingController();
+  TextEditingController landmarkController = TextEditingController();
+  TextEditingController stateController = TextEditingController();
+  TextEditingController pincodeController = TextEditingController();
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedType = _getAddressTypeFromCode(widget.address.addressType);
+    addressController.text = widget.address.addressLine1;
+    areaController.text = widget.address.addressLine2;
+    cityController.text = widget.address.city;
+    stateController.text = widget.address.state;
+    pincodeController.text = widget.address.pincode;
+  }
+
+  String _getAddressTypeFromCode(String code) {
+    switch (code.toLowerCase()) {
+      case 'h':
+        return 'Home';
+      case 'b':
+        return 'Work';
+      case 'o':
+        return 'Other';
+      default:
+        return 'Home';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +71,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            'Enter Address Details',
+            'Update Address',
             style: AppFonts.paragraph.copyWith(
               fontSize: 18,
               color: Colors.black,
@@ -83,7 +114,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                 const SizedBox(height: 16),
                 _buildTextField(
                   label: 'Area, Sector, Locality',
-                  hint: 'Enter area, sector, locality',
+                  hint: 'Enter area',
                   required: true,
                   controller: areaController,
                 ),
@@ -132,10 +163,10 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             16,
             0,
             16,
-            MediaQuery.of(context).padding.bottom + 16,
+            MediaQuery.of(context).padding.bottom + 32,
           ),
           child: FilledButton(
-            onPressed: isLoading ? null : _handleAddAddress,
+            onPressed: isLoading ? null : _handleUpdateAddress,
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primary,
               minimumSize: const Size(double.infinity, 56),
@@ -153,7 +184,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                     ),
                   )
                 : Text(
-                    'Save Details',
+                    'Update Address',
                     style: AppFonts.paragraph.copyWith(
                       fontSize: 16,
                       color: Colors.white,
@@ -166,6 +197,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     );
   }
 
+  // Reuse the widget building methods from AddAddressScreen
   Widget _buildAddressTypeChip(String type) {
     final isSelected = selectedType == type;
     return Padding(
@@ -245,9 +277,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           enabled: enabled,
           keyboardType: isPhoneNumber ? TextInputType.number : TextInputType.text,
           maxLength: maxLength ?? (isPhoneNumber ? 10 : null),
-          inputFormatters: isPhoneNumber ? [
-            FilteringTextInputFormatter.digitsOnly,
-          ] : null,
+          inputFormatters: isPhoneNumber
+              ? [FilteringTextInputFormatter.digitsOnly]
+              : null,
           style: AppFonts.paragraph.copyWith(
             fontSize: 14,
             color: enabled ? AppColors.black : Colors.grey,
@@ -261,14 +293,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             filled: true,
             fillColor: enabled ? Colors.white : Colors.grey[100],
             counterText: '',
-            prefixIcon: prefixIcon != null 
+            prefixIcon: prefixIcon != null
                 ? Icon(prefixIcon, color: Colors.grey, size: 20)
                 : null,
-            prefixText: isPhoneNumber && maxLength == 10 ? '+91 ' : null,
-            prefixStyle: AppFonts.paragraph.copyWith(
-              fontSize: 14,
-              color: Colors.black87,
-            ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(28),
               borderSide: BorderSide.none,
@@ -288,7 +315,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     );
   }
 
-  Future<void> _handleAddAddress() async {
+  Future<void> _handleUpdateAddress() async {
     final userService = UserService();
     
     setState(() {
@@ -299,7 +326,8 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       String addressType = selectedType == 'Home' ? 'H' : 
                           selectedType == 'Work' ? 'B' : 'O';
 
-      await userService.addAddress(
+      await userService.updateAddress(
+        addressId: widget.address.id,
         addressLine1: addressController.text,
         addressLine2: areaController.text,
         city: cityController.text,
@@ -316,7 +344,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 12),
                 Text(
-                  'Address added successfully',
+                  'Address updated successfully',
                   style: AppFonts.paragraph.copyWith(
                     color: Colors.white,
                   ),
@@ -332,6 +360,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             ),
           ),
         );
+        
+        // Refresh the address list before popping
+        context.read<AddressController>().loadAddresses();
         Navigator.pop(context);
       }
     } catch (e) {
@@ -354,13 +385,12 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
 
   @override
   void dispose() {
-    otherAddressController.dispose();
-    stateController.dispose();
-    pincodeController.dispose();
     addressController.dispose();
     areaController.dispose();
-    landmarkController.dispose();
     cityController.dispose();
+    landmarkController.dispose();
+    stateController.dispose();
+    pincodeController.dispose();
     super.dispose();
   }
 }

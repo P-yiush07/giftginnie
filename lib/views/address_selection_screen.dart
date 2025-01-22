@@ -9,6 +9,7 @@ import '../config/route_transitions.dart';
 import '../controllers/main/address_controller.dart';
 import 'package:provider/provider.dart';
 import '../widgets/shimmer/address_shimmer.dart';
+import 'update_address_screen.dart';
 
 class AddressSelectionScreen extends StatelessWidget {
   const AddressSelectionScreen({super.key});
@@ -252,7 +253,21 @@ class AddressSelectionScreen extends StatelessWidget {
                       child: InkWell(
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
-                        onTap: () => Navigator.pop(context, 'edit'),
+                        onTap: () {
+                          // First close the popup menu
+                          Navigator.pop(context);
+                          // Then navigate to update screen
+                          Navigator.push(
+                            context,
+                            SlidePageRoute(
+                              page: UpdateAddressScreen(address: addressModel),
+                              direction: SlideDirection.right,
+                            ),
+                          ).then((_) {
+                            // Refresh addresses when returning from update screen
+                            controller.loadAddresses();
+                          });
+                        },
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -305,11 +320,245 @@ class AddressSelectionScreen extends StatelessWidget {
                   ),
                 ],
                 onSelected: (value) {
-                  // Handle menu item selection
                   if (value == 'edit') {
-                    // Handle edit action
+                    Navigator.push(
+                      context,
+                      SlidePageRoute(
+                        page: UpdateAddressScreen(address: addressModel),
+                        direction: SlideDirection.right,
+                      ),
+                    ).then((_) {
+                      // Refresh addresses when returning from update screen
+                      controller.loadAddresses();
+                    });
                   } else if (value == 'delete') {
-                    // Handle delete action
+                    // Show confirmation dialog
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        title: Text(
+                          'Delete Address',
+                          style: AppFonts.heading1.copyWith(
+                            fontSize: 18,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        content: Text(
+                          'Are you sure you want to delete this address?',
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 14,
+                            color: AppColors.textGrey,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.textGrey,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            ),
+                            child: Text(
+                              'Cancel',
+                              style: AppFonts.paragraph.copyWith(
+                                fontSize: 14,
+                                color: AppColors.textGrey,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              try {
+                                // Show loading indicator
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(
+                                                color: Colors.white24,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Text(
+                                              'Deleting address...',
+                                              style: AppFonts.paragraph.copyWith(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      backgroundColor: AppColors.primary,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      margin: EdgeInsets.only(
+                                        bottom: MediaQuery.of(context).padding.bottom + 16,
+                                        left: 16,
+                                        right: 16,
+                                      ),
+                                      duration: const Duration(seconds: 1),
+                                      elevation: 4,
+                                    ),
+                                  );
+                                }
+
+                                await controller.deleteAddress(addressId);
+
+                                if (context.mounted) {
+                                  // Clear any existing snackbars
+                                  ScaffoldMessenger.of(context).clearSnackBars();
+                                  
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(
+                                                color: Colors.white24,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                Icons.check,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                'Address deleted successfully',
+                                                style: AppFonts.paragraph.copyWith(
+                                                  color: Colors.white,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      backgroundColor: const Color(0xFF4CAF50),
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      margin: EdgeInsets.only(
+                                        bottom: MediaQuery.of(context).padding.bottom + 16,
+                                        left: 16,
+                                        right: 16,
+                                      ),
+                                      duration: const Duration(seconds: 2),
+                                      elevation: 4,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  // Don't show error if it was just a sync issue
+                                  if (e.toString().contains('Failed to sync deletion')) {
+                                    return;
+                                  }
+                                  
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(
+                                                color: Colors.white24,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                Icons.error_outline,
+                                                color: Colors.white,
+                                                size: 18,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                'Failed to delete address. Please try again.',
+                                                style: AppFonts.paragraph.copyWith(
+                                                  color: Colors.white,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      backgroundColor: const Color(0xFFE53935),
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      margin: EdgeInsets.only(
+                                        bottom: MediaQuery.of(context).padding.bottom + 16,
+                                        left: 16,
+                                        right: 16,
+                                      ),
+                                      duration: const Duration(seconds: 3),
+                                      elevation: 4,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            ),
+                            child: Text(
+                              'Delete',
+                              style: AppFonts.paragraph.copyWith(
+                                fontSize: 14,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                        actionsPadding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                        contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+                        titlePadding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                        elevation: 8,
+                      ),
+                    );
                   }
                 },
               ),
