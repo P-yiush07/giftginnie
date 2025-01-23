@@ -9,11 +9,13 @@ import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/services/product_service.dart';
 import 'package:giftginnie_ui/widgets/favourite_button.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
+import 'package:shimmer/shimmer.dart';
 import '../models/product_model.dart';
 import '../widgets/product_detail_bottom_sheet.dart';
 import '../widgets/shimmer/category_shimmer.dart';
 import '../services/image_service.dart';
 import '../views/no_products_view.dart';
+import 'package:flutter/rendering.dart';
 
 class CategoryScreen extends StatefulWidget {
   final CategoryModel category;
@@ -29,6 +31,8 @@ class CategoryScreen extends StatefulWidget {
 
 class _CategoryScreenState extends State<CategoryScreen> {
   late CategoryController _controller;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -49,8 +53,21 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  List<GiftItem> _getFilteredGifts() {
+    final categoryData = _controller.categoryData;
+    if (categoryData == null) return [];
+    
+    if (_searchQuery.isEmpty) return categoryData.gifts;
+    
+    return categoryData.gifts.where((gift) {
+      return gift.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+             gift.brand.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
   }
 
   @override
@@ -117,7 +134,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
                       child: Text(
-                        '${categoryData.categoryName} Category',
+                        '${widget.category.categoryName} Category',
                         style: AppFonts.paragraph.copyWith(
                           fontSize: 24,
                           color: AppColors.black,
@@ -128,7 +145,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
-                        categoryData.description,
+                        widget.category.description,
                         style: AppFonts.paragraph.copyWith(
                           color: AppColors.textGrey,
                           fontSize: 14,
@@ -139,22 +156,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     const SizedBox(height: 16),
                     _buildSearchBar(),
                     const SizedBox(height: 24),
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16.0,
-                        mainAxisSpacing: 16.0,
-                        childAspectRatio: 0.53,
-                      ),
-                      itemCount: categoryData.gifts.length,
-                      itemBuilder: (context, index) {
-                        return _buildGiftItem(categoryData.gifts[index], index);
-                      },
-                    ),
+                    _buildProductGrid(widget.category),
                   ],
                 ),
               ),
@@ -175,6 +177,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
           borderRadius: BorderRadius.circular(24),
         ),
         child: TextField(
+          controller: _searchController,
+          style: AppFonts.paragraph.copyWith(
+            color: AppColors.black,
+          ),
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value;
+            });
+          },
           decoration: InputDecoration(
             hintText: 'Search Gift, Restaurant, Dish....',
             hintStyle: AppFonts.paragraph.copyWith(
@@ -198,6 +209,46 @@ class _CategoryScreenState extends State<CategoryScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProductGrid(CategoryModel categoryData) {
+    final filteredGifts = _getFilteredGifts();
+    
+    // Only show shimmer during initial load, not during search
+    if (_controller.isLoading && _searchQuery.isEmpty) {
+      return const CategoryShimmer();
+    }
+    
+    if (filteredGifts.isEmpty && _searchQuery.isNotEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 32.0),
+          child: Text(
+            'No results found',
+            style: AppFonts.paragraph.copyWith(
+              color: AppColors.textGrey,
+              fontSize: 16,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16.0,
+        mainAxisSpacing: 16.0,
+        childAspectRatio: 0.53,
+      ),
+      itemCount: filteredGifts.length,
+      itemBuilder: (context, index) {
+        return _buildGiftItem(filteredGifts[index], index);
+      },
     );
   }
 
@@ -227,7 +278,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image Section with specific rounded corners
           ClipRRect(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
@@ -235,20 +285,34 @@ class _CategoryScreenState extends State<CategoryScreen> {
             ),
             child: Stack(
               children: [
-                ImageService.getNetworkImage(
-                  key: ValueKey('product_image_${gift.name}'),
-                  imageUrl: gift.images?.isNotEmpty == true ? gift.images![0] : 'assets/images/placeholder.png',
+                SizedBox(
                   width: MediaQuery.of(context).size.width / 2 - 24,
                   height: 200,
-                  fit: BoxFit.cover,
-                  errorWidget: Image.asset(
-                    'assets/images/placeholder.png',
+                  child: Image.network(
+                    gift.images?.isNotEmpty == true ? gift.images![0] : 'assets/images/placeholder.png',
                     width: MediaQuery.of(context).size.width / 2 - 24,
                     height: 200,
                     fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          color: Colors.white,
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/images/placeholder.png',
+                        width: MediaQuery.of(context).size.width / 2 - 24,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      );
+                    },
                   ),
                 ),
-                // Heart icon
                 Positioned(
                   top: 8,
                   right: 8,

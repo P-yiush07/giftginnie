@@ -85,10 +85,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Add WillPopScope to handle back button
   Future<bool> _onWillPop() async {
-    if (_searchFocusNode.hasFocus) {
+    if (_searchFocusNode.hasFocus || _searchController.text.isNotEmpty) {
       _searchFocusNode.unfocus();
+      _searchController.clear();
       setState(() {
         _allowKeyboardShow = false;
+        _searchResults = [];
       });
       return false;
     }
@@ -169,7 +171,7 @@ class _SearchScreenState extends State<SearchScreen> {
         value: SystemUiOverlayStyle.dark.copyWith(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
-          systemNavigationBarColor: AppColors.white,
+          systemNavigationBarColor: Colors.transparent,
           statusBarBrightness: Brightness.light,
         ),
         child: Scaffold(
@@ -193,10 +195,12 @@ class _SearchScreenState extends State<SearchScreen> {
                             IconButton(
                               icon: const Icon(Icons.arrow_back, color: Colors.black),
                               onPressed: () {
-                                if (_searchFocusNode.hasFocus) {
+                                if (_searchFocusNode.hasFocus || _searchController.text.isNotEmpty) {
                                   _searchFocusNode.unfocus();
+                                  _searchController.clear();
                                   setState(() {
                                     _allowKeyboardShow = false;
+                                    _searchResults = [];
                                   });
                                 } else if (widget.isFromBottomTab) {
                                   // If from bottom tab, switch to home tab
@@ -311,8 +315,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_searchController.text.isEmpty) ...[
-                      // Search History Header
+                    if (_searchController.text.isEmpty && _searchHistory.isNotEmpty) ...[
+                      // Search History Header - Only show when there's history
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
                         child: Row(
@@ -354,7 +358,37 @@ class _SearchScreenState extends State<SearchScreen> {
                           },
                         ),
                       ),
-                    ] else ...[
+                    ] else if (_searchController.text.isEmpty) ...[
+                      // Empty State - When no history
+                      Expanded(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SvgPicture.asset(
+                                AppIcons.svg_searchTabIcon,
+                                width: 64,
+                                height: 64,
+                                colorFilter: ColorFilter.mode(
+                                  Colors.grey[300]!,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No history available',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (_searchController.text.isNotEmpty) ...[
                       // Search Results
                       Expanded(
                         child: _isLoading

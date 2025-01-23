@@ -5,6 +5,7 @@ import 'package:giftginnie_ui/controllers/main/user_controller.dart';
 import 'package:giftginnie_ui/services/user_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:dio/dio.dart';
+import 'package:giftginnie_ui/widgets/snackbar_widget.dart';
 
 enum Gender { male, female, other }
 
@@ -65,7 +66,6 @@ class EditProfileController extends ChangeNotifier {
   Future<void> saveProfile(BuildContext context) async {
     try {
       _isLoading = true;
-      _error = null;
       notifyListeners();
 
       final updatedProfile = await _userService.updateUserProfile(
@@ -83,18 +83,15 @@ class EditProfileController extends ChangeNotifier {
       final userController = Provider.of<UserController>(context, listen: false);
       userController.updateUserProfile(updatedProfile);
 
-      // Show success message and pop
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
-        );
+        CustomSnackbar.show(context, 'Profile updated successfully');
         Navigator.pop(context);
       }
     } catch (e) {
-      _error = e.toString();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_error!)),
+        CustomSnackbar.show(
+          context, 
+          e is Exception ? e.toString().replaceAll('Exception: ', '') : 'Failed to update profile'
         );
       }
     } finally {

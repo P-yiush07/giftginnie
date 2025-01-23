@@ -6,6 +6,7 @@ import '../services/user_service.dart';
 import '../models/address_model.dart';
 import 'package:provider/provider.dart';
 import '../controllers/main/address_controller.dart';
+import '../constants/texts.dart';
 
 class UpdateAddressScreen extends StatefulWidget {
   final AddressModel address;
@@ -28,6 +29,8 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
   TextEditingController stateController = TextEditingController();
   TextEditingController pincodeController = TextEditingController();
   bool isLoading = false;
+  final List<String> indianStates = AddressTexts.indianStates;
+  List<String> filteredStates = [];
 
   @override
   void initState() {
@@ -38,6 +41,13 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
     cityController.text = widget.address.city;
     stateController.text = widget.address.state;
     pincodeController.text = widget.address.pincode;
+
+    // Add listeners to all required controllers
+    addressController.addListener(() => setState(() {}));
+    areaController.addListener(() => setState(() {}));
+    cityController.addListener(() => setState(() {}));
+    stateController.addListener(() => setState(() {}));
+    pincodeController.addListener(() => setState(() {}));
   }
 
   String _getAddressTypeFromCode(String code) {
@@ -132,12 +142,7 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
                   controller: landmarkController,
                 ),
                 const SizedBox(height: 16),
-                _buildTextField(
-                  label: 'State',
-                  hint: 'Enter state',
-                  required: true,
-                  controller: stateController,
-                ),
+                _buildStateDropdown(),
                 const SizedBox(height: 16),
                 _buildTextField(
                   label: 'Country',
@@ -166,9 +171,13 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
             MediaQuery.of(context).padding.bottom + 32,
           ),
           child: FilledButton(
-            onPressed: isLoading ? null : _handleUpdateAddress,
+            onPressed: isLoading || !_isFormValid() 
+                ? null 
+                : _handleUpdateAddress,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: _isFormValid() 
+                  ? AppColors.primary 
+                  : Colors.grey.shade300,
               minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(28),
@@ -187,7 +196,7 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
                     'Update Address',
                     style: AppFonts.paragraph.copyWith(
                       fontSize: 16,
-                      color: Colors.white,
+                      color: _isFormValid() ? Colors.white : Colors.grey.shade600,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -197,7 +206,6 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
     );
   }
 
-  // Reuse the widget building methods from AddAddressScreen
   Widget _buildAddressTypeChip(String type) {
     final isSelected = selectedType == type;
     return Padding(
@@ -315,6 +323,95 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
     );
   }
 
+  Widget _buildStateDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'State*',
+          style: AppFonts.paragraph.copyWith(
+            fontSize: 14,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: stateController,
+          onChanged: (value) {
+            setState(() {
+              filteredStates = indianStates
+                  .where((state) => state.toLowerCase().contains(value.toLowerCase()))
+                  .toList();
+            });
+          },
+          onTap: () {
+            setState(() {
+              filteredStates = indianStates;
+            });
+          },
+          style: AppFonts.paragraph.copyWith(
+            fontSize: 14,
+            color: AppColors.black,
+          ),
+          decoration: InputDecoration(
+            hintText: 'Select state',
+            hintStyle: AppFonts.paragraph.copyWith(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            suffixIcon: const Icon(Icons.arrow_drop_down),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.all(16),
+          ),
+        ),
+        if (filteredStates.isNotEmpty && stateController.text.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: filteredStates.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(
+                    filteredStates[index],
+                    style: AppFonts.paragraph.copyWith(fontSize: 14),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      stateController.text = filteredStates[index];
+                      filteredStates = [];
+                    });
+                    FocusScope.of(context).unfocus();
+                  },
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
   Future<void> _handleUpdateAddress() async {
     final userService = UserService();
     
@@ -383,8 +480,24 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
     }
   }
 
+  // Add this method to check if all required fields are filled
+  bool _isFormValid() {
+    return addressController.text.isNotEmpty &&
+        areaController.text.isNotEmpty &&
+        cityController.text.isNotEmpty &&
+        stateController.text.isNotEmpty &&
+        pincodeController.text.length == 6 &&
+        selectedType.isNotEmpty;
+  }
+
   @override
   void dispose() {
+    addressController.removeListener(() => setState(() {}));
+    areaController.removeListener(() => setState(() {}));
+    cityController.removeListener(() => setState(() {}));
+    stateController.removeListener(() => setState(() {}));
+    pincodeController.removeListener(() => setState(() {}));
+    
     addressController.dispose();
     areaController.dispose();
     cityController.dispose();

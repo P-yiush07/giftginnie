@@ -107,6 +107,39 @@ class CouponScreenView extends StatelessWidget {
                           // Coupon List
                           Consumer<CouponController>(
                             builder: (context, controller, _) {
+                              if (controller.coupons.isEmpty) {
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    top: MediaQuery.of(context).size.height * 0.2,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        SvgPicture.asset(
+                                          AppIcons.svg_couponIcon,
+                                          width: 64,
+                                          height: 64,
+                                          colorFilter: ColorFilter.mode(
+                                            Colors.grey[300]!,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'No coupons currently available',
+                                          style: AppFonts.paragraph.copyWith(
+                                            fontSize: 16,
+                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                              
                               return ListView.separated(
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),

@@ -14,7 +14,8 @@ class HomeTabController extends ChangeNotifier {
   final ProductService _productService = ProductService();
   final CategoryService _categoryService = CategoryService();
   final HomeTabModel _model = HomeTabModel();
-  bool _isLoading = false;
+  bool _isLoading = true;
+  bool _isLoadingCategories = true;
   String? _error;
   List<CategoryModel> _categories = [];
   List<Product> _popularProducts = [];
@@ -24,6 +25,7 @@ class HomeTabController extends ChangeNotifier {
   // Getters
   HomeTabModel get model => _model;
   bool get isLoading => _isLoading;
+  bool get isLoadingCategories => _isLoadingCategories;
   String? get error => _error;
   List<CategoryModel> get categories => _categories;
   List<Product> get popularProducts => _popularProducts;
@@ -57,15 +59,17 @@ class HomeTabController extends ChangeNotifier {
   }
 
   Future<void> _fetchCategories() async {
-    _isLoading = true;
+    _isLoadingCategories = true;
     notifyListeners();
 
     try {
       _categories = await _categoryService.getCategories();
+      
+      _isLoadingCategories = false;
+      notifyListeners();
     } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
+      debugPrint('Error fetching categories: $e');
+      _isLoadingCategories = false;
       notifyListeners();
     }
   }

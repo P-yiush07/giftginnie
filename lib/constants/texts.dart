@@ -3,6 +3,7 @@ class AppTexts {
   static const contactUs = ContactUsTexts();
   static const privacyPolicy = PrivacyPolicyTexts();
   static const termsOfService = TermsOfServiceTexts();
+  static const address = AddressTexts();
 }
 
 class ContactUsTexts {
@@ -135,4 +136,18 @@ class TermsOfServiceTexts {
 
   final String contactInformationTitle = '10. Contact Information';
   final String contactInformationContent = 'For any questions about these Terms, please contact our support team.';
+}
+
+class AddressTexts {
+  const AddressTexts();
+
+  static const List<String> indianStates = [
+    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
+    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
+    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+    'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+  ];
 }

@@ -94,6 +94,12 @@ class CartService {
         data: {'code': couponCode},
       );
       return response.statusCode == 200;
+    } on DioException catch (e) {
+      debugPrint('Error applying coupon: $e');
+      if (e.response?.data != null && e.response?.data['message'] != null) {
+        throw Exception(e.response?.data['message']);
+      }
+      throw Exception('Failed to apply coupon');
     } catch (e) {
       debugPrint('Error applying coupon: $e');
       throw Exception('Failed to apply coupon');

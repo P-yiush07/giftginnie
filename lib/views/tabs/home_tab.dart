@@ -32,6 +32,7 @@ import 'package:giftginnie_ui/widgets/shimmer/carousel_shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'package:giftginnie_ui/config/layout_constants.dart';
+import 'package:giftginnie_ui/widgets/home_carousel.dart';
 
 class OfferBanner {
   final String title;
@@ -87,7 +88,13 @@ class _HomeTabViewState extends State<HomeTabView> {
   void initState() {
     super.initState();
     _loadProfile();
-    _startCarouselTimer();
+    
+    // Add a small delay to ensure the PageController is properly initialized
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        _startCarouselTimer();
+      }
+    });
   }
 
   void _loadProfile() async {
@@ -97,13 +104,10 @@ class _HomeTabViewState extends State<HomeTabView> {
 
   void _startCarouselTimer() {
     _carouselTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
-      if (mounted) {
+      if (mounted && _pageController.hasClients) {
         final homeTabController = context.read<HomeTabController>();
         if (homeTabController.carouselItems.isNotEmpty) {
           final nextPage = (_currentPage + 1) % homeTabController.carouselItems.length;
-          setState(() {
-            _currentPage = nextPage;
-          });
           _pageController.animateToPage(
             nextPage,
             duration: const Duration(milliseconds: 300),
@@ -347,102 +351,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                   return const SizedBox.shrink();
                 }
 
-                return Column(
-                  children: [
-                    SizedBox(
-                      height: 210,
-                      child: PageView.builder(
-                        controller: _pageController,
-                        onPageChanged: (int page) {
-                          if (mounted) {
-                            setState(() {
-                              _currentPage = page;
-                            });
-                          }
-                        },
-                        itemCount: controller.carouselItems.length,
-                        itemBuilder: (context, index) {
-                          final item = controller.carouselItems[index];
-                          return GestureDetector(
-                            onTap: () {
-                              if (item.link != null && item.link!.isNotEmpty) {
-                                // Navigate to the link if it exists
-                                launchUrl(Uri.parse(item.link!));
-                              }
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: CachedNetworkImage(
-                                  imageUrl: item.image,
-                                  width: double.infinity,
-                                  height: 210,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Shimmer.fromColors(
-                                    baseColor: AppColors.grey300,
-                                    highlightColor: AppColors.grey100,
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 210,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.grey100,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) {
-                                    debugPrint('Carousel Image Error: $error for URL: $url');
-                                    return Container(
-                                      width: double.infinity,
-                                      height: 210,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.grey100,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.image_not_supported,
-                                            color: AppColors.grey300,
-                                            size: 48,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            'Image not available',
-                                            style: AppFonts.paragraph.copyWith(
-                                              color: AppColors.textGrey,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: DotsIndicator(
-                        dotsCount: controller.carouselItems.length,
-                        position: _currentPage,
-                        decorator: DotsDecorator(
-                          color: AppColors.grey500.withOpacity(0.5),
-                          activeColor: AppColors.primaryRed,
-                          size: const Size(8, 8),
-                          activeSize: const Size(8, 8),
-                          spacing: const EdgeInsets.all(4),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
+                return HomeCarousel(items: controller.carouselItems);
               },
             ),
             // Categories Section
@@ -463,7 +372,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                 const SizedBox(height: 16),
                 Consumer<HomeTabController>(
                   builder: (context, controller, _) {
-                    if (controller.isLoading) {
+                    if (controller.isLoadingCategories) {
                       return const HomeTabCategoryShimmer();
                     }
                     
@@ -496,45 +405,38 @@ class _HomeTabViewState extends State<HomeTabView> {
                         ),
                         // Overflow category chips
                         if (overflowCategories.isNotEmpty) ...[
-                          SizedBox(height: LayoutConstants.rowSpacing * 2), // Double spacing between sections
-                          Column(
-                            children: List.generate(
-                              (overflowCategories.length / LayoutConstants.chipsPerRow).ceil(),
-                              (rowIndex) {
-                                final startIndex = rowIndex * LayoutConstants.chipsPerRow;
-                                final endIndex = (startIndex + LayoutConstants.chipsPerRow) > overflowCategories.length 
-                                    ? overflowCategories.length 
-                                    : startIndex + LayoutConstants.chipsPerRow;
-                                
-                                return Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: rowIndex != (overflowCategories.length / LayoutConstants.chipsPerRow).ceil() - 1 
-                                        ? LayoutConstants.rowSpacing 
-                                        : 0
-                                  ),
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    physics: const BouncingScrollPhysics(),
-                                    padding: EdgeInsets.symmetric(horizontal: LayoutConstants.horizontalPadding),
+                          SizedBox(height: LayoutConstants.rowSpacing * 2),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            padding: EdgeInsets.symmetric(horizontal: LayoutConstants.horizontalPadding),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (var i = 0; i < overflowCategories.length; i += LayoutConstants.chipsPerRow)
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: i + LayoutConstants.chipsPerRow < overflowCategories.length 
+                                          ? LayoutConstants.rowSpacing 
+                                          : 0
+                                    ),
                                     child: Row(
-                                      children: overflowCategories
-                                          .sublist(startIndex, endIndex)
-                                          .asMap()
-                                          .entries
-                                          .map((entry) {
-                                            final isLast = entry.key == endIndex - startIndex - 1;
-                                            return Padding(
-                                              padding: EdgeInsets.only(
-                                                right: isLast ? 0 : LayoutConstants.chipSpacing
-                                              ),
-                                              child: _buildCategoryChip(entry.value),
-                                            );
-                                          })
-                                          .toList(),
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        for (var j = i; j < i + LayoutConstants.chipsPerRow && j < overflowCategories.length; j++)
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                              right: j % LayoutConstants.chipsPerRow != LayoutConstants.chipsPerRow - 1 
+                                                  && j != overflowCategories.length - 1 
+                                                  ? LayoutConstants.chipSpacing 
+                                                  : 0
+                                            ),
+                                            child: _buildCategoryChip(overflowCategories[j]),
+                                          ),
+                                      ],
                                     ),
                                   ),
-                                );
-                              },
+                              ],
                             ),
                           ),
                         ],

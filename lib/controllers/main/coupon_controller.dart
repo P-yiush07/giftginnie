@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/models/coupon_model.dart';
 import 'package:giftginnie_ui/services/coupon_service.dart';
 import 'package:giftginnie_ui/services/cart_service.dart';
 import 'package:provider/provider.dart';
 import 'package:giftginnie_ui/widgets/coupon_success_dialog.dart';
+import 'package:dio/dio.dart';
+import '../../widgets/snackbar_widget.dart';
 
 class CouponController extends ChangeNotifier {
   final CartService _cartService = CartService();
@@ -26,7 +29,14 @@ class CouponController extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      _coupons = await _couponService.getCoupons();
+      final allCoupons = await _couponService.getCoupons();
+      
+      // Filter out expired coupons by checking validUntil date
+      final now = DateTime.now();
+      _coupons = allCoupons.where((coupon) => 
+        coupon.validUntil.isAfter(now)  // Only check if coupon is not expired
+      ).toList();
+      
       _filteredCoupons = _coupons;
       _error = null;
     } catch (e) {
@@ -89,9 +99,12 @@ class CouponController extends ChangeNotifier {
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop(); // Remove loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to apply coupon: ${e.toString()}')),
-        );
+        
+        // Extract error message
+        String errorMessage = e is Exception ? e.toString().replaceAll('Exception: ', '') : 'Failed to apply coupon';
+        
+        // Use the custom snackbar
+        CustomSnackbar.show(context, errorMessage);
       }
     }
   }

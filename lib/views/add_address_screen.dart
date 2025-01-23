@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 import '../constants/fonts.dart';
 import '../services/user_service.dart';
+import '../constants/texts.dart';
 
 class AddAddressScreen extends StatefulWidget {
   const AddAddressScreen({super.key});
@@ -21,6 +22,10 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   TextEditingController landmarkController = TextEditingController();
   TextEditingController cityController = TextEditingController();
   bool isLoading = false;
+
+  final List<String> indianStates = AddressTexts.indianStates;
+
+  List<String> filteredStates = [];
 
   @override
   Widget build(BuildContext context) {
@@ -101,12 +106,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                   controller: landmarkController,
                 ),
                 const SizedBox(height: 16),
-                _buildTextField(
-                  label: 'State',
-                  hint: 'Enter state',
-                  required: true,
-                  controller: stateController,
-                ),
+                _buildStateDropdown(),
                 const SizedBox(height: 16),
                 _buildTextField(
                   label: 'Country',
@@ -135,9 +135,13 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             MediaQuery.of(context).padding.bottom + 16,
           ),
           child: FilledButton(
-            onPressed: isLoading ? null : _handleAddAddress,
+            onPressed: isLoading || !_isFormValid() 
+                ? null 
+                : _handleAddAddress,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: _isFormValid() 
+                  ? AppColors.primary 
+                  : Colors.grey.shade300,
               minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(28),
@@ -156,7 +160,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                     'Save Details',
                     style: AppFonts.paragraph.copyWith(
                       fontSize: 16,
-                      color: Colors.white,
+                      color: _isFormValid() ? Colors.white : Colors.grey.shade600,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -288,6 +292,95 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     );
   }
 
+  Widget _buildStateDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'State*',
+          style: AppFonts.paragraph.copyWith(
+            fontSize: 14,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: stateController,
+          onChanged: (value) {
+            setState(() {
+              filteredStates = indianStates
+                  .where((state) => state.toLowerCase().contains(value.toLowerCase()))
+                  .toList();
+            });
+          },
+          onTap: () {
+            setState(() {
+              filteredStates = indianStates;
+            });
+          },
+          style: AppFonts.paragraph.copyWith(
+            fontSize: 14,
+            color: AppColors.black,
+          ),
+          decoration: InputDecoration(
+            hintText: 'Select state',
+            hintStyle: AppFonts.paragraph.copyWith(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            suffixIcon: const Icon(Icons.arrow_drop_down),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(28),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.all(16),
+          ),
+        ),
+        if (filteredStates.isNotEmpty && stateController.text.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: filteredStates.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(
+                    filteredStates[index],
+                    style: AppFonts.paragraph.copyWith(fontSize: 14),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      stateController.text = filteredStates[index];
+                      filteredStates = [];
+                    });
+                    FocusScope.of(context).unfocus();
+                  },
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
   Future<void> _handleAddAddress() async {
     final userService = UserService();
     
@@ -353,14 +446,38 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    addressController.addListener(() => setState(() {}));
+    areaController.addListener(() => setState(() {}));
+    cityController.addListener(() => setState(() {}));
+    stateController.addListener(() => setState(() {}));
+    pincodeController.addListener(() => setState(() {}));
+  }
+
+  @override
   void dispose() {
-    otherAddressController.dispose();
-    stateController.dispose();
-    pincodeController.dispose();
+    addressController.removeListener(() => setState(() {}));
+    areaController.removeListener(() => setState(() {}));
+    cityController.removeListener(() => setState(() {}));
+    stateController.removeListener(() => setState(() {}));
+    pincodeController.removeListener(() => setState(() {}));
+    
     addressController.dispose();
     areaController.dispose();
-    landmarkController.dispose();
     cityController.dispose();
+    landmarkController.dispose();
+    stateController.dispose();
+    pincodeController.dispose();
+    otherAddressController.dispose();
     super.dispose();
+  }
+
+  bool _isFormValid() {
+    return addressController.text.isNotEmpty &&
+        areaController.text.isNotEmpty &&
+        cityController.text.isNotEmpty &&
+        stateController.text.isNotEmpty &&
+        pincodeController.text.length == 6;
   }
 }
