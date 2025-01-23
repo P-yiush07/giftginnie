@@ -31,6 +31,7 @@ import '../../../controllers/main/address_controller.dart';
 import 'package:giftginnie_ui/widgets/shimmer/carousel_shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
+import 'package:giftginnie_ui/config/layout_constants.dart';
 
 class OfferBanner {
   final String title;
@@ -466,68 +467,80 @@ class _HomeTabViewState extends State<HomeTabView> {
                       return const HomeTabCategoryShimmer();
                     }
                     
-                    return SizedBox(
-                      height: 100,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemCount: controller.categories.length,
-                        itemBuilder: (context, index) {
-                          final category = controller.categories[index];
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              right: index != controller.categories.length - 1 ? 16.0 : 0,
-                            ),
-                            child: _buildCategoryItem(category: category),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  height: 100,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // First row
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildProductCategoryChip('Diary'),
-                              const SizedBox(width: 12),
-                              _buildProductCategoryChip('Water Bottle'),
-                              const SizedBox(width: 12),
-                              _buildProductCategoryChip('Wooden Calender'),
-                              const SizedBox(width: 12),
-                              _buildProductCategoryChip('Wooden Frame'),
-                              const SizedBox(width: 12),
-                              _buildProductCategoryChip('Photo Frame'),
-                            ],
+                    // Split categories using the constant
+                    final mainCategories = controller.categories.take(LayoutConstants.maxMainCategories).toList();
+                    final overflowCategories = controller.categories.length > LayoutConstants.maxMainCategories 
+                        ? controller.categories.sublist(LayoutConstants.maxMainCategories) 
+                        : <CategoryModel>[];
+
+                    return Column(
+                      children: [
+                        // Main category items
+                        SizedBox(
+                          height: 100,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            padding: EdgeInsets.symmetric(horizontal: LayoutConstants.horizontalPadding),
+                            itemCount: mainCategories.length,
+                            itemBuilder: (context, index) {
+                              final category = mainCategories[index];
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  right: index != mainCategories.length - 1 ? LayoutConstants.chipSpacing : 0,
+                                ),
+                                child: _buildCategoryItem(category: category),
+                              );
+                            },
                           ),
-                          const SizedBox(height: 12),
-                          // Second row
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildProductCategoryChip('Mug'),
-                              const SizedBox(width: 12),
-                              _buildProductCategoryChip('T-Shirt'),
-                              const SizedBox(width: 12),
-                              _buildProductCategoryChip('Custom Gift'),
-                            ],
+                        ),
+                        // Overflow category chips
+                        if (overflowCategories.isNotEmpty) ...[
+                          SizedBox(height: LayoutConstants.rowSpacing * 2), // Double spacing between sections
+                          Column(
+                            children: List.generate(
+                              (overflowCategories.length / LayoutConstants.chipsPerRow).ceil(),
+                              (rowIndex) {
+                                final startIndex = rowIndex * LayoutConstants.chipsPerRow;
+                                final endIndex = (startIndex + LayoutConstants.chipsPerRow) > overflowCategories.length 
+                                    ? overflowCategories.length 
+                                    : startIndex + LayoutConstants.chipsPerRow;
+                                
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: rowIndex != (overflowCategories.length / LayoutConstants.chipsPerRow).ceil() - 1 
+                                        ? LayoutConstants.rowSpacing 
+                                        : 0
+                                  ),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    padding: EdgeInsets.symmetric(horizontal: LayoutConstants.horizontalPadding),
+                                    child: Row(
+                                      children: overflowCategories
+                                          .sublist(startIndex, endIndex)
+                                          .asMap()
+                                          .entries
+                                          .map((entry) {
+                                            final isLast = entry.key == endIndex - startIndex - 1;
+                                            return Padding(
+                                              padding: EdgeInsets.only(
+                                                right: isLast ? 0 : LayoutConstants.chipSpacing
+                                              ),
+                                              child: _buildCategoryChip(entry.value),
+                                            );
+                                          })
+                                          .toList(),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         ],
-                      ),
-                    ),
-                  ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -911,21 +924,26 @@ class _HomeTabViewState extends State<HomeTabView> {
     );
   }
 
-  Widget _buildProductCategoryChip(String label) {
+  Widget _buildCategoryChip(CategoryModel category) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          // Handle chip tap
-          print('Category chip tapped: $label');
+          Navigator.push(
+            context,
+            SlidePageRoute(
+              page: CategoryScreen(
+                category: category,
+              ),
+              direction: SlideDirection.right,
+            ),
+          );
         },
-        splashColor: AppColors.primaryRed.withOpacity(0.1),
-        highlightColor: AppColors.primaryRed.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
-        child: Ink(
+        child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Color(0xFFF9F9F9),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: AppColors.grey300,
@@ -940,10 +958,10 @@ class _HomeTabViewState extends State<HomeTabView> {
             ],
           ),
           child: Text(
-            label,
+            category.categoryName,
             style: AppFonts.paragraph.copyWith(
               fontSize: 14,
-              color: Color(0xFF656565),
+              color: AppColors.textGrey,
               fontWeight: FontWeight.w500,
             ),
           ),
