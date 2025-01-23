@@ -558,7 +558,6 @@ class _HomeTabViewState extends State<HomeTabView> {
                                   child: _buildProductCard(
                                     image: product.images.first,
                                     title: product.name,
-                                    deliveryDays: 3,
                                     rating: product.rating,
                                     index: index,
                                   ),
@@ -752,7 +751,6 @@ class _HomeTabViewState extends State<HomeTabView> {
   Widget _buildProductCard({
     required String image,
     required String title,
-    required int deliveryDays,
     required double rating,
     required int index,
   }) {
@@ -852,24 +850,6 @@ class _HomeTabViewState extends State<HomeTabView> {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          SvgPicture.asset(
-                            'assets/images/alarm-clock.svg',
-                            width: 16,
-                            height: 16,
-                            colorFilter: ColorFilter.mode(
-                              AppColors.successGreen,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$deliveryDays Days Delivery',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
                           Icon(
                             Icons.star_rounded,
                             size: 16,

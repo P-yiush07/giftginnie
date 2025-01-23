@@ -457,66 +457,6 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                           _buildRatingBar(3, 68, 0.5),
                           _buildRatingBar(2, 42, 0.3),
                           _buildRatingBar(1, 15, 0.1),
-                          const SizedBox(height: 16),
-                          // Share Rate Button
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // Handle share rate action
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryRed,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: Text(
-                                'Share your rate',
-                                style: AppFonts.paragraph.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          // All Ratings Section
-                          Text(
-                            'All Ratings',
-                            style: AppFonts.heading1.copyWith(
-                              fontSize: 18,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          // User Ratings List
-                          _buildUserRating(
-                            name: 'Savannah Nguyen',
-                            rating: 5,
-                            avatarColor: Color(0xFFFFE9E9),
-                          ),
-                          const SizedBox(height: 24),
-                          _buildUserRating(
-                            name: 'Marvin McKinney',
-                            rating: 4,
-                            avatarColor: Color(0xFFFFF9E7),
-                          ),
-                          const SizedBox(height: 24),
-                          _buildUserRating(
-                            name: 'Cameron Williamson',
-                            rating: 5,
-                            avatarColor: Color(0xFFFFECE3),
-                          ),
-                          const SizedBox(height: 24),
-                          _buildUserRating(
-                            name: 'Eleanor Pena',
-                            rating: 4,
-                            avatarColor: Color(0xFFE9F5FF),
-                          ),
                           const SizedBox(height: 52),
                           // Illustration
                           Center(
@@ -604,62 +544,6 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildUserRating({
-    required String name,
-    required int rating,
-    required Color avatarColor,
-  }) {
-    return Row(
-      children: [
-        // Avatar Circle
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: avatarColor,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              name[0], // First letter of name
-              style: AppFonts.heading1.copyWith(
-                color: Colors.black87,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        // Name and Rating
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: AppFonts.paragraph.copyWith(
-                  color: Colors.black87,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: List.generate(5, (index) {
-                  return Icon(
-                    index < rating ? Icons.star : Icons.star_border,
-                    color: Colors.amber,
-                    size: 16,
-                  );
-                }),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

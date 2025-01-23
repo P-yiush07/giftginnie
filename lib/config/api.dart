@@ -60,4 +60,10 @@ abstract class ApiEndpoints {
 
   // Search products endpoint
   static String searchProducts(String query) => '/products/searchProducts?search=$query';
+
+  //RazorPay Create Order
+  static const String createOrder = '/orders/checkout/';
+
+  //RazorPay endpoints
+  static const String verifyPayment = '/orders/verifyPayment/';
 }

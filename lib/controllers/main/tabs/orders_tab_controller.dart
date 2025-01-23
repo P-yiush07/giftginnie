@@ -32,9 +32,9 @@ class OrdersTabController extends ChangeNotifier {
     }
   }
 
-  Future<void> trackOrder(String orderId) async {
-    await _orderService.trackOrder(orderId);
-  }
+  // Future<void> trackOrder(String orderId) async {
+  //   await _orderService.trackOrder(orderId);
+  // }
 
   Future<void> rateOrder(String orderId, int rating) async {
     await _orderService.rateOrder(orderId, rating);

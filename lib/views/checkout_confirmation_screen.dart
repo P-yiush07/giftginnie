@@ -11,6 +11,10 @@ import '../services/checkout_service.dart';
 import '../services/image_service.dart';
 import '../controllers/main/address_controller.dart';
 import '../views/address_selection_screen.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../views/order_failed_screen.dart';
+import '../controllers/main/home_controller.dart';
+import '../views/home_screen.dart';
 
 class CheckoutConfirmationScreen extends StatefulWidget {
   final CartModel cartData;
@@ -21,38 +25,181 @@ class CheckoutConfirmationScreen extends StatefulWidget {
   });
 
   @override
-  State<CheckoutConfirmationScreen> createState() => _CheckoutConfirmationScreenState();
+  State<CheckoutConfirmationScreen> createState() =>
+      _CheckoutConfirmationScreenState();
 }
 
-class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen> {
+class _CheckoutConfirmationScreenState
+    extends State<CheckoutConfirmationScreen> {
   final CheckoutService _checkoutService = CheckoutService();
   bool _isProcessing = false;
 
-  Future<void> _processPayment() async {
-    setState(() => _isProcessing = true);
+  late Razorpay _razorpay;
 
-    try {
-      final success = await _checkoutService.processPayment();
-      
-      if (success && mounted) {
-        Navigator.pushReplacement(
+  @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    if (mounted) {
+      setState(() => _isProcessing = true);
+
+      try {
+        final success = await _checkoutService.verifyPayment(
+          paymentId: response.paymentId!,
+          orderId: response.orderId!,
+          signature: response.signature!,
+        );
+
+        if (!success) {
+          throw Exception('Payment verification failed');
+        }
+
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => SuccessScreen(
               model: SuccessModel(
                 title: 'Order Placed Successfully!',
-                message: 'Your order has been placed successfully. You can track your order status in the orders section.',
-                buttonText: 'View Orders',
+                message: 'Your order has been placed successfully. You can track your order in the Orders section.',
+                buttonText: 'Go Back',
+                showBackButton: false,
+              ),
+              onButtonPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChangeNotifierProvider(
+                      create: (_) => HomeController(),
+                      child: const HomeScreen(),
+                    ),
+                  ),
+                  (route) => false,
+                ).then((_) {
+                  final homeController = Provider.of<HomeController>(context, listen: false);
+                  homeController.setCurrentIndex(3);
+                });
+              },
+            ),
+          ),
+          (route) => false,
+        );
+      } catch (e) {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OrderFailedScreen(
+                message: 'Payment verification failed. Please try again.',
+                onRetry: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CheckoutConfirmationScreen(
+                        cartData: widget.cartData,
+                      ),
+                    ),
+                  );
+                },
                 showBackButton: false,
               ),
             ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isProcessing = false);
+        }
+      }
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OrderFailedScreen(
+            message: 'Payment failed. Please try again.',
+            onRetry: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CheckoutConfirmationScreen(
+                    cartData: widget.cartData,
+                  ),
+                ),
+              );
+            },
+            showBackButton: false,
+          ),
+        ),
+      );
+    }
+  }
+
+    void _handleExternalWallet(ExternalWalletResponse response) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("External wallet selected: ${response.walletName}")),
+      );
+    }
+  }
+
+  Future<void> _processPayment() async {
+    if (mounted) {
+      final addressController = Provider.of<AddressController>(context, listen: false);
+      if (addressController.selectedAddress == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a delivery address'),
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.only(bottom: 16, left: 16, right: 16),
           ),
         );
+        return;
       }
+    }
+
+    setState(() => _isProcessing = true);
+
+    try {
+      // Create order
+      final orderDetails = await _checkoutService.createOrder(
+        Provider.of<AddressController>(context, listen: false).selectedAddress!.id,
+      );
+      
+      var options = {
+        'key': 'rzp_test_sAHiDzlP1sRvQQ',
+        'amount': orderDetails['amount'] * 100,
+        'name': 'GiftGinnie',
+        'order_id': orderDetails['razorpayOrderId'],
+        'description': 'Order Payment',
+        'timeout': 300,
+        'currency': orderDetails['currency'],
+      };
+
+      _razorpay.open(options);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          const SnackBar(
+            content: Text('Something went wrong. Please try again later.'),
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.only(bottom: 16, left: 16, right: 16),
+            duration: Duration(seconds: 3),
+          ),
         );
       }
     } finally {
@@ -135,57 +282,58 @@ class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen>
             ),
           ),
           const SizedBox(height: 16),
-          ...widget.cartData.items.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: ImageService.getNetworkImage(
-                    imageUrl: item.product.images.isNotEmpty 
-                      ? item.product.images[0] 
-                      : 'assets/images/placeholder.png',
-                    width: 60,
-                    height: 60,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.product.name,
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.primaryRed
+          ...widget.cartData.items
+              .map((item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: ImageService.getNetworkImage(
+                            imageUrl: item.product.images.isNotEmpty
+                                ? item.product.images[0]
+                                : 'assets/images/placeholder.png',
+                            width: 60,
+                            height: 60,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Qty: ${item.quantity}',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 12,
-                          color: Colors.grey[600],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.product.name,
+                                style: AppFonts.paragraph.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.primaryRed),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Qty: ${item.quantity}',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '₹${item.product.sellingPrice.toStringAsFixed(2)}',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 14,
+                                  color: AppColors.primaryRed,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '₹${item.product.sellingPrice.toStringAsFixed(2)}',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: AppColors.primaryRed,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          )).toList(),
+                      ],
+                    ),
+                  ))
+              .toList(),
         ],
       ),
     );
@@ -195,7 +343,7 @@ class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen>
     return Consumer<AddressController>(
       builder: (context, addressController, _) {
         final selectedAddress = addressController.selectedAddress;
-        
+
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -337,13 +485,15 @@ class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen>
     final double originalPrice = widget.cartData.originalPrice;
     final double discountedPrice = widget.cartData.discountedPrice;
     final double discount = originalPrice - discountedPrice;
-    
+
     String discountLabel = 'Discount';
     if (widget.cartData.coupon != null) {
       if (widget.cartData.coupon!.discountType == 'FLAT') {
-        discountLabel = 'Discount (₹${widget.cartData.coupon!.discountValue.toStringAsFixed(0)} OFF)';
+        discountLabel =
+            'Discount (₹${widget.cartData.coupon!.discountValue.toStringAsFixed(0)} OFF)';
       } else {
-        discountLabel = 'Discount (${widget.cartData.coupon!.discountValue.toStringAsFixed(0)}% OFF)';
+        discountLabel =
+            'Discount (${widget.cartData.coupon!.discountValue.toStringAsFixed(0)}% OFF)';
       }
     }
 
@@ -443,54 +593,37 @@ class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Animated dots background (optional effect)
-              if (_isProcessing) ...[
-                Positioned(
-                  right: 0,
-                  child: SizedBox(
-                    width: 120,
-                    height: 40,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: List.generate(
-                        3,
-                        (index) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: TweenAnimationBuilder(
-                            tween: Tween(begin: 0.0, end: 1.0),
-                            duration: Duration(milliseconds: 700 + (index * 200)),
-                            curve: Curves.easeInOut,
-                            builder: (context, double value, child) {
-                              return Transform.scale(
-                                scale: value,
-                                child: Opacity(
-                                  opacity: value,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.3),
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+              if (_isProcessing)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    3,
+                    (index) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: TweenAnimationBuilder(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 700 + (index * 200)),
+                        curve: Curves.easeInOut,
+                        builder: (context, double value, child) {
+                          return Transform.scale(
+                            scale: value,
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
-                ),
-              ],
-              
-              // Main payment button content
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
+                )
+              else
+                GestureDetector(
                   onTap: _isProcessing ? null : _processPayment,
-                  splashColor: Colors.white.withOpacity(0.1),
-                  highlightColor: Colors.white.withOpacity(0.05),
                   child: Container(
                     width: double.infinity,
                     height: double.infinity,
@@ -498,37 +631,25 @@ class _CheckoutConfirmationScreenState extends State<CheckoutConfirmationScreen>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (_isProcessing)
-                          const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        else ...[
-                          const Icon(
-                            Icons.lock_outline,
+                        const Icon(
+                          Icons.lock_outline,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Pay ₹${widget.cartData.discountedPrice.toStringAsFixed(2)}',
+                          style: AppFonts.paragraph.copyWith(
                             color: Colors.white,
-                            size: 20,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Pay ₹${widget.cartData.discountedPrice.toStringAsFixed(2)}',
-                            style: AppFonts.paragraph.copyWith(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
+                        ),
                       ],
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
