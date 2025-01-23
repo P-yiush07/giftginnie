@@ -77,6 +77,12 @@ class CheckoutService {
     required String signature,
   }) async {
     try {
+      // Debug log before making the API call
+      print('Attempting to verify payment with:');
+      print('Payment ID: $paymentId');
+      print('Order ID: $orderId');
+      print('Signature: $signature');
+
       final response = await _dio.post(
         '${ApiConstants.baseUrl}${ApiEndpoints.verifyPayment}',
         data: {
@@ -86,10 +92,17 @@ class CheckoutService {
         },
       );
 
+      // Debug log after API response
+      print('Payment verification API response:');
+      print('Status code: ${response.statusCode}');
+      print('Response body: ${response.data}');
+
       return response.statusCode == 200;
     } catch (e) {
-      debugPrint('Error verifying payment: $e');
-      throw Exception('Failed to verify payment');
+      // Debug log for errors
+      print('Error in verifyPayment:');
+      print(e.toString());
+      return false;
     }
   }
 }

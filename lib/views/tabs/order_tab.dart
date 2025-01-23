@@ -248,7 +248,7 @@ class _OrderCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Text(
-              DateFormat('dd MMM yyyy h:mm a').format(order.createdAt),
+              DateFormat('MMMM d, yyyy, h:mm a').format(order.createdAt.toLocal()),
               style: AppFonts.paragraph.copyWith(
                 fontSize: 12,
                 color: AppColors.textGrey,
@@ -335,6 +335,7 @@ class _RatingDialogState extends State<RatingDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),

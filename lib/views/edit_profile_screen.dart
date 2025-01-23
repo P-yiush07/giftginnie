@@ -212,7 +212,9 @@ class EditProfileView extends StatelessWidget {
                               ? null 
                               : () => controller.saveProfile(context),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryRed,
+                            backgroundColor: controller.isLoading 
+                                ? AppColors.grey500 
+                                : AppColors.primaryRed,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(28),
                             ),

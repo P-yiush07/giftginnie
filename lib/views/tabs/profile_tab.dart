@@ -12,6 +12,7 @@ import '../../../controllers/main/user_controller.dart';
 import '../../../services/image_service.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../../views/about_screen.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -317,22 +318,29 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: const Divider(height: 1, thickness: 0.5),
                     ),
-                    _buildProfileOption(
-                      title: 'Settings',
-                      subtitle: 'Set the all notifications',
-                      onTap: () {
-                        // Handle settings
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: const Divider(height: 1, thickness: 0.5),
-                    ),
+                    // Removed Settings Option
+                    // _buildProfileOption(
+                    //   title: 'Settings',
+                    //   subtitle: 'Set the all notifications',
+                    //   onTap: () {
+                    //     // Handle settings
+                    //   },
+                    // ),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    //   child: const Divider(height: 1, thickness: 0.5),
+                    // ),
                     _buildProfileOption(
                       title: 'About',
                       subtitle: 'Know more about the service and policy.',
                       onTap: () {
-                        // Handle about
+                        Navigator.push(
+                          context,
+                          SlidePageRoute(
+                            page: const AboutScreen(),
+                            direction: SlideDirection.right,
+                          ),
+                        );
                       },
                     ),
                   ],

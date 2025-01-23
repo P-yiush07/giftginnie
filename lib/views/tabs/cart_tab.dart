@@ -436,6 +436,7 @@ class _CartTabViewState extends State<CartTabView> {
                             fontSize: 12,
                             color: Colors.grey,
                             decoration: TextDecoration.lineThrough,
+                            decorationColor: AppColors.black
                           ),
                         ),
                       ],

@@ -56,6 +56,11 @@ class _CheckoutConfirmationScreenState
       setState(() => _isProcessing = true);
 
       try {
+        // Log the payment ID
+        print('Razorpay Payment ID: ${response.paymentId}');
+        print('Razorpay Order ID: ${response.orderId}');
+        print('Razorpay Signature: ${response.signature}');
+
         final success = await _checkoutService.verifyPayment(
           paymentId: response.paymentId!,
           orderId: response.orderId!,

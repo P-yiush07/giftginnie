@@ -29,6 +29,8 @@ import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../controllers/main/address_controller.dart';
 import 'package:giftginnie_ui/widgets/shimmer/carousel_shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:async';
 
 class OfferBanner {
   final String title;
@@ -78,16 +80,37 @@ class _HomeTabViewState extends State<HomeTabView> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   final Set<int> _likedProducts = {};
+  Timer? _carouselTimer;
 
   @override
   void initState() {
     super.initState();
     _loadProfile();
+    _startCarouselTimer();
   }
 
   void _loadProfile() async {
     final userController = context.read<UserController>();
     await userController.loadUserProfile();
+  }
+
+  void _startCarouselTimer() {
+    _carouselTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      if (mounted) {
+        final homeTabController = context.read<HomeTabController>();
+        if (homeTabController.carouselItems.isNotEmpty) {
+          final nextPage = (_currentPage + 1) % homeTabController.carouselItems.length;
+          setState(() {
+            _currentPage = nextPage;
+          });
+          _pageController.animateToPage(
+            nextPage,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
   }
 
   String _convertImageUrl(String url) {
@@ -330,63 +353,73 @@ class _HomeTabViewState extends State<HomeTabView> {
                       child: PageView.builder(
                         controller: _pageController,
                         onPageChanged: (int page) {
-                          setState(() {
-                            _currentPage = page;
-                          });
+                          if (mounted) {
+                            setState(() {
+                              _currentPage = page;
+                            });
+                          }
                         },
                         itemCount: controller.carouselItems.length,
                         itemBuilder: (context, index) {
                           final item = controller.carouselItems[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: CachedNetworkImage(
-                                imageUrl: _convertImageUrl(item.image),
-                                width: double.infinity,
-                                height: 210,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Shimmer.fromColors(
-                                  baseColor: AppColors.grey300,
-                                  highlightColor: AppColors.grey100,
-                                  child: Container(
-                                    width: double.infinity,
-                                    height: 210,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.grey100,
-                                      borderRadius: BorderRadius.circular(12),
+                          return GestureDetector(
+                            onTap: () {
+                              if (item.link != null && item.link!.isNotEmpty) {
+                                // Navigate to the link if it exists
+                                launchUrl(Uri.parse(item.link!));
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: CachedNetworkImage(
+                                  imageUrl: item.image,
+                                  width: double.infinity,
+                                  height: 210,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Shimmer.fromColors(
+                                    baseColor: AppColors.grey300,
+                                    highlightColor: AppColors.grey100,
+                                    child: Container(
+                                      width: double.infinity,
+                                      height: 210,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.grey100,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                errorWidget: (context, url, error) {
-                                  debugPrint('Carousel Image Error: $error for URL: $url');
-                                  return Container(
-                                    width: double.infinity,
-                                    height: 210,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.grey100,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.image_not_supported,
-                                          color: AppColors.grey300,
-                                          size: 48,
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Image not available',
-                                          style: AppFonts.paragraph.copyWith(
-                                            color: AppColors.textGrey,
-                                            fontSize: 14,
+                                  errorWidget: (context, url, error) {
+                                    debugPrint('Carousel Image Error: $error for URL: $url');
+                                    return Container(
+                                      width: double.infinity,
+                                      height: 210,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.grey100,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.image_not_supported,
+                                            color: AppColors.grey300,
+                                            size: 48,
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Image not available',
+                                            style: AppFonts.paragraph.copyWith(
+                                              color: AppColors.textGrey,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           );
@@ -695,6 +728,7 @@ class _HomeTabViewState extends State<HomeTabView> {
 
   @override
   void dispose() {
+    _carouselTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
