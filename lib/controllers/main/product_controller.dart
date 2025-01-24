@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/product_model.dart';
-import '../../services/product_service.dart';
-import '../../services/cache_service.dart';
-import '../../services/wishlist_service.dart';
+import '../../services/Product/product_service.dart';
+import '../../services/Cache/cache_service.dart';
+import '../../services/Product/wishlist_service.dart';
 import 'dart:convert';
 
 class ProductController extends ChangeNotifier {

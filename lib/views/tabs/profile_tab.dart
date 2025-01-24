@@ -3,17 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
-import 'package:giftginnie_ui/views/address_selection_screen.dart';
+import 'package:giftginnie_ui/views/Address%20Screen/address_selection_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/profile_tab_controller.dart';
-import '../../../views/edit_profile_screen.dart';
-import '../../../views/favourite_gifts_screen.dart';
+import '../Profile Screen/edit_profile_screen.dart';
+import '../Profile Screen/favourite_gifts_screen.dart';
 import '../../../controllers/main/user_controller.dart';
 import '../../../services/image_service.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../../views/about_screen.dart';
-import '../../../widgets/connectivity_wrapper.dart';
+import '../Profile Screen/about_screen.dart';
+import '../../widgets/Internet/connectivity_wrapper.dart';
 import '../../../services/connectivity_service.dart';
 
 class ProfileTab extends StatelessWidget {

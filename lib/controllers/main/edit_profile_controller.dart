@@ -2,11 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:giftginnie_ui/controllers/main/user_controller.dart';
-import 'package:giftginnie_ui/services/user_service.dart';
+import 'package:giftginnie_ui/services/User/user_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:dio/dio.dart';
-import 'package:giftginnie_ui/widgets/snackbar_widget.dart';
-import 'package:giftginnie_ui/services/cache_service.dart';
+import 'package:giftginnie_ui/widgets/Snackbar/snackbar_widget.dart';
+import 'package:giftginnie_ui/services/Cache/cache_service.dart';
 
 enum Gender { male, female, other }
 

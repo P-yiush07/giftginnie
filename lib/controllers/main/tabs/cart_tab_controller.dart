@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/cart_model.dart';
-import '../../../services/cart_service.dart';
+import '../../../services/Cart/cart_service.dart';
 import '../../../controllers/main/home_controller.dart';
 
 class CartTabController extends ChangeNotifier {

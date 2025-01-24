@@ -8,10 +8,10 @@ import '../../constants/fonts.dart';
 import '../../controllers/main/tabs/orders_tab_controller.dart';
 import '../../models/orders_model.dart';
 import '../../widgets/shimmer/orders_shimmer.dart';
-import '../../widgets/connectivity_wrapper.dart';
+import '../../widgets/Internet/connectivity_wrapper.dart';
 import '../../services/connectivity_service.dart';
 import '../../controllers/main/home_controller.dart';
-import '../../views/order_detail_screen.dart';
+import '../Order Screen/order_detail_screen.dart';
 
 class OrdersTab extends StatelessWidget {
   const OrdersTab({super.key});

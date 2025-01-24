@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/sign_up_model.dart';
-import 'package:giftginnie_ui/services/auth_service.dart';
+import 'package:giftginnie_ui/services/Auth/auth_service.dart';
 
 class SignUpController extends ChangeNotifier {
   final SignUpModel _model = SignUpModel();

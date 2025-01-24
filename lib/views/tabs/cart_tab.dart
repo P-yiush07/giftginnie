@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
-import 'package:giftginnie_ui/views/address_selection_screen.dart';
+import 'package:giftginnie_ui/views/Address%20Screen/address_selection_screen.dart';
 import 'package:giftginnie_ui/widgets/shimmer/cartItem_shimmer.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/cart_tab_controller.dart';
-import 'package:giftginnie_ui/views/coupon_screen.dart';
+import 'package:giftginnie_ui/views/Product%20Screen/coupon_screen.dart';
 import 'package:giftginnie_ui/config/route_transitions.dart';
 import '../../../controllers/main/address_controller.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../controllers/main/home_controller.dart';
-import '../../../widgets/error_widget.dart';
+import '../../widgets/Error/error_widget.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:giftginnie_ui/views/checkout_confirmation_screen.dart';
+import 'package:giftginnie_ui/views/Order%20Screen/checkout_confirmation_screen.dart';
 import '../../../services/connectivity_service.dart';
-import '../../../widgets/connectivity_wrapper.dart';
+import '../../widgets/Internet/connectivity_wrapper.dart';
 
 class CartTab extends StatelessWidget {
   const CartTab({super.key});

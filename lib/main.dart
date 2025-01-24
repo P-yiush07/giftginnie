@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/controllers/authHome_controller.dart';
 import 'package:giftginnie_ui/controllers/main/address_controller.dart';
 import 'package:giftginnie_ui/controllers/main/product_controller.dart';
-import 'package:giftginnie_ui/widgets/splash_screen.dart';
+import 'package:giftginnie_ui/widgets/Splash%20Screen/splash_screen.dart';
 import 'constants/colors.dart';
 import 'utils/global.dart';
 import 'package:provider/provider.dart';
-import 'services/cache_service.dart';
+import 'services/Cache/cache_service.dart';
 import 'controllers/main/user_controller.dart';
 import 'services/connectivity_service.dart';
 

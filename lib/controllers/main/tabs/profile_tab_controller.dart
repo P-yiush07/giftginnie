@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:giftginnie_ui/services/auth_service.dart';
-import 'package:giftginnie_ui/views/authHome_screen.dart';
+import 'package:giftginnie_ui/services/Auth/auth_service.dart';
+import 'package:giftginnie_ui/views/Auth%20Screen/authHome_screen.dart';
 
 class ProfileTabController extends ChangeNotifier {
   // Pofile-specific state management here

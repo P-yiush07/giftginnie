@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/orders_model.dart';
-import '../../../services/order_service.dart';
+import '../../../services/Order/order_service.dart';
 
 class OrdersTabController extends ChangeNotifier {
   final OrderService _orderService = OrderService();

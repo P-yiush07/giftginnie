@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/models/coupon_model.dart';
-import 'package:giftginnie_ui/services/coupon_service.dart';
-import 'package:giftginnie_ui/services/cart_service.dart';
+import 'package:giftginnie_ui/services/Product/coupon_service.dart';
+import 'package:giftginnie_ui/services/Cart/cart_service.dart';
 import 'package:provider/provider.dart';
-import 'package:giftginnie_ui/widgets/coupon_success_dialog.dart';
+import 'package:giftginnie_ui/widgets/Success%20Dialog/coupon_success_dialog.dart';
 import 'package:dio/dio.dart';
-import '../../widgets/snackbar_widget.dart';
+import '../../widgets/Snackbar/snackbar_widget.dart';
 
 class CouponController extends ChangeNotifier {
   final CartService _cartService = CartService();

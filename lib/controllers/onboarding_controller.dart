@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/onboarding_model.dart';
 import '../constants/colors.dart';
 import '../constants/images.dart';
-import '../views/authHome_screen.dart';
+import '../views/Auth Screen/authHome_screen.dart';
 
 class OnboardingController extends ChangeNotifier {
   int _currentPage = 0;

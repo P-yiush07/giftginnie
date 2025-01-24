@@ -9,7 +9,7 @@ import '../../controllers/main/home_controller.dart';
 import 'tabs/home_tab.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
-import 'package:giftginnie_ui/views/search_screen.dart';
+import 'package:giftginnie_ui/views/Product%20Screen/search_screen.dart';
 
 
 class HomeScreen extends StatelessWidget {

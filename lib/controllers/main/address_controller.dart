@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/address_model.dart';
-import '../../services/user_service.dart';
-import '../../services/cache_service.dart';
+import '../../services/User/user_service.dart';
+import '../../services/Cache/cache_service.dart';
 
 class AddressController extends ChangeNotifier {
   final UserService _userService = UserService();

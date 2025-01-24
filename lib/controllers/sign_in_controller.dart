@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/sign_in_model.dart';
-import '../services/auth_service.dart';
+import '../services/Auth/auth_service.dart';
 import '../models/otp_verification_model.dart';
 
 class SignInController extends ChangeNotifier {

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/controllers/main/product_controller.dart';
 import 'package:giftginnie_ui/utils/global.dart';
 import '../../models/category_model.dart';
-import '../../services/product_service.dart';
-import '../../services/category_service.dart';
+import '../../services/Product/product_service.dart';
+import '../../services/Product/category_service.dart';
 import 'package:provider/provider.dart';
 
 class CategoryController extends ChangeNotifier {

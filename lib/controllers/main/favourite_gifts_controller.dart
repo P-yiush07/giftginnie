@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
-import 'package:giftginnie_ui/services/wishlist_service.dart';
+import 'package:giftginnie_ui/services/Product/wishlist_service.dart';
 import 'package:giftginnie_ui/controllers/main/product_controller.dart';
 
 class FavouriteGiftsController extends ChangeNotifier {
