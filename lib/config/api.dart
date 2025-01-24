@@ -66,4 +66,7 @@ abstract class ApiEndpoints {
 
   //RazorPay endpoints
   static const String verifyPayment = '/orders/verifyPayment/';
+
+  // Product rating endpoint
+  static String productRating(String productId) => '/product/$productId/rating/';
 }

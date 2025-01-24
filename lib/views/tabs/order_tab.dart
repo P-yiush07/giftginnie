@@ -177,14 +177,19 @@ class _OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
+      onTap: () async {
+        await Navigator.push(
           context,
           SlidePageRoute(
             page: OrderDetailScreen(order: order),
             direction: SlideDirection.right,
           ),
         );
+        
+        // After returning, refresh the orders
+        if (context.mounted) {
+          context.read<OrdersTabController>().loadOrders();
+        }
       },
       child: Container(
         decoration: BoxDecoration(
@@ -352,39 +357,6 @@ class _OrderCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (!_hasRating() && order.status == 'DELIVERED')
-                    TextButton(
-                      onPressed: () => _showRatingDialog(context),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        backgroundColor: AppColors.primaryRed.withOpacity(0.1),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.star_outline,
-                            size: 16,
-                            color: AppColors.primaryRed,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Rate Order',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 12,
-                              color: AppColors.primaryRed,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -394,20 +366,6 @@ class _OrderCard extends StatelessWidget {
     );
   }
 
-  bool _hasRating() {
-    // Get the number of items being displayed
-    int displayCount = order.items.length > 2 ? 2 : order.items.length;
-    
-    // Check if any of the displayed products has a rating
-    return order.items.take(displayCount).any((item) => item.product.rating != null);
-  }
-
-  void _showRatingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => RatingDialog(orderId: order.id.toString()),
-    );
-  }
 
   Widget _buildStatusChip(String status) {
     Color backgroundColor;

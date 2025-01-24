@@ -70,6 +70,8 @@ class CartItemsShimmer extends StatelessWidget {
               ),
             ),
             
+            const SizedBox(width: 12),
+            
             // Quantity selector shimmer
             Container(
               width: 100,

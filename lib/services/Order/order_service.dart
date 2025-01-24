@@ -70,4 +70,39 @@ class OrderService {
     // Add actual reorder implementation
     await Future.delayed(const Duration(seconds: 1));
   }
+
+  Future<void> rateProduct(String productId, int rating) async {
+    try {
+      final url = '${ApiConstants.baseUrl}${ApiEndpoints.productRating(productId)}';
+      final data = {
+        'rating': rating,
+      };
+      
+      // Log the request details
+      debugPrint('Rating Product Request:');
+      debugPrint('URL: $url');
+      debugPrint('Body: $data');
+      
+      final response = await _dio.post(
+        url,
+        data: data,
+      );
+      
+      // Log the successful response
+      debugPrint('Rating Response Status: ${response.statusCode}');
+      debugPrint('Rating Response Data: ${response.data}');
+      
+    } catch (e) {
+      // Detailed error logging
+      debugPrint('Error rating product:');
+      if (e is DioException) {
+        debugPrint('Request URL: ${e.requestOptions.uri}');
+        debugPrint('Request Data: ${e.requestOptions.data}');
+        debugPrint('Status Code: ${e.response?.statusCode}');
+        debugPrint('Error Response: ${e.response?.data}');
+      }
+      debugPrint('Error Details: $e');
+      throw Exception('Failed to rate product: $e');
+    }
+  }
 }

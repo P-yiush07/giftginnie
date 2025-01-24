@@ -78,12 +78,14 @@ class OrderItem {
   final OrderProduct product;
   final int quantity;
   final double price;
+  int? myRating;
 
   OrderItem({
     required this.id,
     required this.product,
     required this.quantity,
     required this.price,
+    this.myRating,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
@@ -92,6 +94,7 @@ class OrderItem {
       product: OrderProduct.fromJson(json['product']),
       quantity: json['quantity'],
       price: double.parse(json['price']),
+      myRating: json['my_rating']?.toInt(),
     );
   }
 }
