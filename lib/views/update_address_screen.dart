@@ -395,7 +395,10 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
                 return ListTile(
                   title: Text(
                     filteredStates[index],
-                    style: AppFonts.paragraph.copyWith(fontSize: 14),
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
                   ),
                   onTap: () {
                     setState(() {

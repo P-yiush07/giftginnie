@@ -13,21 +13,30 @@ import '../../../services/image_service.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../views/about_screen.dart';
+import '../../../widgets/connectivity_wrapper.dart';
+import '../../../services/connectivity_service.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: AppColors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-      child: ChangeNotifierProvider(
-        create: (_) => ProfileTabController(),
-        child: const ProfileTabView(),
+    return ConnectivityWrapper(
+      onRetry: () {
+        if (context.read<ConnectivityService>().isConnected) {
+          context.read<UserController>().loadUserProfile();
+        }
+      },
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: AppColors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        child: ChangeNotifierProvider(
+          create: (_) => ProfileTabController(),
+          child: const ProfileTabView(),
+        ),
       ),
     );
   }
@@ -264,13 +273,18 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                           ),
                         );
                       },
-                      child: Text(
-                        'Edit',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: AppColors.primaryRed,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      child: Consumer<UserController>(
+                        builder: (context, userController, _) {
+                          final bool hasProfileImage = userController.userProfile?.profileImage != null;
+                          return Text(
+                            hasProfileImage ? 'Edit' : 'Add',
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 14,
+                              color: AppColors.primaryRed,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],

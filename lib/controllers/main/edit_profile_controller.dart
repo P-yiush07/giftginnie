@@ -6,6 +6,7 @@ import 'package:giftginnie_ui/services/user_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:giftginnie_ui/widgets/snackbar_widget.dart';
+import 'package:giftginnie_ui/services/cache_service.dart';
 
 enum Gender { male, female, other }
 
@@ -49,6 +50,19 @@ class EditProfileController extends ChangeNotifier {
             _selectedGender = Gender.other;
         }
       }
+      notifyListeners();
+    } else {
+      // If no profile is available, try to get phone number from cache
+      _loadPhoneFromCache();
+    }
+  }
+
+  Future<void> _loadPhoneFromCache() async {
+    final cacheService = CacheService();
+    final userData = cacheService.userData;
+    if (userData != null && userData['phone_number'] != null) {
+      phoneController.text = userData['phone_number'].toString();
+      countryCodeController.text = '91'; // Default country code for India
       notifyListeners();
     }
   }

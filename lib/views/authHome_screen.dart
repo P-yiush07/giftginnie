@@ -4,7 +4,6 @@ import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/models/auth_home_model.dart';
 import 'package:giftginnie_ui/views/onboarding_screen.dart';
 import 'package:giftginnie_ui/views/sign_in_screen.dart';
-import 'package:giftginnie_ui/views/sign_up_screen.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
 import '../constants/icons.dart';
@@ -57,29 +56,6 @@ class AuthHomeView extends StatelessWidget {
     );
   }
 
-  void navigateToSignUp(BuildContext context) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => 
-          const SignUpScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
-          var tween = Tween(begin: begin, end: end)
-              .chain(CurveTween(curve: curve));
-          var offsetAnimation = animation.drive(tween);
-          return SlideTransition(
-            position: offsetAnimation,
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 300),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<AuthController>(context);
@@ -98,39 +74,33 @@ class AuthHomeView extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Stack(
-            children: [
-              // Main content
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    Text(
-                      model.welcomeTitle,
-                      style: AppFonts.heading1.copyWith(
-                        fontSize: 24,
-                        color: AppColors.authTitleText,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      model.welcomeDescription,
-                      style: AppFonts.paragraph.copyWith(
-                        fontSize: 16,
-                        color: AppColors.authDescriptionText,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 48),
-                    _buildAuthButtons(context, controller, model),
-                    const SizedBox(height: 48),
-                  ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              children: [
+                const Spacer(),
+                Text(
+                  model.welcomeTitle,
+                  style: AppFonts.heading1.copyWith(
+                    fontSize: 24,
+                    color: AppColors.authTitleText,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                Text(
+                  model.welcomeDescription,
+                  style: AppFonts.paragraph.copyWith(
+                    fontSize: 16,
+                    color: AppColors.authDescriptionText,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 48),
+                _buildAuthButtons(context, controller, model),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+              ],
+            ),
           ),
         ),
       ),
@@ -157,81 +127,7 @@ class AuthHomeView extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        _buildSocialButton(
-          text: model.facebookButtonText,
-          icon: AppIcons.svg_facebookIcon,
-          onPressed: controller.handleFacebookSignIn,
-        ),
-        const SizedBox(height: 16),
-        _buildSocialButton(
-          text: model.googleButtonText,
-          icon: AppIcons.svg_googleIcon,
-          onPressed: controller.handleGoogleSignIn,
-        ),
-        const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              model.noAccountText,
-              style: AppFonts.paragraph.copyWith(
-                color: AppColors.authDescriptionText
-                ),
-            ),
-            TextButton(
-              onPressed: () => navigateToSignUp(context),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                model.signUpButtonText,
-                style: AppFonts.paragraph.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
       ],
-    );
-  }
-
-  Widget _buildSocialButton({
-    required String text,
-    required String icon,
-    required VoidCallback onPressed,
-  }) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        backgroundColor: AppColors.authSocialButtonBackground,
-        minimumSize: const Size(double.infinity, 56),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            icon,
-            height: 24,
-            width: 24,
-          ),
-          const SizedBox(width: 12),
-          Text(
-            text,
-            style: AppFonts.paragraph.copyWith(
-              fontSize: 16,
-              color: AppColors.authSocialButtonText,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

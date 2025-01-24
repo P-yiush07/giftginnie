@@ -13,6 +13,8 @@ import 'package:giftginnie_ui/controllers/main/home_controller.dart';
 import 'package:giftginnie_ui/services/product_service.dart';
 import 'dart:async';
 import 'package:giftginnie_ui/services/cache_service.dart';
+import 'package:giftginnie_ui/services/connectivity_service.dart';
+import 'package:giftginnie_ui/widgets/connectivity_wrapper.dart';
 
 class SearchScreen extends StatefulWidget {
   final bool showSearchButton;
@@ -92,10 +94,11 @@ class _SearchScreenState extends State<SearchScreen> {
         _allowKeyboardShow = false;
         _searchResults = [];
       });
+      // Add a small delay to ensure unfocus completes
+      await Future.delayed(const Duration(milliseconds: 100));
       return false;
     }
     if (widget.isFromBottomTab) {
-      // If from bottom tab, switch to home tab
       Provider.of<HomeController>(context, listen: false).setCurrentIndex(0);
       return false;
     }
@@ -165,241 +168,254 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark.copyWith(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          systemNavigationBarColor: Colors.transparent,
-          statusBarBrightness: Brightness.light,
-        ),
-        child: Scaffold(
-          backgroundColor: const Color(0xFFF9F9F9),
-          body: Column(
-            children: [
-              Container(
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    Container(
-                      color: Colors.white,
-                      height: MediaQuery.of(context).padding.top,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0.0, 12.0, 16.0, 5.0),
-                      child: Row(
-                        children: [
-                          // Back Button
-                          if (widget.showSearchButton) ...[
-                            IconButton(
-                              icon: const Icon(Icons.arrow_back, color: Colors.black),
-                              onPressed: () {
-                                if (_searchFocusNode.hasFocus || _searchController.text.isNotEmpty) {
-                                  _searchFocusNode.unfocus();
-                                  _searchController.clear();
-                                  setState(() {
-                                    _allowKeyboardShow = false;
-                                    _searchResults = [];
-                                  });
-                                } else if (widget.isFromBottomTab) {
-                                  // If from bottom tab, switch to home tab
-                                  Provider.of<HomeController>(context, listen: false).setCurrentIndex(0);
-                                } else {
-                                  Navigator.pop(context);
-                                }
-                              },
-                              padding: const EdgeInsets.only(left: 8.0),
-                              constraints: const BoxConstraints(),
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          // Search TextField
-                          Expanded(
-                            child: Container(
-                              height: 52,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(26),
+    return ConnectivityWrapper(
+      onRetry: () {
+        if (context.read<ConnectivityService>().isConnected) {
+          // Re-perform search if there was a query
+          if (_searchController.text.isNotEmpty) {
+            _performSearch(_searchController.text);
+          }
+        }
+      },
+      child: WillPopScope(
+        onWillPop: _onWillPop,
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            systemNavigationBarColor: Colors.transparent,
+            statusBarBrightness: Brightness.light,
+          ),
+          child: Scaffold(
+            backgroundColor: const Color(0xFFF9F9F9),
+            body: Column(
+              children: [
+                Container(
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      Container(
+                        color: Colors.white,
+                        height: MediaQuery.of(context).padding.top,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0.0, 12.0, 16.0, 5.0),
+                        child: Row(
+                          children: [
+                            // Back Button
+                            if (widget.showSearchButton) ...[
+                              IconButton(
+                                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                                onPressed: () async {
+                                  if (_searchFocusNode.hasFocus || _searchController.text.isNotEmpty) {
+                                    _searchFocusNode.unfocus();
+                                    _searchController.clear();
+                                    setState(() {
+                                      _allowKeyboardShow = false;
+                                      _searchResults = [];
+                                    });
+                                    // Add a small delay to ensure unfocus completes
+                                    await Future.delayed(const Duration(milliseconds: 100));
+                                  }
+                                  
+                                  if (widget.isFromBottomTab) {
+                                    Provider.of<HomeController>(context, listen: false).setCurrentIndex(0);
+                                  } else {
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                padding: const EdgeInsets.only(left: 8.0),
+                                constraints: const BoxConstraints(),
                               ),
-                              child: TextField(
-                                controller: _searchController,
-                                focusNode: _searchFocusNode,
-                                autofocus: widget.autoFocus && _allowKeyboardShow,
-                                textInputAction: TextInputAction.search,
-                                onSubmitted: (_) {
-                                  _searchFocusNode.unfocus();
-                                  setState(() {
-                                    _allowKeyboardShow = false;
-                                  });
-                                },
-                                onTap: () {
-                                  setState(() {
-                                    _allowKeyboardShow = true;
-                                  });
-                                },
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
+                              const SizedBox(width: 4),
+                            ],
+                            // Search TextField
+                            Expanded(
+                              child: Container(
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(26),
                                 ),
-                                decoration: InputDecoration(
-                                  hintText: 'Search Gift Store',
-                                  hintStyle: AppFonts.paragraph.copyWith(
-                                    color: AppColors.textGrey,
+                                child: TextField(
+                                  controller: _searchController,
+                                  focusNode: _searchFocusNode,
+                                  autofocus: widget.autoFocus && _allowKeyboardShow,
+                                  textInputAction: TextInputAction.search,
+                                  onSubmitted: (_) {
+                                    _searchFocusNode.unfocus();
+                                    setState(() {
+                                      _allowKeyboardShow = false;
+                                    });
+                                  },
+                                  onTap: () {
+                                    setState(() {
+                                      _allowKeyboardShow = true;
+                                    });
+                                  },
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16,
                                   ),
-                                  isDense: true,
-                                  contentPadding: const EdgeInsets.only(
-                                    top: 24,
-                                    bottom: 16,
-                                    left: 0,
-                                    right: 16,
-                                  ),
-                                  prefixIcon: Padding(
-                                    padding: const EdgeInsets.only(
-                                      left: 2.0,
-                                      right: 8.0,
-                                      top: 12.0,
-                                      bottom: 12.0,
+                                  decoration: InputDecoration(
+                                    hintText: 'Search Gift Store',
+                                    hintStyle: AppFonts.paragraph.copyWith(
+                                      color: AppColors.textGrey,
                                     ),
-                                    child: SvgPicture.asset(
-                                      AppIcons.svg_searchTabIcon,
-                                      colorFilter: ColorFilter.mode(
-                                        AppColors.textGrey,
-                                        BlendMode.srcIn,
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.only(
+                                      top: 24,
+                                      bottom: 16,
+                                      left: 0,
+                                      right: 16,
+                                    ),
+                                    prefixIcon: Padding(
+                                      padding: const EdgeInsets.only(
+                                        left: 2.0,
+                                        right: 8.0,
+                                        top: 12.0,
+                                        bottom: 12.0,
+                                      ),
+                                      child: SvgPicture.asset(
+                                        AppIcons.svg_searchTabIcon,
+                                        colorFilter: ColorFilter.mode(
+                                          AppColors.textGrey,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                     ),
+                                    suffixIcon: _searchController.text.isNotEmpty
+                                        ? IconButton(
+                                            icon: const Icon(Icons.close, size: 20),
+                                            onPressed: () {
+                                              _searchController.clear();
+                                              setState(() {});
+                                            },
+                                          )
+                                        : null,
+                                    border: InputBorder.none,
                                   ),
-                                  suffixIcon: _searchController.text.isNotEmpty
-                                      ? IconButton(
-                                          icon: const Icon(Icons.close, size: 20),
-                                          onPressed: () {
-                                            _searchController.clear();
-                                            setState(() {});
-                                          },
-                                        )
-                                      : null,
-                                  border: InputBorder.none,
+                                  onChanged: (value) {
+                                    setState(() {});
+                                    _performSearch(value);
+                                  },
                                 ),
-                                onChanged: (value) {
-                                  setState(() {});
-                                  _performSearch(value);
+                              ),
+                            ),
+                            // Search Button instead of Cancel
+                            if (widget.showSearchButton) ...[
+                              const SizedBox(width: 12),
+                              TextButton(
+                                onPressed: () {
+                                  if (_searchController.text.isNotEmpty) {
+                                    _searchFocusNode.unfocus();
+                                    _performSearch(_searchController.text);
+                                  }
                                 },
-                              ),
-                            ),
-                          ),
-                          // Search Button instead of Cancel
-                          if (widget.showSearchButton) ...[
-                            const SizedBox(width: 12),
-                            TextButton(
-                              onPressed: () {
-                                if (_searchController.text.isNotEmpty) {
-                                  _searchFocusNode.unfocus();
-                                  _performSearch(_searchController.text);
-                                }
-                              },
-                              child: Text(
-                                'Search',
-                                style: AppFonts.paragraph.copyWith(
-                                  color: AppColors.primaryRed,
-                                  fontSize: 14,
+                                child: Text(
+                                  'Search',
+                                  style: AppFonts.paragraph.copyWith(
+                                    color: AppColors.primaryRed,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_searchController.text.isEmpty && _searchHistory.isNotEmpty) ...[
-                      // Search History Header - Only show when there's history
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Search History',
-                              style: AppFonts.paragraph.copyWith(
-                                fontSize: 16,
-                                color: AppColors.black
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: _clearSearchHistory,
-                              child: Text(
-                                'Clear all',
-                                style: AppFonts.paragraph.copyWith(
-                                  color: AppColors.primaryRed,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Search History List
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _searchHistory.length,
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          itemBuilder: (context, index) {
-                            return InkWell(
-                              onTap: () {
-                                _searchController.text = _searchHistory[index];
-                                _performSearch(_searchHistory[index]);
-                              },
-                              child: _buildHistoryItem(_searchHistory[index]),
-                            );
-                          },
-                        ),
-                      ),
-                    ] else if (_searchController.text.isEmpty) ...[
-                      // Empty State - When no history
-                      Expanded(
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (_searchController.text.isEmpty && _searchHistory.isNotEmpty) ...[
+                        // Search History Header - Only show when there's history
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              SvgPicture.asset(
-                                AppIcons.svg_searchTabIcon,
-                                width: 64,
-                                height: 64,
-                                colorFilter: ColorFilter.mode(
-                                  Colors.grey[300]!,
-                                  BlendMode.srcIn,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
                               Text(
-                                'No history available',
+                                'Search History',
                                 style: AppFonts.paragraph.copyWith(
                                   fontSize: 16,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.black
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: _clearSearchHistory,
+                                child: Text(
+                                  'Clear all',
+                                  style: AppFonts.paragraph.copyWith(
+                                    color: AppColors.primaryRed,
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
+                        // Search History List
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: _searchHistory.length,
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                onTap: () {
+                                  _searchController.text = _searchHistory[index];
+                                  _performSearch(_searchHistory[index]);
+                                },
+                                child: _buildHistoryItem(_searchHistory[index]),
+                              );
+                            },
+                          ),
+                        ),
+                      ] else if (_searchController.text.isEmpty) ...[
+                        // Empty State - When no history
+                        Expanded(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SvgPicture.asset(
+                                  AppIcons.svg_searchTabIcon,
+                                  width: 64,
+                                  height: 64,
+                                  colorFilter: ColorFilter.mode(
+                                    Colors.grey[300]!,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No history available',
+                                  style: AppFonts.paragraph.copyWith(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (_searchController.text.isNotEmpty) ...[
+                        // Search Results
+                        Expanded(
+                          child: _isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : _buildSearchResults(),
+                        ),
+                      ],
                     ],
-                    if (_searchController.text.isNotEmpty) ...[
-                      // Search Results
-                      Expanded(
-                        child: _isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : _buildSearchResults(),
-                      ),
-                    ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

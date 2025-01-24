@@ -94,10 +94,6 @@ class SignInView extends StatelessWidget {
                         _buildPhoneInput(controller),
                         const SizedBox(height: 24),
                         _buildVerifyButton(controller),
-                        const SizedBox(height: 24),
-                        _buildDivider(model.orText),
-                        const SizedBox(height: 24),
-                        _buildSocialButtons(controller),
                       ] else ...[
                         _buildOTPInput(controller),
                       ],
@@ -393,109 +389,6 @@ class SignInView extends StatelessWidget {
                 ),
               ),
       ),
-    );
-  }
-
-  Widget _buildDivider(String text) {
-    return Row(
-      children: [
-        const Spacer(flex: 1),
-        Expanded(
-          flex: 2,
-          child: Divider(
-            color: Colors.grey.withOpacity(0.5),
-            thickness: 0.5,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Colors.grey.withOpacity(0.7),
-              fontSize: 14,
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 2,
-          child: Divider(
-            color: Colors.grey.withOpacity(0.5),
-            thickness: 0.5,
-          ),
-        ),
-        const Spacer(flex: 1),
-      ],
-    );
-  }
-
-  Widget _buildSocialButton({
-    required String text,
-    required String icon,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            spreadRadius: 0,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextButton(
-        onPressed: onPressed,
-        style: TextButton.styleFrom(
-          backgroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 56),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          elevation: 0,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              icon,
-              height: 24,
-              width: 24,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              text,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButtons(SignInController controller) {
-    return Column(
-      children: [
-        _buildSocialButton(
-          text: controller.model.facebookButtonText,
-          icon: AppIcons.svg_facebookIcon,
-          onPressed: controller.handleFacebookLogin,
-        ),
-        const SizedBox(height: 16),
-        _buildSocialButton(
-          text: controller.model.googleButtonText,
-          icon: AppIcons.svg_googleIcon,
-          onPressed: controller.handleGoogleLogin,
-        ),
-      ],
     );
   }
 

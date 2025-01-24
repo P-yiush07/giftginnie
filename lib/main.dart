@@ -9,6 +9,7 @@ import 'utils/global.dart';
 import 'package:provider/provider.dart';
 import 'services/cache_service.dart';
 import 'controllers/main/user_controller.dart';
+import 'services/connectivity_service.dart';
 
 void main() async {
   try {
@@ -38,6 +39,7 @@ void main() async {
     runApp(
       MultiProvider(
         providers: [
+          ChangeNotifierProvider(create: (_) => ConnectivityService()),
           ChangeNotifierProvider(create: (_) => AuthController()),
           ChangeNotifierProvider(create: (_) => UserController()),
           ChangeNotifierProvider(create: (_) => AddressController()),
@@ -55,6 +57,7 @@ void main() async {
     runApp(
       MultiProvider(
         providers: [
+          ChangeNotifierProvider(create: (_) => ConnectivityService()),
           ChangeNotifierProvider(create: (_) => AuthController()),
           ChangeNotifierProvider(create: (_) => UserController()),
           ChangeNotifierProvider(create: (_) => AddressController()),
@@ -76,6 +79,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ConnectivityService()),
         ChangeNotifierProvider(create: (_) => AuthController()),
         ChangeNotifierProvider(create: (_) => UserController()),
         ChangeNotifierProvider(create: (_) => AddressController()),

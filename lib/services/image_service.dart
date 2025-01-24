@@ -6,8 +6,8 @@ import 'package:shimmer/shimmer.dart';
 class ImageService {
   static Widget getNetworkImage({
     required String imageUrl,
-    required double width,
-    required double height,
+    double? width,
+    double? height,
     BoxFit fit = BoxFit.cover,
     Widget? errorWidget,
     Key? key,
@@ -25,9 +25,9 @@ class ImageService {
       );
     }
 
-    // Only set cache dimensions if they are finite
-    final int? cacheWidth = width.isFinite ? width.toInt() : null;
-    final int? cacheHeight = height.isFinite ? height.toInt() : null;
+    // Only set cache dimensions if width/height are provided and finite
+    final int? cacheWidth = width?.isFinite == true ? width!.toInt() : null;
+    final int? cacheHeight = height?.isFinite == true ? height!.toInt() : null;
 
     return CachedNetworkImage(
       key: key,

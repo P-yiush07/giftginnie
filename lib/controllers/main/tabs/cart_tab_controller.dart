@@ -109,6 +109,11 @@ class CartTabController extends ChangeNotifier {
     }
   }
 
+  Future<void> refreshData() async {
+    // Refresh cart data
+    await initializeData();
+  }
+
   @override
   void dispose() {
     _homeController.removeListener(_onTabChange);

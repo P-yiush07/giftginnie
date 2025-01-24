@@ -10,7 +10,6 @@ import 'package:giftginnie_ui/widgets/product_detail_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import '../controllers/main/favourite_gifts_controller.dart';
 import '../widgets/shimmer/favourite_gifts_shimmer.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../controllers/main/product_controller.dart';
 
 class FavouriteGiftsScreen extends StatelessWidget {
@@ -175,7 +174,7 @@ class FavouriteGiftsView extends StatelessWidget {
                   key: ValueKey('favourite_product_${product.id}'),
                   imageUrl: product.images.isNotEmpty ? product.images[0] : 'assets/images/placeholder.png',
                   width: MediaQuery.of(context).size.width / 2 - 24,
-                  height: 240,
+                  height: 200,
                   fit: BoxFit.cover,
                   errorWidget: Image.asset(
                     'assets/images/placeholder.png',

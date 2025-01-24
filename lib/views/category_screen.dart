@@ -287,11 +287,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
               children: [
                 SizedBox(
                   width: MediaQuery.of(context).size.width / 2 - 24,
-                  height: 200,
+                  height: 210,
                   child: Image.network(
                     gift.images?.isNotEmpty == true ? gift.images![0] : 'assets/images/placeholder.png',
-                    width: MediaQuery.of(context).size.width / 2 - 24,
-                    height: 200,
                     fit: BoxFit.cover,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
@@ -371,6 +369,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                             fontSize: 12,
                             color: Colors.grey,
                             decoration: TextDecoration.lineThrough,
+                            decorationColor: AppColors.black
                           ),
                         ),
                       ],

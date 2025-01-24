@@ -4,6 +4,9 @@ import 'package:giftginnie_ui/services/auth_service.dart';
 import 'package:giftginnie_ui/views/home_screen.dart';
 import 'package:giftginnie_ui/views/onboarding_screen.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
+import 'package:giftginnie_ui/services/connectivity_service.dart';
+import 'package:giftginnie_ui/widgets/no_internet_widget.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,13 +23,32 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuthStatus() async {
-    final authService = AuthService();
+    final connectivityService = context.read<ConnectivityService>();
     
     // Add a slight delay to show splash screen
     await Future.delayed(const Duration(seconds: 2));
     
     if (!mounted) return;
 
+    if (!connectivityService.isConnected) {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => NoInternetWidget(
+            onRetry: () async {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const SplashScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
+    final authService = AuthService();
     final isAuthenticated = await authService.isAuthenticated();
     
     if (!mounted) return;

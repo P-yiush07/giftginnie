@@ -33,6 +33,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'package:giftginnie_ui/config/layout_constants.dart';
 import 'package:giftginnie_ui/widgets/home_carousel.dart';
+import 'package:giftginnie_ui/services/connectivity_service.dart';
+import 'package:giftginnie_ui/widgets/no_internet_widget.dart';
+import 'package:giftginnie_ui/widgets/connectivity_wrapper.dart';
 
 class OfferBanner {
   final String title;
@@ -57,15 +60,22 @@ class HomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: AppColors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-      child: ChangeNotifierProvider(
-        create: (_) => HomeTabController(),
-        child: const HomeTabView(),
+    return ConnectivityWrapper(
+      onRetry: () {
+        if (context.read<ConnectivityService>().isConnected) {
+          context.read<HomeTabController>().refreshData();
+        }
+      },
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        child: ChangeNotifierProvider(
+          create: (_) => HomeTabController(),
+          child: const HomeTabView(),
+        ),
       ),
     );
   }
@@ -88,7 +98,7 @@ class _HomeTabViewState extends State<HomeTabView> {
   void initState() {
     super.initState();
     _loadProfile();
-    
+
     // Add a small delay to ensure the PageController is properly initialized
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
@@ -107,7 +117,8 @@ class _HomeTabViewState extends State<HomeTabView> {
       if (mounted && _pageController.hasClients) {
         final homeTabController = context.read<HomeTabController>();
         if (homeTabController.carouselItems.isNotEmpty) {
-          final nextPage = (_currentPage + 1) % homeTabController.carouselItems.length;
+          final nextPage =
+              (_currentPage + 1) % homeTabController.carouselItems.length;
           _pageController.animateToPage(
             nextPage,
             duration: const Duration(milliseconds: 300),
@@ -129,17 +140,17 @@ class _HomeTabViewState extends State<HomeTabView> {
   }
 
   String getAddressTypeLabel(String type) {
-      switch (type.toLowerCase()) {
-        case 'h':
-          return 'Home';
-        case 'b':
-          return 'Work';
-        case 'o':
-          return 'Other';
-        default:
-          return 'Other';
-      }
+    switch (type.toLowerCase()) {
+      case 'h':
+        return 'Home';
+      case 'b':
+        return 'Work';
+      case 'o':
+        return 'Other';
+      default:
+        return 'Other';
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,13 +193,17 @@ class _HomeTabViewState extends State<HomeTabView> {
                                       ),
                                     )
                                   : CachedNetworkImage(
-                                      imageUrl: userController.userProfile?.profileImage?.isNotEmpty == true 
-                                          ? userController.userProfile!.profileImage! 
+                                      imageUrl: userController.userProfile
+                                                  ?.profileImage?.isNotEmpty ==
+                                              true
+                                          ? userController
+                                              .userProfile!.profileImage!
                                           : 'https://static.vecteezy.com/system/resources/thumbnails/036/594/092/small_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg',
                                       width: 40,
                                       height: 40,
                                       fit: BoxFit.cover,
-                                      placeholder: (context, url) => Shimmer.fromColors(
+                                      placeholder: (context, url) =>
+                                          Shimmer.fromColors(
                                         baseColor: AppColors.grey300,
                                         highlightColor: AppColors.grey100,
                                         child: Container(
@@ -197,7 +212,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                                           color: Colors.white,
                                         ),
                                       ),
-                                      errorWidget: (context, url, error) => Image.asset(
+                                      errorWidget: (context, url, error) =>
+                                          Image.asset(
                                         'assets/images/placeholder.png',
                                         width: 40,
                                         height: 40,
@@ -226,10 +242,13 @@ class _HomeTabViewState extends State<HomeTabView> {
                               child: addressController.isLoading
                                   ? _buildAddressShimmer()
                                   : Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          addressController.selectedAddress?.getAddressLabel() ?? 'Select Address',
+                                          addressController.selectedAddress
+                                                  ?.getAddressLabel() ??
+                                              'Select Address',
                                           style: AppFonts.paragraph.copyWith(
                                             fontSize: 14,
                                             color: AppColors.textGrey,
@@ -246,8 +265,12 @@ class _HomeTabViewState extends State<HomeTabView> {
                                             const SizedBox(width: 4),
                                             Expanded(
                                               child: Text(
-                                                addressController.selectedAddress?.fullAddress ?? 'Tap to select delivery address',
-                                                style: AppFonts.paragraph.copyWith(
+                                                addressController
+                                                        .selectedAddress
+                                                        ?.fullAddress ??
+                                                    'Tap to select delivery address',
+                                                style:
+                                                    AppFonts.paragraph.copyWith(
                                                   fontSize: 15,
                                                   fontWeight: FontWeight.w500,
                                                   color: AppColors.black,
@@ -277,7 +300,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                         ),
                         onPressed: () {
                           // Get the HomeController instance and set the index to 4 (Profile tab)
-                          Provider.of<HomeController>(context, listen: false).setCurrentIndex(4);
+                          Provider.of<HomeController>(context, listen: false)
+                              .setCurrentIndex(4);
                         },
                       ),
                     ],
@@ -375,11 +399,15 @@ class _HomeTabViewState extends State<HomeTabView> {
                     if (controller.isLoadingCategories) {
                       return const HomeTabCategoryShimmer();
                     }
-                    
+
                     // Split categories using the constant
-                    final mainCategories = controller.categories.take(LayoutConstants.maxMainCategories).toList();
-                    final overflowCategories = controller.categories.length > LayoutConstants.maxMainCategories 
-                        ? controller.categories.sublist(LayoutConstants.maxMainCategories) 
+                    final mainCategories = controller.categories
+                        .take(LayoutConstants.maxMainCategories)
+                        .toList();
+                    final overflowCategories = controller.categories.length >
+                            LayoutConstants.maxMainCategories
+                        ? controller.categories
+                            .sublist(LayoutConstants.maxMainCategories)
                         : <CategoryModel>[];
 
                     return Column(
@@ -390,13 +418,16 @@ class _HomeTabViewState extends State<HomeTabView> {
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             physics: const BouncingScrollPhysics(),
-                            padding: EdgeInsets.symmetric(horizontal: LayoutConstants.horizontalPadding),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: LayoutConstants.horizontalPadding),
                             itemCount: mainCategories.length,
                             itemBuilder: (context, index) {
                               final category = mainCategories[index];
                               return Padding(
                                 padding: EdgeInsets.only(
-                                  right: index != mainCategories.length - 1 ? LayoutConstants.chipSpacing : 0,
+                                  right: index != mainCategories.length - 1
+                                      ? LayoutConstants.chipSpacing
+                                      : 0,
                                 ),
                                 child: _buildCategoryItem(category: category),
                               );
@@ -409,29 +440,48 @@ class _HomeTabViewState extends State<HomeTabView> {
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             physics: const BouncingScrollPhysics(),
-                            padding: EdgeInsets.symmetric(horizontal: LayoutConstants.horizontalPadding),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: LayoutConstants.horizontalPadding),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                for (var i = 0; i < overflowCategories.length; i += LayoutConstants.chipsPerRow)
+                                for (var i = 0;
+                                    i < overflowCategories.length;
+                                    i += LayoutConstants.chipsPerRow)
                                   Padding(
                                     padding: EdgeInsets.only(
-                                      bottom: i + LayoutConstants.chipsPerRow < overflowCategories.length 
-                                          ? LayoutConstants.rowSpacing 
-                                          : 0
-                                    ),
+                                        bottom:
+                                            i + LayoutConstants.chipsPerRow <
+                                                    overflowCategories.length
+                                                ? LayoutConstants.rowSpacing
+                                                : 0),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        for (var j = i; j < i + LayoutConstants.chipsPerRow && j < overflowCategories.length; j++)
+                                        for (var j = i;
+                                            j <
+                                                    i +
+                                                        LayoutConstants
+                                                            .chipsPerRow &&
+                                                j < overflowCategories.length;
+                                            j++)
                                           Padding(
                                             padding: EdgeInsets.only(
-                                              right: j % LayoutConstants.chipsPerRow != LayoutConstants.chipsPerRow - 1 
-                                                  && j != overflowCategories.length - 1 
-                                                  ? LayoutConstants.chipSpacing 
-                                                  : 0
-                                            ),
-                                            child: _buildCategoryChip(overflowCategories[j]),
+                                                right: j %
+                                                                LayoutConstants
+                                                                    .chipsPerRow !=
+                                                            LayoutConstants
+                                                                    .chipsPerRow -
+                                                                1 &&
+                                                        j !=
+                                                            overflowCategories
+                                                                    .length -
+                                                                1
+                                                    ? LayoutConstants
+                                                        .chipSpacing
+                                                    : 0),
+                                            child: _buildCategoryChip(
+                                                overflowCategories[j]),
                                           ),
                                       ],
                                     ),
@@ -498,10 +548,15 @@ class _HomeTabViewState extends State<HomeTabView> {
                           itemBuilder: (context, index) {
                             return Consumer<HomeTabController>(
                               builder: (context, controller, _) {
-                                final product = controller.popularProducts[index];
+                                final product =
+                                    controller.popularProducts[index];
                                 return Padding(
                                   padding: EdgeInsets.only(
-                                    right: index != controller.popularProducts.length - 1 ? 16.0 : 0,
+                                    right: index !=
+                                            controller.popularProducts.length -
+                                                1
+                                        ? 16.0
+                                        : 0,
                                   ),
                                   child: _buildProductCard(
                                     image: product.images.first,
@@ -522,7 +577,7 @@ class _HomeTabViewState extends State<HomeTabView> {
             ),
             // After the Top Products section, add:
             const SizedBox(height: 40),
-            
+
             // Popular Categories Section
             Container(
               width: double.infinity,
@@ -607,7 +662,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 24.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 40.0, horizontal: 24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -634,7 +690,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                 ),
               ),
             ),
-            const SizedBox(height: 40),  // Added bottom spacing
+            const SizedBox(height: 40), // Added bottom spacing
           ],
         ),
       ),
@@ -658,11 +714,10 @@ class _HomeTabViewState extends State<HomeTabView> {
               Navigator.push(
                 context,
                 SlidePageRoute(
-                  page: CategoryScreen(
-                    category: category,
-                  ),
-                  direction: SlideDirection.right
-                ),
+                    page: CategoryScreen(
+                      category: category,
+                    ),
+                    direction: SlideDirection.right),
               );
             },
             borderRadius: BorderRadius.circular(32),
@@ -720,9 +775,11 @@ class _HomeTabViewState extends State<HomeTabView> {
                       product: snapshot.data!,
                       onProductUpdated: (updatedProduct) {
                         // Update only this specific product in the list
-                        final index = controller.popularProducts.indexWhere((p) => p.id == updatedProduct.id);
+                        final index = controller.popularProducts
+                            .indexWhere((p) => p.id == updatedProduct.id);
                         if (index != -1) {
-                          controller.updatePopularProduct(index, updatedProduct);
+                          controller.updatePopularProduct(
+                              index, updatedProduct);
                         }
                       },
                     );
@@ -747,7 +804,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                     fit: BoxFit.cover,
                   ),
                 ),
-                
+
                 // Darker Gradient Overlay - Updated opacity values
                 Container(
                   decoration: BoxDecoration(
@@ -756,14 +813,14 @@ class _HomeTabViewState extends State<HomeTabView> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        AppColors.black.withOpacity(0.5),  // Increased from 0.2
-                        AppColors.black.withOpacity(0.9),  // Increased from 0.8
+                        AppColors.black.withOpacity(0.5), // Increased from 0.2
+                        AppColors.black.withOpacity(0.9), // Increased from 0.8
                       ],
                       stops: const [0.5, 1.0],
                     ),
                   ),
                 ),
-                
+
                 // Updated Heart Icon
                 Positioned(
                   top: 8,
@@ -773,14 +830,15 @@ class _HomeTabViewState extends State<HomeTabView> {
                     isLiked: product.isLiked,
                     onProductUpdated: (updatedProduct) {
                       // Update only this specific product in the list
-                      final index = controller.popularProducts.indexWhere((p) => p.id == updatedProduct.id);
+                      final index = controller.popularProducts
+                          .indexWhere((p) => p.id == updatedProduct.id);
                       if (index != -1) {
                         controller.updatePopularProduct(index, updatedProduct);
                       }
                     },
                   ),
                 ),
-                
+
                 // Content
                 Positioned(
                   left: 12,
@@ -900,7 +958,8 @@ class _HomeTabViewState extends State<HomeTabView> {
               children: [
                 // Image - Changed from Image.asset to ImageService.getNetworkImage
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
                   child: ImageService.getNetworkImage(
                     imageUrl: image,
                     width: double.infinity,
@@ -916,7 +975,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                 ),
                 // Dark Gradient Overlay
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
                   child: Container(
                     height: 180,
                     width: double.infinity,

@@ -9,6 +9,7 @@ import 'package:giftginnie_ui/services/product_service.dart';
 import 'package:giftginnie_ui/utils/global.dart';
 import 'package:provider/provider.dart';
 import 'package:giftginnie_ui/controllers/main/product_controller.dart';
+import 'package:giftginnie_ui/services/connectivity_service.dart';
 
 class HomeTabController extends ChangeNotifier {
   final ProductService _productService = ProductService();
@@ -39,6 +40,18 @@ class HomeTabController extends ChangeNotifier {
   Future<void> _fetchInitialData() async {
     _isLoading = true;
     notifyListeners();
+
+    final connectivityService = Provider.of<ConnectivityService>(
+      navigatorKey.currentContext!,
+      listen: false,
+    );
+
+    if (!connectivityService.isConnected) {
+      _error = 'No internet connection';
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
 
     try {
       // Fetch carousel items first for faster appearance

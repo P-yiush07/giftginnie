@@ -14,25 +14,30 @@ import '../../../controllers/main/home_controller.dart';
 import '../../../widgets/error_widget.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:giftginnie_ui/views/checkout_confirmation_screen.dart';
+import '../../../services/connectivity_service.dart';
+import '../../../widgets/connectivity_wrapper.dart';
 
 class CartTab extends StatelessWidget {
   const CartTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.dark.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: AppColors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-      child: Consumer<HomeController>(
-        builder: (context, homeController, _) {
-          return ChangeNotifierProvider(
-            create: (_) => CartTabController(homeController),
-            child: const CartTabView(),
-          );
-        },
+    return ConnectivityWrapper(
+      onRetry: () {
+        if (context.read<ConnectivityService>().isConnected) {
+          context.read<CartTabController>().refreshData();
+        }
+      },
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: AppColors.white,
+          systemNavigationBarIconBrightness: Brightness.dark,
+        ),
+        child: ChangeNotifierProvider(
+          create: (_) => CartTabController(context.read<HomeController>()),
+          child: const CartTabView(),
+        ),
       ),
     );
   }

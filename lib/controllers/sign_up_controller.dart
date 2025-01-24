@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/models/sign_up_model.dart';
-import 'package:get_it/get_it.dart';
 import 'package:giftginnie_ui/services/auth_service.dart';
-
-final GetIt serviceLocator = GetIt.instance;
 
 class SignUpController extends ChangeNotifier {
   final SignUpModel _model = SignUpModel();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
-  final AuthService _authService = serviceLocator<AuthService>();
   bool _isLoading = false;
   bool _isPhoneVerified = false;
 
@@ -17,16 +13,6 @@ class SignUpController extends ChangeNotifier {
     // Add listeners to controllers
     _phoneController.addListener(_onPhoneChanged);
     _otpController.addListener(_onOtpChanged);
-  }
-
-  void _onPhoneChanged() {
-    // Trigger UI update when phone number changes
-    notifyListeners();
-  }
-
-  void _onOtpChanged() {
-    // Trigger UI update when OTP changes
-    notifyListeners();
   }
 
   // Getters
@@ -51,23 +37,21 @@ class SignUpController extends ChangeNotifier {
     notifyListeners();
   }
 
-  @override
-  void dispose() {
-    _phoneController.removeListener(_onPhoneChanged);
-    _otpController.removeListener(_onOtpChanged);
-    _phoneController.dispose();
-    _otpController.dispose();
-    super.dispose();
+  void _onPhoneChanged() {
+    notifyListeners();
+  }
+
+  void _onOtpChanged() {
+    notifyListeners();
   }
 
   Future<void> verifyPhone() async {
     if (_phoneController.text.isEmpty) return;
     
     isLoading = true;
-
     try {
-      // TODO: Implement phone verification logic
-      await Future.delayed(const Duration(seconds: 2)); // Simulated delay
+      // Simulated API call
+      await Future.delayed(const Duration(seconds: 2));
       isPhoneVerified = true;
     } finally {
       isLoading = false;
@@ -78,10 +62,10 @@ class SignUpController extends ChangeNotifier {
     if (_otpController.text.isEmpty) return;
     
     isLoading = true;
-
     try {
-      // TODO: Implement OTP verification logic
-      await Future.delayed(const Duration(seconds: 2)); // Simulated delay
+      // Simulated API call
+      await Future.delayed(const Duration(seconds: 2));
+      // Handle successful login
     } finally {
       isLoading = false;
     }
@@ -96,10 +80,19 @@ class SignUpController extends ChangeNotifier {
   }
 
   Future<void> resendOTP() async {
-    // TODO: Implement OTP resend logic
+    // Implement OTP resend logic
   }
 
   void backToPhoneInput() {
     isPhoneVerified = false;
+  }
+
+  @override
+  void dispose() {
+    _phoneController.removeListener(_onPhoneChanged);
+    _otpController.removeListener(_onOtpChanged);
+    _phoneController.dispose();
+    _otpController.dispose();
+    super.dispose();
   }
 }

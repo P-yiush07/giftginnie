@@ -52,7 +52,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.6,
+      initialChildSize: 0.9,
       minChildSize: 0.4,
       maxChildSize: 0.95,
       builder: (context, scrollController) {
@@ -74,7 +74,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                           ClipRRect(
                             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                             child: Container(
-                              height: 300,
+                              height: 400,
                               color: Colors.grey[200],
                               child: PageView.builder(
                                 controller: _imageController,
@@ -87,8 +87,8 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                 itemBuilder: (context, index) {
                                   return ImageService.getNetworkImage(
                                     imageUrl: _product.images[index],
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 300,
+                                    // width: MediaQuery.of(context).size.width,
+                                    // height: 300,
                                     fit: BoxFit.cover,
                                     errorWidget: Image.asset(
                                       'assets/images/placeholder.png',
@@ -196,6 +196,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                   fontSize: 16,
                                   color: Colors.grey,
                                   decoration: TextDecoration.lineThrough,
+                                  decorationColor: AppColors.black
                                 ),
                               ),
                             ],

@@ -141,7 +141,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             style: FilledButton.styleFrom(
               backgroundColor: _isFormValid() 
                   ? AppColors.primary 
-                  : Colors.grey.shade300,
+                  : AppColors.grey500,
               minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(28),
@@ -364,7 +364,10 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                 return ListTile(
                   title: Text(
                     filteredStates[index],
-                    style: AppFonts.paragraph.copyWith(fontSize: 14),
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
                   ),
                   onTap: () {
                     setState(() {

@@ -18,8 +18,8 @@ class AuthService {
   AuthService() {
     _dio = Dio(BaseOptions(
       baseUrl: ApiConstants.baseUrl,
-      connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 3),
+      connectTimeout: const Duration(seconds:30),
+      receiveTimeout: const Duration(seconds: 30),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -127,47 +127,44 @@ class AuthService {
     required String token,
   }) async {
     try {
-      Map<String, dynamic> data;
-      
-      if (AuthConfig.useDummyAuth) {
-        // Get dummy tokens directly without OTP verification
-        final response = await _dio.get(ApiEndpoints.dummyToken);
-        if (response.statusCode != 200) {
-          throw Exception('Failed to get dummy tokens');
-        }
-        data = response.data;
-      } else {
-        // Use real OTP verification
-        final response = await _dio.post(
-          ApiEndpoints.verifyOTP,
-          data: {
-            'phone_number': phoneNumber,
-            'country_code': '91',
-            'otp': otp,
-            'verification_id': verificationId,
-            'token': token,
-          },
-        );
-        
-        if (response.statusCode != 200) {
-          throw Exception(response.data['message'] ?? 'Failed to verify OTP');
-        }
-        data = response.data['data'];
-      }
+      debugPrint('Sending verification request with:');
+      debugPrint('Phone: $phoneNumber');
+      debugPrint('OTP: $otp');
+      debugPrint('VerificationId: $verificationId');
+      debugPrint('Token: $token');
 
-      // Save auth data
-      await _saveAuthData(
-        accessToken: data['access'],
-        refreshToken: data['refresh'],
-        userData: {
-          'user_id': JwtDecoder.decode(data['access'])['user_id'],
+      final response = await _dio.post(
+        ApiEndpoints.verifyOTP,
+        data: {
           'phone_number': phoneNumber,
+          'country_code': '91',
+          'otp': otp,
+          'verification_id': verificationId,
+          'token': token,
         },
       );
+      
+      debugPrint('Response status: ${response.statusCode}');
+      debugPrint('Response data: ${response.data}');
+
+      if (response.statusCode == 200 && response.data['data'] != null) {
+        // Save auth data
+        await _saveAuthData(
+          accessToken: response.data['data']['access'],
+          refreshToken: response.data['data']['refresh'],
+          userData: {
+            'user_id': JwtDecoder.decode(response.data['data']['access'])['user_id'],
+            'phone_number': phoneNumber,
+          },
+        );
+      } else {
+        throw Exception(response.data['message'] ?? 'Failed to verify OTP');
+      }
     } on DioException catch (e) {
       debugPrint('Error in auth process: $e');
-      if (e.response?.statusCode == 401) {
-        throw Exception('Invalid OTP. Please try again.');
+      debugPrint('Error response: ${e.response?.data}');
+      if (e.response?.statusCode == 400) {
+        throw Exception(e.response?.data['message'] ?? 'Invalid OTP. Please try again.');
       }
       throw Exception('Failed to verify OTP. Please try again.');
     }

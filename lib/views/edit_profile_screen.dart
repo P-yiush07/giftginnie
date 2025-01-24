@@ -150,6 +150,7 @@ class EditProfileView extends StatelessWidget {
                             icon: Icons.phone_outlined,
                             controller: controller.phoneController,
                             keyboardType: TextInputType.phone,
+                            enabled: false,
                           ),
                           const SizedBox(height: 24),
                           Text(
@@ -255,6 +256,7 @@ class EditProfileView extends StatelessWidget {
     required IconData icon,
     required TextEditingController controller,
     TextInputType? keyboardType,
+    bool enabled = true,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,12 +272,13 @@ class EditProfileView extends StatelessWidget {
         Container(
           height: 52,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: enabled ? Colors.white : const Color(0xFFF5F5F5),
             borderRadius: BorderRadius.circular(26),
           ),
           child: TextFormField(
             controller: controller,
             keyboardType: keyboardType,
+            enabled: enabled,
             style: const TextStyle(
               color: AppColors.authSocialButtonText,
               fontSize: 15,
