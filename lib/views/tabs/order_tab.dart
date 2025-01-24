@@ -395,8 +395,11 @@ class _OrderCard extends StatelessWidget {
   }
 
   bool _hasRating() {
-    // Check if any product in the order has a rating
-    return order.items.any((item) => item.product.rating != null);
+    // Get the number of items being displayed
+    int displayCount = order.items.length > 2 ? 2 : order.items.length;
+    
+    // Check if any of the displayed products has a rating
+    return order.items.take(displayCount).any((item) => item.product.rating != null);
   }
 
   void _showRatingDialog(BuildContext context) {

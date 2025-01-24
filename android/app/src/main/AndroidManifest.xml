@@ -5,9 +5,9 @@
     <!-- For Android 12 and lower -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <application
-        android:label="giftginnie_ui"
+        android:label="Gift Ginnie"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/app_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"
