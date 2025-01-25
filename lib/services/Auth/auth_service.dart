@@ -147,7 +147,7 @@ class AuthService {
       debugPrint('Response status: ${response.statusCode}');
       debugPrint('Response data: ${response.data}');
 
-      if (response.statusCode == 200 && response.data['data'] != null) {
+      if ((response.statusCode == 200 || response.statusCode == 201) && response.data['data'] != null) {
         await _saveAuthData(
           accessToken: response.data['data']['access'],
           refreshToken: response.data['data']['refresh'],
