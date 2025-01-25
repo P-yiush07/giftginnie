@@ -16,16 +16,16 @@ class ContactUsTexts {
 
   // Contact Options
   final String emailTitle = 'Email Us';
-  final String emailAddress = 'support@giftginnie.com';
+  final String emailAddress = 'giftginnie1@gmail.com';
   final String phoneTitle = 'Call Us';
-  final String phoneNumber = '+1 (555) 123-4567';
+  final String phoneNumber = '8000-932-933';
 
   // Business Hours
   final String businessHoursTitle = 'Business Hours';
   final String weekdayHours = 'Monday - Friday';
-  final String weekdayTiming = '9:00 AM - 6:00 PM';
+  final String weekdayTiming = '10:30 AM - 8:00 PM';
   final String saturdayHours = 'Saturday';
-  final String saturdayTiming = '10:00 AM - 4:00 PM';
+  final String saturdayTiming = '10:30 AM - 8:00 PM';
   final String sundayHours = 'Sunday';
   final String sundayTiming = 'Closed';
 }

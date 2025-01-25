@@ -131,5 +131,9 @@ class SignInController extends ChangeNotifier {
 
   void backToPhoneInput() {
     isPhoneVerified = false;
+    _verificationData = null;
+    _otpController.clear();
+    _error = null;
+    notifyListeners();
   }
 }

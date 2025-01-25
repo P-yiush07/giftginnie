@@ -361,7 +361,9 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                               : ElevatedButton(
                                   onPressed: null,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.grey300,
+                                    backgroundColor: const Color(0xFFE0E0E0),
+                                    disabledBackgroundColor: const Color(0xFFE0E0E0),
+                                    disabledForegroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(28),
                                     ),
@@ -369,7 +371,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                   child: Text(
                                     'Out of Stock',
                                     style: AppFonts.heading1.copyWith(
-                                      color: Colors.white,
+                                      color: const Color(0xFF757575),
                                       fontSize: 16,
                                     ),
                                   ),

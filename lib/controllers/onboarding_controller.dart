@@ -10,19 +10,19 @@ class OnboardingController extends ChangeNotifier {
     OnboardingModel(
       title: 'Browse Best Gift',
       description: 'Explore a variety of nearby Gift and their mouthwatering menus right at your fingertips.',
-      imagePath: AppImages.webp_onboardingPhone,
+      imagePath: AppImages.webp_onboardingPhone1,
       bgColor: AppColors.primaryBg
     ),
     OnboardingModel(
       title: 'Track Your Orders',
       description: 'Stay updated with real-time tracking of your gift orders from purchase to delivery.',
-      imagePath: AppImages.webp_onboardingPhone,
+      imagePath: AppImages.webp_onboardingPhone2,
       bgColor: AppColors.secondaryBg
     ),
     OnboardingModel(
       title: 'Secure Payments',
       description: 'Enjoy hassle-free and secure payment options for a seamless checkout experience.',
-      imagePath: AppImages.webp_onboardingPhone,
+      imagePath: AppImages.webp_onboardingPhone3,
       bgColor: AppColors.tertiaryBg
     ),
   ];

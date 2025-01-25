@@ -59,11 +59,12 @@ class SignInView extends StatelessWidget {
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.black),
                   onPressed: () {
-                    final controller =
-                        Provider.of<SignInController>(context, listen: false);
-                    controller.isPhoneVerified
-                        ? controller.backToPhoneInput()
-                        : Navigator.of(context).pop();
+                    final controller = Provider.of<SignInController>(context, listen: false);
+                    if (controller.isPhoneVerified) {
+                      controller.backToPhoneInput();
+                    } else {
+                      Navigator.of(context).pop();
+                    }
                   },
                 ),
               ),

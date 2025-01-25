@@ -136,11 +136,11 @@ class AuthService {
       final response = await _dio.post(
         ApiEndpoints.verifyOTP,
         data: {
-          'phone_number': phoneNumber,
+          'phone_number': phoneNumber.toString(),
           'country_code': '91',
-          'otp': otp,
-          'verification_id': verificationId,
-          'token': token,
+          'otp': otp.toString(),
+          'verification_id': verificationId.toString(),
+          'token': token.toString(),
         },
       );
       
@@ -148,7 +148,6 @@ class AuthService {
       debugPrint('Response data: ${response.data}');
 
       if (response.statusCode == 200 && response.data['data'] != null) {
-        // Save auth data
         await _saveAuthData(
           accessToken: response.data['data']['access'],
           refreshToken: response.data['data']['refresh'],

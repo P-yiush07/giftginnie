@@ -1030,7 +1030,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        rating.toString(),
+                        rating.toStringAsFixed(1),
                         style: AppFonts.paragraph.copyWith(
                           fontSize: 14,
                           color: Colors.white,
