@@ -314,24 +314,6 @@ class SignInView extends StatelessWidget {
         // Action Buttons Group
         _buildLoginButton(controller),
         const SizedBox(height: 16),
-        Center(
-          child: TextButton(
-            onPressed: controller.resendOTP,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              controller.model.resendOtpText,
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/icons.dart';
+import 'package:giftginnie_ui/controllers/main/tabs/home_tab_controller.dart';
+import 'package:giftginnie_ui/services/connectivity_service.dart';
 import 'package:giftginnie_ui/views/tabs/cart_tab.dart';
 import 'package:giftginnie_ui/views/tabs/order_tab.dart';
 import 'package:giftginnie_ui/views/tabs/profile_tab.dart';
+import 'package:giftginnie_ui/widgets/Internet/connectivity_wrapper.dart';
 import 'package:provider/provider.dart';
 import '../../constants/colors.dart';
 import '../../controllers/main/home_controller.dart';
@@ -10,17 +13,57 @@ import 'tabs/home_tab.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/views/Product%20Screen/search_screen.dart';
+import 'package:flutter/services.dart';
 
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  DateTime? _lastBackPressTime;
+  final HomeController _homeController = HomeController();
+
+  Future<bool> _onWillPop() async {
+    if (_homeController.currentIndex != 0) {
+      _homeController.setCurrentIndex(0);
+      return false;
+    }
+    
+    if (_lastBackPressTime == null || 
+        DateTime.now().difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+      _lastBackPressTime = DateTime.now();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Press back again to exit'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return false;
+    }
+    
+    await SystemNavigator.pop(animated: true);
+    return true;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => HomeController(),
-      child: const HomeView(),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: ChangeNotifierProvider.value(
+        value: _homeController,
+        child: const HomeView(),
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _homeController.dispose();
+    super.dispose();
   }
 }
 
@@ -202,6 +245,38 @@ class HomeView extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class HomeTab extends StatelessWidget {
+  const HomeTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        SystemNavigator.pop(); // This will close the app
+        return false;
+      },
+      child: ConnectivityWrapper(
+        onRetry: () {
+          if (context.read<ConnectivityService>().isConnected) {
+            context.read<HomeTabController>().refreshData();
+          }
+        },
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: ChangeNotifierProvider(
+            create: (_) => HomeTabController(),
+            child: const HomeTabView(),
+          ),
+        ),
+      ),
     );
   }
 }

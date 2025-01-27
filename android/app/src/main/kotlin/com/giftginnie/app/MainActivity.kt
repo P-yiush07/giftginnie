@@ -1,4 +1,4 @@
-package com.example.giftginnie_ui
+package com.giftginnie.app
 
 import io.flutter.embedding.android.FlutterActivity
 
