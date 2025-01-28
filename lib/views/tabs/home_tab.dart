@@ -395,7 +395,9 @@ class _HomeTabViewState extends State<HomeTabView> {
                         return const SizedBox.shrink();
                       }
 
-                      return HomeCarousel(items: controller.carouselItems);
+                      return HomeCarousel(
+                        items: controller.carouselItems,
+                      );
                     },
                   ),
                   // Categories Section

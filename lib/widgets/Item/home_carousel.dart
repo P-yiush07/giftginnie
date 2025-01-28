@@ -20,10 +20,14 @@ class HomeCarousel extends StatefulWidget {
   State<HomeCarousel> createState() => _HomeCarouselState();
 }
 
-class _HomeCarouselState extends State<HomeCarousel> {
+class _HomeCarouselState extends State<HomeCarousel> with AutomaticKeepAliveClientMixin {
   late PageController _pageController;
   Timer? _carouselTimer;
   int _currentPage = 0;
+  bool _isDisposed = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -34,24 +38,31 @@ class _HomeCarouselState extends State<HomeCarousel> {
 
   void _startCarouselTimer() {
     _carouselTimer?.cancel();
+    if (widget.items.isEmpty) return;
+
     _carouselTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (_currentPage < widget.items.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
-      if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _currentPage,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeIn,
-        );
-      }
+      if (_isDisposed || !mounted || !_pageController.hasClients) return;
+
+      final nextPage = (_currentPage + 1) % widget.items.length;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     });
   }
 
   @override
+  void didUpdateWidget(HomeCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.items != oldWidget.items) {
+      _startCarouselTimer();
+    }
+  }
+
+  @override
   void dispose() {
+    _isDisposed = true;
     _carouselTimer?.cancel();
     _pageController.dispose();
     super.dispose();
@@ -59,6 +70,12 @@ class _HomeCarouselState extends State<HomeCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
+    if (widget.items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       children: [
         SizedBox(
@@ -66,9 +83,9 @@ class _HomeCarouselState extends State<HomeCarousel> {
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (int page) {
-              setState(() {
-                _currentPage = page;
-              });
+              if (mounted) {
+                setState(() => _currentPage = page);
+              }
             },
             itemCount: widget.items.length,
             itemBuilder: (context, index) {

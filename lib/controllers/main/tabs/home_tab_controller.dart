@@ -25,6 +25,9 @@ class HomeTabController extends ChangeNotifier {
   List<Product> _popularProducts = [];
   List<PopularCategory> _popularCategories = [];
   List<CarouselItem> _carouselItems = [];
+  DateTime? _lastRefreshTime;
+  static const Duration _minRefreshInterval = Duration(seconds: 2);
+  bool _isDisposed = false;
 
   // Getters
   HomeTabModel get model => _model;
@@ -126,13 +129,19 @@ class HomeTabController extends ChangeNotifier {
       _isLoadingCarousel = true;
       notifyListeners();
       
-      _carouselItems = await _productService.getCarouselItems();
+      final items = await _productService.getCarouselItems();
+      if (!_isDisposed) {
+        _carouselItems = items;
+        _isLoadingCarousel = false;
+        notifyListeners();
+      }
     } catch (e) {
       debugPrint('Error fetching carousel items: $e');
+      if (!_isDisposed) {
+        _isLoadingCarousel = false;
+        notifyListeners();
+      }
       rethrow;
-    } finally {
-      _isLoadingCarousel = false;
-      notifyListeners();
     }
   }
 
@@ -149,7 +158,15 @@ class HomeTabController extends ChangeNotifier {
 
   // Initialize data
   Future<void> refreshData() async {
+    // Check if enough time has passed since last refresh
+    if (_lastRefreshTime != null && 
+        DateTime.now().difference(_lastRefreshTime!) < _minRefreshInterval) {
+      return;
+    }
+    
     _error = null;
+    _lastRefreshTime = DateTime.now();
+    
     // Set loading states for all sections including carousel
     _isLoadingCarousel = true;
     _isLoadingPopularProducts = true;
@@ -219,6 +236,7 @@ class HomeTabController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _isDisposed = true;
     // Clean up any resources
     super.dispose();
   }
