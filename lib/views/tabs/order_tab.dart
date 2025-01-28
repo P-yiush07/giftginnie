@@ -12,6 +12,7 @@ import '../../widgets/Internet/connectivity_wrapper.dart';
 import '../../services/connectivity_service.dart';
 import '../../controllers/main/home_controller.dart';
 import '../Order Screen/order_detail_screen.dart';
+import '../../widgets/Error/error_widget.dart';
 
 class OrdersTab extends StatelessWidget {
   const OrdersTab({super.key});
@@ -83,7 +84,13 @@ class OrdersTabView extends StatelessWidget {
 
                   if (controller.error != null) {
                     return SliverToBoxAdapter(
-                      child: Center(child: Text(controller.error!)),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height - 200,
+                        child: ErrorState(
+                          message: 'Unable to load your orders. Please try again.',
+                          onRetry: () => controller.initializeData(),
+                        ),
+                      ),
                     );
                   }
 

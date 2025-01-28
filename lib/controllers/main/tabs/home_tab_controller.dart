@@ -17,6 +17,9 @@ class HomeTabController extends ChangeNotifier {
   final HomeTabModel _model = HomeTabModel();
   bool _isLoading = true;
   bool _isLoadingCategories = true;
+  bool _isLoadingPopularProducts = true;
+  bool _isLoadingCarousel = true;
+  bool _isLoadingPopularCategories = false;
   String? _error;
   List<CategoryModel> _categories = [];
   List<Product> _popularProducts = [];
@@ -27,6 +30,9 @@ class HomeTabController extends ChangeNotifier {
   HomeTabModel get model => _model;
   bool get isLoading => _isLoading;
   bool get isLoadingCategories => _isLoadingCategories;
+  bool get isLoadingPopularProducts => _isLoadingPopularProducts;
+  bool get isLoadingCarousel => _isLoadingCarousel;
+  bool get isLoadingPopularCategories => _isLoadingPopularCategories;
   String? get error => _error;
   List<CategoryModel> get categories => _categories;
   List<Product> get popularProducts => _popularProducts;
@@ -34,11 +40,12 @@ class HomeTabController extends ChangeNotifier {
   List<CarouselItem> get carouselItems => _carouselItems;
 
   HomeTabController() {
-    _fetchInitialData();
+    initializeData();
   }
 
-  Future<void> _fetchInitialData() async {
+  Future<void> initializeData() async {
     _isLoading = true;
+    _isLoadingPopularProducts = true;
     notifyListeners();
 
     final connectivityService = Provider.of<ConnectivityService>(
@@ -49,6 +56,7 @@ class HomeTabController extends ChangeNotifier {
     if (!connectivityService.isConnected) {
       _error = 'No internet connection';
       _isLoading = false;
+      _isLoadingPopularProducts = false;
       notifyListeners();
       return;
     }
@@ -67,6 +75,7 @@ class HomeTabController extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      _isLoadingPopularProducts = false;
       notifyListeners();
     }
   }
@@ -82,53 +91,48 @@ class HomeTabController extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error fetching categories: $e');
-      _isLoadingCategories = false;
-      notifyListeners();
+      rethrow;
     }
   }
 
   Future<void> _fetchPopularProducts() async {
     try {
+      _isLoadingPopularProducts = true;
+      notifyListeners();
+      
+      await Future.delayed(const Duration(milliseconds: 500));
       _popularProducts = await _productService.getPopularProducts();
-      // Initialize like states in ProductController
-      final productController = Provider.of<ProductController>(navigatorKey.currentContext!, listen: false);
-      for (var product in _popularProducts) {
-        productController.updateProductLikeStatus(product.id, product.isLiked);
-      }
     } catch (e) {
       debugPrint('Error fetching popular products: $e');
+      rethrow;
+    } finally {
+      _isLoadingPopularProducts = false;
+      notifyListeners();
     }
   }
 
   Future<void> _fetchPopularCategories() async {
     try {
       _popularCategories = await _categoryService.getPopularCategories();
-      
-      // Debug logging
-      debugPrint('Popular Categories Response:');
-      for (var category in _popularCategories) {
-        debugPrint('''
-          Category ID: ${category.categoryId}
-          Name: ${category.categoryName}
-          Image URL: ${category.image}
-          Rating: ${category.averageRating}
-          Description: ${category.categoryDescription}
-          ----------------------------------------
-        ''');
-      }
-      
       notifyListeners();
     } catch (e) {
       debugPrint('Error fetching popular categories: $e');
+      rethrow;
     }
   }
 
   Future<void> _fetchCarouselItems() async {
     try {
-      _carouselItems = await _productService.getCarouselItems();
+      _isLoadingCarousel = true;
       notifyListeners();
+      
+      _carouselItems = await _productService.getCarouselItems();
     } catch (e) {
       debugPrint('Error fetching carousel items: $e');
+      rethrow;
+    } finally {
+      _isLoadingCarousel = false;
+      notifyListeners();
     }
   }
 
@@ -144,47 +148,36 @@ class HomeTabController extends ChangeNotifier {
   }
 
   // Initialize data
-  Future<void> initializeData() async {
-    isLoading = true;
-    error = null;
+  Future<void> refreshData() async {
+    _error = null;
+    // Set loading states for all sections including carousel
+    _isLoadingCarousel = true;
+    _isLoadingPopularProducts = true;
+    _isLoadingCategories = true;
+    notifyListeners();
 
     try {
-      // TODO: Fetch categories
-      await _fetchCategories();
-      
-      // TODO: Fetch featured products
-      await _fetchFeaturedProducts();
-      
-      // TODO: Fetch trending products
-      await _fetchTrendingProducts();
-      
-      // TODO: Fetch special offers
-      await _fetchSpecialOffers();
-      
+      // Clear existing data
+      _carouselItems = [];
+      _categories = [];
+      _popularProducts = [];
+      notifyListeners();
+
+      await Future.wait([
+        _fetchCarouselItems(),
+        _fetchCategories(),
+        _fetchPopularProducts(),
+      ]);
+
     } catch (e) {
-      error = 'Failed to load home data: ${e.toString()}';
+      _error = 'Failed to refresh content';
+      debugPrint('Error refreshing home data: $e');
     } finally {
-      isLoading = false;
+      _isLoadingCarousel = false;
+      _isLoadingPopularProducts = false;
+      _isLoadingCategories = false;
+      notifyListeners();
     }
-  }
-
-  Future<void> _fetchFeaturedProducts() async {
-    // TODO: Implement featured products fetching
-    await Future.delayed(const Duration(seconds: 1));
-  }
-
-  Future<void> _fetchTrendingProducts() async {
-    // TODO: Implement trending products fetching
-    await Future.delayed(const Duration(seconds: 1));
-  }
-
-  Future<void> _fetchSpecialOffers() async {
-    // TODO: Implement special offers fetching
-    await Future.delayed(const Duration(seconds: 1));
-  }
-
-  Future<void> refreshData() async {
-    await initializeData();
   }
 
   void handleCategoryTap(String categoryId) {
