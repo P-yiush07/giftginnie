@@ -1,4 +1,4 @@
-package com.giftginnie.app
+package com.giftginnie1.app
 
 import io.flutter.embedding.android.FlutterActivity
 
