@@ -10,8 +10,10 @@ import 'package:provider/provider.dart';
 import 'services/Cache/cache_service.dart';
 import 'controllers/main/user_controller.dart';
 import 'services/connectivity_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  await dotenv.load(fileName: ".env");
   try {
     WidgetsFlutterBinding.ensureInitialized();
     

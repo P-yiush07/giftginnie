@@ -15,6 +15,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'order_failed_screen.dart';
 import '../../controllers/main/home_controller.dart';
 import '../home_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CheckoutConfirmationScreen extends StatefulWidget {
   final CartModel cartData;
@@ -186,7 +187,7 @@ class _CheckoutConfirmationScreenState
       );
       
       var options = {
-        'key': 'rzp_test_sAHiDzlP1sRvQQ',
+        'key': dotenv.env['RAZORPAY_KEY'],
         'amount': orderDetails['amount'] * 100,
         'name': 'GiftGinnie',
         'order_id': orderDetails['razorpayOrderId'],

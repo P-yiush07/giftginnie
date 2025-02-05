@@ -1,5 +1,5 @@
 abstract class ApiConstants {
-  static const String baseUrl = 'http://18.218.49.219:8000/api/v1';
+  static const String baseUrl = 'https://ip.giftginnie.in/api/v1';
 }
 
 abstract class ApiEndpoints {
