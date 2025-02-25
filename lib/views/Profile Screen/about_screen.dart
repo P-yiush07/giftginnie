@@ -6,6 +6,7 @@ import 'package:giftginnie_ui/views/Profile%20Screen/terms_of_service_screen.dar
 import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:giftginnie_ui/views/Profile%20Screen/privacy_policy_screen.dart';
 import 'package:giftginnie_ui/views/Profile%20Screen/contact_us_screen.dart';
+import 'package:giftginnie_ui/views/Profile%20Screen/about_details_screen.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -57,12 +58,37 @@ class AboutScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      'Your trusted platform for discovering and sending perfect gifts.',
-                      style: AppFonts.paragraph.copyWith(
-                        fontSize: 15,
-                        color: AppColors.textGrey,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Your trusted platform for discovering and sending perfect gifts.',
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 15,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              SlidePageRoute(
+                                page: const AboutDetailsScreen(),
+                                direction: SlideDirection.right,
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Read More',
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 14,
+                              color: AppColors.primaryRed,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

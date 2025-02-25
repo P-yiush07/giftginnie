@@ -15,6 +15,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../Profile Screen/about_screen.dart';
 import '../../widgets/Internet/connectivity_wrapper.dart';
 import '../../../services/connectivity_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -397,17 +399,48 @@ class _ProfileTabViewState extends State<ProfileTabView> {
               Consumer<UserController>(
                 builder: (context, userController, _) {
                   if (userController.userProfile?.dateJoined != null) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: Text(
-                          _formatJoinDate(userController.userProfile!.dateJoined),
-                          style: AppFonts.paragraph.copyWith(
-                            fontSize: 14,
-                            color: AppColors.textGrey,
+                    return Column(
+                      children: [
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Text(
+                              _formatJoinDate(userController.userProfile!.dateJoined),
+                              style: AppFonts.paragraph.copyWith(
+                                fontSize: 14,
+                                color: AppColors.textGrey,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                        // Social Media Buttons
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 24),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildSocialMediaButton(
+                                icon: FontAwesomeIcons.instagram,
+                                url: 'https://www.instagram.com/giftginnie1/profilecard/?igsh=MnowdXowaXk3OWRu',
+                                color: const Color(0xFFE4405F),
+                              ),
+                              const SizedBox(width: 32),
+                              _buildSocialMediaButton(
+                                icon: FontAwesomeIcons.facebook,
+                                url: 'https://www.facebook.com/profile.php?id=61566517247110',
+                                color: const Color(0xFF1877F2),
+                              ),
+                              const SizedBox(width: 32),
+                              _buildSocialMediaButton(
+                                icon: FontAwesomeIcons.youtube,
+                                url: 'https://youtube.com/@giftginnie?si=oloUJ-NgEC5ickPJ',
+                                color: const Color(0xFFFF0000),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     );
                   }
                   return const SizedBox.shrink();
@@ -416,6 +449,26 @@ class _ProfileTabViewState extends State<ProfileTabView> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSocialMediaButton({
+    required IconData icon,
+    required String url,
+    required Color color,
+  }) {
+    return GestureDetector(
+      onTap: () async {
+        final Uri uri = Uri.parse(url);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: FaIcon(
+        icon,
+        size: 28,
+        color: color,
       ),
     );
   }

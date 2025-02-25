@@ -660,7 +660,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                                 image: category.image,
                                 rating: category.averageRating,
                                 title: category.categoryName,
-                                categories: [category.categoryDescription],
+                                categories: [],
                                 isBestDeal: false,
                                 category: category,
                               ),
@@ -957,7 +957,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                 categoryName: category.categoryName,
                 description: category.categoryDescription,
                 image: category.image,
-                gifts: [], // Initially empty, will be populated by CategoryScreen
+                gifts: [],
               ),
             ),
             direction: SlideDirection.right,
@@ -982,7 +982,6 @@ class _HomeTabViewState extends State<HomeTabView> {
           children: [
             Stack(
               children: [
-                // Image - Changed from Image.asset to ImageService.getNetworkImage
                 ClipRRect(
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(12)),
@@ -999,7 +998,6 @@ class _HomeTabViewState extends State<HomeTabView> {
                     ),
                   ),
                 ),
-                // Dark Gradient Overlay
                 ClipRRect(
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(12)),
@@ -1019,7 +1017,6 @@ class _HomeTabViewState extends State<HomeTabView> {
                     ),
                   ),
                 ),
-                // Best Deal Badge
                 if (isBestDeal)
                   Positioned(
                     top: 12,
@@ -1043,7 +1040,6 @@ class _HomeTabViewState extends State<HomeTabView> {
                       ),
                     ),
                   ),
-                // Rating
                 Positioned(
                   bottom: 12,
                   left: 12,
@@ -1070,26 +1066,15 @@ class _HomeTabViewState extends State<HomeTabView> {
             ),
             Padding(
               padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppFonts.paragraph.copyWith(
-                      color: AppColors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    categories.join(', '),
-                    style: AppFonts.heading1.copyWith(
-                      fontSize: 14,
-                      color: AppColors.primaryRed,
-                    ),
-                  ),
-                ],
+              child: Text(
+                title,
+                style: AppFonts.paragraph.copyWith(
+                  color: AppColors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

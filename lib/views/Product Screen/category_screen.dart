@@ -132,7 +132,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   children: [
                     // Category Title
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 8.0),
+                      padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 24.0),
                       child: Text(
                         '${widget.category.categoryName} Category',
                         style: AppFonts.paragraph.copyWith(
@@ -141,19 +141,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                         ),
                       ),
                     ),
-                    // Description
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        widget.category.description,
-                        style: AppFonts.paragraph.copyWith(
-                          color: AppColors.textGrey,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
                     // Search Bar
-                    const SizedBox(height: 16),
                     _buildSearchBar(),
                     const SizedBox(height: 24),
                     _buildProductGrid(widget.category),
