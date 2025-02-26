@@ -225,7 +225,7 @@ class FavouriteGiftsView extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '\$${product.sellingPrice.toStringAsFixed(2)}',
+                      '\₹${product.sellingPrice.toStringAsFixed(2)}',
                       style: AppFonts.paragraph.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

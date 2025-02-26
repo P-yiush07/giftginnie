@@ -674,41 +674,52 @@ class _HomeTabViewState extends State<HomeTabView> {
                   const SizedBox(height: 24),
                   Material(
                     color: Colors.white,
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        image: DecorationImage(
-                          image: AssetImage(AppImages.webp_cta),
-                          fit: BoxFit.fitHeight,
-                          alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: () async {
+                        final whatsappUrl = 'https://api.whatsapp.com/send?phone=918000932933';
+                        if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+                          await launchUrl(
+                            Uri.parse(whatsappUrl),
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          image: DecorationImage(
+                            image: AssetImage(AppImages.webp_cta),
+                            fit: BoxFit.fitHeight,
+                            alignment: Alignment.centerRight,
+                          ),
                         ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 40.0, horizontal: 24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'For Bulk Orders',
-                              style: AppFonts.paragraph.copyWith(
-                                fontSize: 14,
-                                color: AppColors.textDarkGrey.withOpacity(0.8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 40.0, horizontal: 24.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'For Bulk Orders',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 14,
+                                  color: AppColors.textDarkGrey.withOpacity(0.8),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'CONNECT\nOVER\nWHATSAPP',
-                              style: AppFonts.paragraph.copyWith(
-                                fontSize: 24,
-                                height: 1.2,
-                                color: AppColors.textDarkGrey,
-                                fontWeight: FontWeight.w500,
+                              const SizedBox(height: 8),
+                              Text(
+                                'CONNECT\nOVER\nWHATSAPP',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 24,
+                                  height: 1.2,
+                                  color: AppColors.textDarkGrey,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
