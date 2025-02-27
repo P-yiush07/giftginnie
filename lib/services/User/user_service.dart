@@ -55,7 +55,8 @@ class UserService {
         '${ApiConstants.baseUrl}${ApiEndpoints.userProfile}',
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && response.data['data'] != null) {
+        debugPrint('Profile response: ${response.data}');
         return UserProfileModel.fromJson(response.data['data']);
       }
       
@@ -63,6 +64,9 @@ class UserService {
     } on DioException catch (e) {
       debugPrint('Error fetching user profile: $e');
       throw Exception('Failed to load profile. Please try again.');
+    } catch (e) {
+      debugPrint('Error parsing user profile: $e');
+      throw Exception('Failed to process profile data. Please try again.');
     }
   }
 

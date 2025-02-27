@@ -76,6 +76,18 @@ class AuthService {
     await _cacheService.clear();
   }
 
+  Future<void> saveAuthData({
+    required String accessToken,
+    required String refreshToken,
+    required Map<String, dynamic> userData,
+  }) async {
+    await _saveAuthData(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      userData: userData,
+    );
+  }
+
   // API Methods
   Future<OtpVerificationModel> sendOTP(String phoneNumber) async {
     if (AuthConfig.useDummyAuth) {

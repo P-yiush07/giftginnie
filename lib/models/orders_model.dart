@@ -62,13 +62,13 @@ class DeliveryAddress {
   factory DeliveryAddress.fromJson(Map<String, dynamic> json) {
     return DeliveryAddress(
       id: json['id'],
-      addressLine1: json['address_line_1'],
-      addressLine2: json['address_line_2'],
-      city: json['city'],
-      state: json['state'],
-      country: json['country'],
-      pincode: json['pincode'],
-      addressType: json['address_type'],
+      addressLine1: json['address_line_1'] ?? '',
+      addressLine2: json['address_line_2'] ?? '',
+      city: json['city'] ?? '',
+      state: json['state'] ?? '',
+      country: json['country'] ?? '',
+      pincode: json['pincode'] ?? '',
+      addressType: json['address_type'] ?? '',
     );
   }
 }
@@ -129,18 +129,18 @@ class OrderProduct {
   factory OrderProduct.fromJson(Map<String, dynamic> json) {
     return OrderProduct(
       id: json['id'],
-      name: json['name'],
-      description: json['description'],
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
       images: (json['images'] as List)
-          .map((img) => img['image'].toString())
+          .map((img) => img['image']?.toString() ?? '')
           .toList(),
-      inStock: json['in_stock'],
+      inStock: json['in_stock'] ?? false,
       rating: json['rating']?.toDouble(),
-      originalPrice: double.parse(json['original_price']),
-      sellingPrice: double.parse(json['selling_price']),
-      brand: json['brand'],
-      productType: json['product_type'],
-      isLiked: json['is_liked'],
+      originalPrice: double.parse(json['original_price']?.toString() ?? '0.0'),
+      sellingPrice: double.parse(json['selling_price']?.toString() ?? '0.0'),
+      brand: json['brand'] ?? '',
+      productType: json['product_type'] ?? '',
+      isLiked: json['is_liked'] ?? false,
     );
   }
 }

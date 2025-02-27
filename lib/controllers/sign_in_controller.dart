@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/sign_in_model.dart';
 import '../services/Auth/auth_service.dart';
 import '../models/otp_verification_model.dart';
+import '../config/auth_config.dart';
 
 class SignInController extends ChangeNotifier {
   final SignInModel _model = SignInModel();
@@ -66,20 +67,25 @@ class SignInController extends ChangeNotifier {
   Future<void> verifyPhone() async {
     if (_phoneController.text.isEmpty) return;
     
-    debugPrint('Starting phone verification...');
     _error = null;
     isLoading = true;
 
     try {
-      _verificationData = await _authService.sendOTP(_phoneController.text);
-      debugPrint('OTP sent successfully');
-      isPhoneVerified = true;
-      debugPrint('isPhoneVerified set to: $_isPhoneVerified');
+      // Check if using test credentials
+      if (_phoneController.text == AuthConfig.testPhoneNumber) {
+        _verificationData = OtpVerificationModel(
+          verificationId: 'dummy_id',
+          authToken: 'dummy_token'
+        );
+        isPhoneVerified = true;
+      } else {
+        _verificationData = await _authService.sendOTP(_phoneController.text);
+        isPhoneVerified = true;
+      }
     } catch (e) {
       debugPrint('Error during verification: $e');
       _error = 'Please try again later.';
       isPhoneVerified = false;
-      notifyListeners();
     } finally {
       isLoading = false;
       notifyListeners();
@@ -93,12 +99,23 @@ class SignInController extends ChangeNotifier {
     isLoading = true;
 
     try {
-      debugPrint('Verifying OTP with:');
-      debugPrint('Phone: ${_phoneController.text}');
-      debugPrint('OTP: ${_otpController.text}');
-      debugPrint('VerificationId: ${_verificationData!.verificationId}');
-      debugPrint('Token: ${_verificationData!.authToken}');
-      
+      // Check if using test credentials
+      if (_phoneController.text == AuthConfig.testPhoneNumber && 
+          _otpController.text == AuthConfig.testOTP) {
+        // Get dummy tokens
+        final tokenResponse = await _authService.getDummyTokens();
+        await _authService.saveAuthData(
+          accessToken: tokenResponse['access'],
+          refreshToken: tokenResponse['refresh'],
+          userData: {
+            'user_id': 3, // Dummy user ID
+            'phone_number': _phoneController.text,
+          },
+        );
+        return true;
+      }
+
+      // Normal OTP verification flow
       await _authService.verifyOTP(
         phoneNumber: _phoneController.text,
         otp: _otpController.text,

@@ -37,7 +37,7 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
     super.initState();
     selectedType = _getAddressTypeFromCode(widget.address.addressType);
     addressController.text = widget.address.addressLine1;
-    areaController.text = widget.address.addressLine2;
+    areaController.text = widget.address.addressLine2 ?? '';
     cityController.text = widget.address.city;
     stateController.text = widget.address.state;
     pincodeController.text = widget.address.pincode;

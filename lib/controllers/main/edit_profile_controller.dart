@@ -31,7 +31,7 @@ class EditProfileController extends ChangeNotifier {
       final profile = userController.userProfile!;
       
       nameController.text = profile.fullName;
-      emailController.text = profile.email;
+      emailController.text = profile.email ?? '';
       phoneController.text = profile.phoneNumber;
       countryCodeController.text = profile.countryCode;
       
