@@ -1,0 +1,82 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import '../../config/api.dart';
+import '../../models/category_model.dart';
+import '../Cache/cache_service.dart';
+import '../../models/popular_category_model.dart';
+
+class CategoryService {
+  final Dio _dio;
+  final CacheService _cacheService = CacheService();
+  final Map<String, CategoryModel> _categoryCache = {};
+  static const String _accessTokenKey = 'auth_token';
+
+  CategoryService() : _dio = Dio() {
+    _initializeDio();
+  }
+
+  void _initializeDio() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Get the access token from cache
+          final accessToken = await _cacheService.getString(_accessTokenKey);
+          if (accessToken != null) {
+            options.headers['Authorization'] = 'Bearer $accessToken';
+          }
+          return handler.next(options);
+        },
+      ),
+    );
+  }
+
+  Future<List<CategoryModel>> getCategories() async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}${ApiEndpoints.categories}');
+      final data = response.data['data'] as List;
+      return data.map((json) => CategoryModel.fromJson(json)).toList();
+    } catch (e) {
+      debugPrint('Error fetching categories: $e');
+      throw Exception('Failed to load categories');
+    }
+  }
+
+  Future<CategoryModel> getCategoryData(String categoryId) async {
+    // Check cache first
+    if (_categoryCache.containsKey(categoryId)) {
+      return _categoryCache[categoryId]!;
+    }
+
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}${ApiEndpoints.categories}/$categoryId');
+      final categoryData = CategoryModel.fromJson(response.data['data']);
+      
+      // Cache the result
+      _categoryCache[categoryId] = categoryData;
+      
+      return categoryData;
+    } catch (e) {
+      debugPrint('Error fetching category data: $e');
+      throw Exception('Failed to load category data');
+    }
+  }
+
+  void clearCache(String? categoryId) {
+    if (categoryId != null) {
+      _categoryCache.remove(categoryId);
+    } else {
+      _categoryCache.clear();
+    }
+  }
+
+  Future<List<PopularCategory>> getPopularCategories() async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}${ApiEndpoints.popularCategories}');
+      final data = response.data['data'] as List;
+      return data.map((json) => PopularCategory.fromJson(json)).toList();
+    } catch (e) {
+      debugPrint('Error fetching popular categories: $e');
+      throw Exception('Failed to load popular categories');
+    }
+  }
+}

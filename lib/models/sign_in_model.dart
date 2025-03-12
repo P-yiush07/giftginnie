@@ -10,7 +10,7 @@ class SignInModel {
   final String resendOtpText;
 
   SignInModel({
-    this.title = 'Welcome Back 😉',
+    this.title = 'Welcome 😉',
     this.subtitle = 'Log in to your account to start gifting joy and surprises to your loved ones.',
     this.phoneLabel = 'Phone Number',
     this.otpLabel = 'OTP Verification',

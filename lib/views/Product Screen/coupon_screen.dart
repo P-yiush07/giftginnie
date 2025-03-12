@@ -1,0 +1,316 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:giftginnie_ui/constants/colors.dart';
+import 'package:giftginnie_ui/constants/fonts.dart';
+import 'package:giftginnie_ui/controllers/main/coupon_controller.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+
+import '../../models/coupon_model.dart';
+import '../../constants/icons.dart';
+import '../../widgets/shimmer/coupon_shimmer.dart';
+
+class CouponScreen extends StatelessWidget {
+  const CouponScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => CouponController(),
+      child: const CouponScreenView(),
+    );
+  }
+}
+
+class CouponScreenView extends StatelessWidget {
+  const CouponScreenView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<CouponController>(
+      builder: (context, controller, _) {
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
+            backgroundColor: const Color(0xFFF9F9F9),
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(kToolbarHeight),
+              child: Container(
+                color: Colors.white,
+                child: AppBar(
+                  backgroundColor: Colors.white,
+                  elevation: 0,
+                  scrolledUnderElevation: 0,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.black),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  title: Text(
+                    'Coupon Code',
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                  surfaceTintColor: Colors.white,
+                ),
+              ),
+            ),
+            body: controller.isLoading
+                ? const CouponShimmer()
+                : SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          // Search Bar
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(32),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Consumer<CouponController>(
+                              builder: (context, controller, _) {
+                                return TextField(
+                                  onChanged: controller.searchCoupons,
+                                  decoration: InputDecoration(
+                                    hintText: 'Search Coupon code here',
+                                    hintStyle: AppFonts.paragraph.copyWith(
+                                      color: Colors.grey[400],
+                                    ),
+                                    prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          
+                          // Coupon List
+                          Consumer<CouponController>(
+                            builder: (context, controller, _) {
+                              if (controller.coupons.isEmpty) {
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    top: MediaQuery.of(context).size.height * 0.2,
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        SvgPicture.asset(
+                                          AppIcons.svg_couponIcon,
+                                          width: 64,
+                                          height: 64,
+                                          colorFilter: ColorFilter.mode(
+                                            Colors.grey[300]!,
+                                            BlendMode.srcIn,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          'No coupons currently available',
+                                          style: AppFonts.paragraph.copyWith(
+                                            fontSize: 16,
+                                            color: Colors.grey[600],
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                              
+                              return ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: controller.coupons.length,
+                                separatorBuilder: (context, index) => const SizedBox(height: 16),
+                                itemBuilder: (context, index) {
+                                  final coupon = controller.coupons[index];
+                                  return _buildCouponItem(
+                                    context,
+                                    discount: coupon.displayTitle,
+                                    description: coupon.displayDescription,
+                                    condition: coupon.displayCondition,
+                                    code: coupon.code,
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCouponItem(BuildContext context, {
+    required String discount,
+    required String description,
+    required String condition,
+    required String code,
+  }) {
+    return GestureDetector(
+      onTap: () => context.read<CouponController>().applyCoupon(context, code),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Colors.grey[200]!,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title Row with Icon
+            Row(
+              children: [
+                SvgPicture.asset(
+                  AppIcons.svg_couponIcon,
+                  width: 20,
+                  height: 20,
+                  colorFilter: ColorFilter.mode(
+                    AppColors.primaryRed,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    discount,
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 16,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            // Description
+            Text(
+              description,
+              style: AppFonts.paragraph.copyWith(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Validity
+            Text(
+              condition,
+              style: AppFonts.paragraph.copyWith(
+                color: Colors.grey[600],
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Coupon Code Container
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: AppColors.primaryRed,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.white,
+              ),
+              child: Text(
+                code,
+                style: AppFonts.paragraph.copyWith(
+                  color: AppColors.primaryRed,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Dotted Separator
+            Row(
+              children: [
+                Expanded(
+                  child: CustomPaint(
+                    painter: DottedLinePainter(color: Colors.grey[300]!),
+                    child: const SizedBox(height: 1),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Tap To Apply
+            Center(
+              child: Text(
+                'Tap To Apply',
+                style: AppFonts.paragraph.copyWith(
+                  color: AppColors.primaryRed,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DottedLinePainter extends CustomPainter {
+  final Color color;
+  
+  DottedLinePainter({required this.color});
+  
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..strokeWidth = 1
+      ..strokeCap = StrokeCap.round;
+      
+    const double dashWidth = 4;
+    const double dashSpace = 4;
+    double currentX = 0;
+    
+    while (currentX < size.width) {
+      canvas.drawLine(
+        Offset(currentX, 0),
+        Offset(currentX + dashWidth, 0),
+        paint,
+      );
+      currentX += dashWidth + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}

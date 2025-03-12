@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/constants/fonts.dart';
 import '../controllers/onboarding_controller.dart';
 import 'package:provider/provider.dart';
 import '../constants/colors.dart';
@@ -36,8 +37,9 @@ class OnboardingView extends StatelessWidget {
           return Stack(
             fit: StackFit.expand,
             children: [
-              // Background color
-              Container(
+              // Background color with animated container
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
                 decoration: BoxDecoration(
                   color: controller.onboardingPages[controller.currentPage].bgColor != null
                       ? Color(controller.onboardingPages[controller.currentPage].bgColor!)
@@ -45,34 +47,31 @@ class OnboardingView extends StatelessWidget {
                 ),
               ),
               
-              // Swipeable content area
-              GestureDetector(
-                onHorizontalDragEnd: (DragEndDetails details) {
-                  if (details.primaryVelocity! > 0) {
-                    // Swiped right
-                    controller.previousPage();
-                  } else if (details.primaryVelocity! < 0) {
-                    // Swiped left
-                    controller.nextPage(context);
-                  }
-                },
-                child: Column(
-                  children: [
-                    SizedBox(height: screenHeight * 0.1),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 40),
-                        child: Image.asset(
-                          controller.onboardingPages[controller.currentPage].imagePath,
-                          fit: BoxFit.contain,
+              // PageView for smooth sliding
+              PageView.builder(
+                controller: controller.pageController,
+                onPageChanged: controller.onPageChanged,
+                itemCount: controller.onboardingPages.length,
+                itemBuilder: (context, index) {
+                  final page = controller.onboardingPages[index];
+                  return Column(
+                    children: [
+                      SizedBox(height: screenHeight * 0.1),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Image.asset(
+                            page.imagePath,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  );
+                },
               ),
 
-              // Fixed bottom white container overlapping the content
+              // Fixed bottom white container
               Positioned(
                 left: 0,
                 right: 0,
@@ -85,9 +84,9 @@ class OnboardingView extends StatelessWidget {
                     children: [
                       Text(
                         controller.onboardingPages[controller.currentPage].title,
-                        style: const TextStyle(
+                        style: AppFonts.heading1.copyWith(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w400,
                           color: Colors.black,
                         ),
                       ),
@@ -95,19 +94,21 @@ class OnboardingView extends StatelessWidget {
                       Text(
                         controller.onboardingPages[controller.currentPage].description,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: AppFonts.paragraph.copyWith(
                           fontSize: 16,
                           color: Colors.grey,
                         ),
                       ),
                       const SizedBox(height: 48),
                       
-                      // Pagination dots
+                      // Pagination dots with animation
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
                           controller.onboardingPages.length,
-                          (index) => Container(
+                          (index) => AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             width: index == controller.currentPage ? 32 : 8,
                             height: 8,
@@ -127,7 +128,7 @@ class OnboardingView extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           TextButton(
-                            onPressed: controller.skipOnboarding,
+                            onPressed: () => controller.skipOnboarding(context),
                             style: TextButton.styleFrom(
                               minimumSize: const Size(150, 48),
                               foregroundColor: AppColors.textGrey,
@@ -135,11 +136,10 @@ class OnboardingView extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(24),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Skip',
-                              style: TextStyle(
+                              style: AppFonts.paragraph.copyWith(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -156,11 +156,10 @@ class OnboardingView extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(24),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Next',
-                              style: TextStyle(
+                              style: AppFonts.paragraph.copyWith(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
