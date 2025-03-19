@@ -6,6 +6,7 @@ import 'package:giftginnie_ui/controllers/main/user_controller.dart';
 import 'package:giftginnie_ui/models/popular_category_model.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/views/Address%20Screen/address_selection_screen.dart';
+import 'package:giftginnie_ui/views/Product%20Screen/all_categories_screen.dart';
 import 'package:giftginnie_ui/widgets/Error/error_widget.dart';
 import 'package:giftginnie_ui/widgets/Item/favourite_button.dart';
 import 'package:giftginnie_ui/widgets/shimmer/popular_product_shimmer.dart';
@@ -401,18 +402,40 @@ class _HomeTabViewState extends State<HomeTabView> {
                     },
                   ),
                   // Categories Section
-                  const SizedBox(height: 24),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          'Categories',
-                          style: AppFonts.heading1.copyWith(
-                            fontSize: 18,
-                            color: AppColors.black,
-                          ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Categories',
+                              style: AppFonts.heading1.copyWith(
+                                fontSize: 18,
+                                color: AppColors.black,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  SlidePageRoute(
+                                    page: const AllCategoriesScreen(),
+                                    direction: SlideDirection.right,
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                'View All',
+                                style: AppFonts.paragraph.copyWith(
+                                  color: AppColors.primaryRed,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -422,96 +445,27 @@ class _HomeTabViewState extends State<HomeTabView> {
                             return const HomeTabCategoryShimmer();
                           }
 
-                          // Split categories using the constant
                           final mainCategories = controller.categories
-                              .take(LayoutConstants.maxMainCategories)
+                              .take(6) // Show only top 6 categories
                               .toList();
-                          final overflowCategories = controller.categories.length >
-                                  LayoutConstants.maxMainCategories
-                              ? controller.categories.sublist(LayoutConstants.maxMainCategories)
-                              : <CategoryModel>[];
 
-                          return Column(
-                            children: [
-                              // Main category items
-                              SizedBox(
-                                height: 100,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  physics: const BouncingScrollPhysics(),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: LayoutConstants.horizontalPadding),
-                                  itemCount: mainCategories.length,
-                                  itemBuilder: (context, index) {
-                                    final category = mainCategories[index];
-                                    return Padding(
-                                      padding: EdgeInsets.only(
-                                        right: index != mainCategories.length - 1
-                                            ? LayoutConstants.chipSpacing
-                                            : 0,
-                                      ),
-                                      child: _buildCategoryItem(category: category),
-                                    );
-                                  },
-                                ),
-                              ),
-                              // Overflow category chips
-                              if (overflowCategories.isNotEmpty) ...[
-                                SizedBox(height: LayoutConstants.rowSpacing * 2),
-                                SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  physics: const BouncingScrollPhysics(),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: LayoutConstants.horizontalPadding),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      for (var i = 0;
-                                          i < overflowCategories.length;
-                                          i += LayoutConstants.chipsPerRow)
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              bottom:
-                                                  i + LayoutConstants.chipsPerRow <
-                                                          overflowCategories.length
-                                                      ? LayoutConstants.rowSpacing
-                                                      : 0),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              for (var j = i;
-                                                  j <
-                                                          i +
-                                                              LayoutConstants
-                                                                  .chipsPerRow &&
-                                                  j < overflowCategories.length;
-                                                  j++)
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      right: j %
-                                                                      LayoutConstants
-                                                                          .chipsPerRow !=
-                                                                      LayoutConstants
-                                                                          .chipsPerRow -
-                                                                      1 &&
-                                                          j !=
-                                                              overflowCategories
-                                                                      .length -
-                                                                  1
-                                                      ? LayoutConstants
-                                                          .chipSpacing
-                                                      : 0),
-                                                  child: _buildCategoryChip(
-                                                      overflowCategories[j]),
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                    ],
+                          return SizedBox(
+                            height: 100,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              physics: const BouncingScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: mainCategories.length,
+                              itemBuilder: (context, index) {
+                                final category = mainCategories[index];
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    right: index != mainCategories.length - 1 ? 16.0 : 0,
                                   ),
-                                ),
-                              ],
-                            ],
+                                  child: _buildCategoryItem(category: category),
+                                );
+                              },
+                            ),
                           );
                         },
                       ),
@@ -742,50 +696,70 @@ class _HomeTabViewState extends State<HomeTabView> {
   }
 
   Widget _buildCategoryItem({required CategoryModel category}) {
-    return Column(
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                SlidePageRoute(
-                    page: CategoryScreen(
-                      category: category,
-                    ),
-                    direction: SlideDirection.right),
-              );
-            },
-            borderRadius: BorderRadius.circular(32),
-            child: Ink(
-              decoration: BoxDecoration(
-                color: AppColors.grey100,
-                shape: BoxShape.circle,
-              ),
-              child: Container(
-                width: 64,
-                height: 64,
-                child: ClipOval(
-                  child: ImageService.getNetworkImage(
-                    imageUrl: category.image,
-                    width: 64,
-                    height: 64,
+    return SizedBox(
+      width: 80, // Increased width to accommodate more text
+      child: Column(
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  SlidePageRoute(
+                      page: CategoryScreen(
+                        category: category,
+                      ),
+                      direction: SlideDirection.right),
+                );
+              },
+              borderRadius: BorderRadius.circular(32),
+              child: Ink(
+                decoration: BoxDecoration(
+                  color: AppColors.grey100,
+                  shape: BoxShape.circle,
+                ),
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  child: ClipOval(
+                    child: category.image != null
+                        ? ImageService.getNetworkImage(
+                            imageUrl: category.image!,
+                            width: 64,
+                            height: 64,
+                            errorWidget: Image.asset(
+                              'assets/images/placeholder.png',
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Image.asset(
+                            'assets/images/placeholder.png',
+                            width: 64,
+                            height: 64,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          category.categoryName,
-          style: AppFonts.paragraph.copyWith(
-            fontSize: 12,
-            color: AppColors.labelGrey,
+          const SizedBox(height: 8),
+          Text(
+            category.categoryName,
+            style: AppFonts.paragraph.copyWith(
+              fontSize: 11, // Slightly smaller font
+              height: 1.2, // Tighter line height
+              color: AppColors.labelGrey,
+            ),
+            maxLines: 2, // Allow two lines
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -900,52 +874,6 @@ class _HomeTabViewState extends State<HomeTabView> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildCategoryChip(CategoryModel category) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            SlidePageRoute(
-              page: CategoryScreen(
-                category: category,
-              ),
-              direction: SlideDirection.right,
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppColors.grey300,
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Text(
-            category.categoryName,
-            style: AppFonts.paragraph.copyWith(
-              fontSize: 14,
-              color: AppColors.textGrey,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
     );
   }
 

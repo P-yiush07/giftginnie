@@ -104,7 +104,8 @@ class _HomeCarouselState extends State<HomeCarousel> with AutomaticKeepAliveClie
                       imageUrl: item.image,
                       width: double.infinity,
                       height: 210,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
+                      alignment: Alignment.center,
                       placeholder: (context, url) => Shimmer.fromColors(
                         baseColor: AppColors.grey300,
                         highlightColor: AppColors.grey100,
@@ -119,7 +120,16 @@ class _HomeCarouselState extends State<HomeCarousel> with AutomaticKeepAliveClie
                       ),
                       errorWidget: (context, url, error) {
                         return Container(
-                          // ... (keep existing error widget code)
+                          width: double.infinity,
+                          height: 210,
+                          decoration: BoxDecoration(
+                            color: AppColors.grey100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.error,
+                            color: AppColors.grey300,
+                          ),
                         );
                       },
                     ),

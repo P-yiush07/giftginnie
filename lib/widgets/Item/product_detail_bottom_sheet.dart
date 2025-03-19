@@ -27,6 +27,8 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
   int _currentImageIndex = 0;
   late Product _product;
   bool _isAddingToCart = false;
+  bool _isDescriptionExpanded = false;
+  static const int _descriptionMaxLines = 3;
 
   @override
   void initState() {
@@ -232,12 +234,34 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                Text(
-                                  _product.description,
-                                  style: AppFonts.paragraph.copyWith(
-                                    color: AppColors.textGrey,
-                                    height: 1.5,
-                                  ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _product.description,
+                                      maxLines: _isDescriptionExpanded ? null : _descriptionMaxLines,
+                                      overflow: _isDescriptionExpanded ? null : TextOverflow.ellipsis,
+                                      style: AppFonts.paragraph.copyWith(
+                                        color: AppColors.textGrey,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _isDescriptionExpanded = !_isDescriptionExpanded;
+                                        });
+                                      },
+                                      child: Text(
+                                        _isDescriptionExpanded ? 'Read Less' : 'Read More',
+                                        style: AppFonts.paragraph.copyWith(
+                                          color: AppColors.primaryRed,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),

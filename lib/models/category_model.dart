@@ -2,14 +2,14 @@ class CategoryModel {
   final int id;
   final String categoryName;
   final String description;
-  final String image;
+  final String? image;
   final List<GiftItem> gifts;
 
   CategoryModel({
     required this.id,
     required this.categoryName,
     required this.description,
-    required this.image,
+    this.image,
     required this.gifts,
   });
 
@@ -18,7 +18,7 @@ class CategoryModel {
       id: json['id'] as int,
       categoryName: json['name'] as String,
       description: json['description'] as String,
-      image: json['image'] as String,
+      image: json['image'] as String?,
       gifts: (json['gifts'] as List?)
               ?.map((gift) => GiftItem.fromJson(gift))
               .toList() ??
