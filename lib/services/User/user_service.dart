@@ -31,15 +31,36 @@ class UserService {
 
   Future<List<AddressModel>> getUserAddresses() async {
     try {
+      // Get the auth token for the cookie header
+      final accessToken = await _cacheService.getString(_accessTokenKey);
+      if (accessToken == null) {
+        throw Exception('Authentication token not found. Please log in again.');
+      }
+      
       final response = await _dio.get(
-        '${ApiConstants.baseUrl}${ApiEndpoints.userAddresses}',
+        '${ApiConstants.baseUrl}${ApiEndpoints.addresses}',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cookie': 'token=$accessToken',
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
       );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> addressesJson = response.data['data'];
+      debugPrint('Address response: ${response.data}');
+
+      if (response.statusCode == 200 && response.data['addresses'] != null) {
+        final List<dynamic> addressesJson = response.data['addresses'];
         return addressesJson
             .map((json) => AddressModel.fromJson(json))
             .toList();
+      }
+      
+      // If addresses key is missing or empty, return an empty list
+      if (response.statusCode == 200) {
+        return [];
       }
       
       throw Exception(response.data['message'] ?? 'Failed to fetch addresses');
@@ -51,8 +72,17 @@ class UserService {
 
   Future<UserProfileModel> getUserProfile() async {
     try {
+      // Get user ID from cached user data
+      final userData = await _cacheService.userData;
+      if (userData == null || userData['user_id'] == null) {
+        throw Exception('User ID not found. Please log in again.');
+      }
+      
+      final userId = userData['user_id'];
+      debugPrint('Fetching profile for user ID: $userId');
+
       final response = await _dio.get(
-        '${ApiConstants.baseUrl}${ApiEndpoints.userProfile}',
+        '${ApiConstants.baseUrl}${ApiEndpoints.userProfile(userId)}',
       );
 
       if (response.statusCode == 200 && response.data['data'] != null) {
@@ -71,73 +101,121 @@ class UserService {
   }
 
   Future<UserProfileModel> updateUserProfile({
-    required String email,
+    String? email,
     required String fullName,
     required String phoneNumber,
     required String countryCode,
-    required String gender,
+    String? gender,
     required bool isWholesaleCustomer,
-    File? imageFile,
   }) async {
     try {
-      final formData = FormData.fromMap({
-        'email': email,
-        'full_name': fullName,
-        'phone_number': phoneNumber,
-        'country_code': countryCode,
-        'gender': gender,
-        'is_wholesale_customer': isWholesaleCustomer,
-      });
-
-      if (imageFile != null) {
-        formData.files.add(
-          MapEntry(
-            'image',
-            await MultipartFile.fromFile(imageFile.path),
-          ),
-        );
-      }
-
-      final response = await _dio.patch(
-        '${ApiConstants.baseUrl}${ApiEndpoints.updateUserProfile}',
-        data: formData,
-      );
-
-      if (response.statusCode == 200) {
-        return UserProfileModel.fromJson(response.data['data']);
+      // Use the exact field names required by the API
+      final Map<String, dynamic> data = {
+        'name': fullName,
+        'phone': phoneNumber,
+      };
+      
+      // Using new update endpoint with PUT method
+      debugPrint('Updating user profile with data: $data');
+      
+      // Get the auth token for the cookie header
+      final accessToken = await _cacheService.getString(_accessTokenKey);
+      if (accessToken == null) {
+        throw Exception('Authentication token not found. Please log in again.');
       }
       
-      throw Exception(response.data['message'] ?? 'Failed to update profile');
+      final response = await _dio.put(
+        '${ApiConstants.baseUrl}${ApiEndpoints.updateUser}',
+        data: data,  // Sending as JSON rather than FormData
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cookie': 'token=$accessToken',
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
+      );
+
+      debugPrint('Update profile response status: ${response.statusCode}');
+      debugPrint('Update profile response data: ${response.data}');
+      
+      if (response.statusCode == 200) {
+        try {
+          debugPrint('Parsing user profile from response data: ${response.data['data']}');
+          return UserProfileModel.fromJson(response.data['data']);
+        } catch (parseError) {
+          debugPrint('Error parsing user profile: $parseError');
+          debugPrint('Response data structure: ${response.data}');
+          throw Exception('Failed to parse updated profile data: $parseError');
+        }
+      }
+      
+      throw Exception(response.data['message'] ?? 'Failed to update profile. Status: ${response.statusCode}');
     } on DioException catch (e) {
-      debugPrint('Error updating user profile: $e');
+      debugPrint('DioException updating user profile: $e');
+      debugPrint('Response status: ${e.response?.statusCode}');
+      debugPrint('Response data: ${e.response?.data}');
+      
+      if (e.response?.data != null && e.response?.data['message'] != null) {
+        throw Exception(e.response?.data['message']);
+      }
       throw Exception('Failed to update profile. Please try again.');
+    } catch (e) {
+      debugPrint('General error updating user profile: $e');
+      throw Exception('Failed to update profile: $e');
     }
   }
 
   Future<AddressModel> addAddress({
+    required String fullName,
     required String addressLine1,
     required String addressLine2,
     required String city,
     required String state,
     required String pincode,
-    required String addressType,
+    required String phone,
+    bool isDefault = false,
+    // Keeping this parameter for backward compatibility but not using it
+    String? addressType,
   }) async {
     try {
+      // Get the auth token for the cookie header
+      final accessToken = await _cacheService.getString(_accessTokenKey);
+      if (accessToken == null) {
+        throw Exception('Authentication token not found. Please log in again.');
+      }
+      
       final response = await _dio.post(
-        '${ApiConstants.baseUrl}${ApiEndpoints.userAddresses}',
+        '${ApiConstants.baseUrl}${ApiEndpoints.addresses}',
         data: {
-          'address_line_1': addressLine1,
-          'address_line_2': addressLine2,
+          'fullName': fullName,
+          'addressLine1': addressLine1,
+          'addressLine2': addressLine2,
           'city': city,
           'state': state,
-          'country': 'IN',
-          'pincode': pincode,
-          'address_type': addressType,
+          'country': 'India',
+          'zipCode': pincode,
+          'phone': phone,
+          'isDefault': isDefault
         },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cookie': 'token=$accessToken',
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
       );
 
-      if (response.statusCode == 201) {
-        return AddressModel.fromJson(response.data['data']);
+      debugPrint('Add address response: ${response.data}');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        if (response.data['data'] != null) {
+          return AddressModel.fromJson(response.data['data']);
+        }
+        throw Exception('Invalid response format');
       }
       
       throw Exception(response.data['message'] ?? 'Failed to add address');
@@ -148,31 +226,54 @@ class UserService {
   }
 
   Future<AddressModel> updateAddress({
-    required int addressId,
+    required String addressId,
+    required String fullName,
     required String addressLine1,
     required String addressLine2,
     required String city,
     required String state,
     required String pincode,
-    required String addressType,
+    required String phone,
+    bool isDefault = false,
+    String? addressType, // Keeping for backward compatibility
   }) async {
     try {
-      final response = await _dio.patch(
-        '${ApiConstants.baseUrl}${ApiEndpoints.userAddresses}',
+      // Get the auth token for the cookie header
+      final accessToken = await _cacheService.getString(_accessTokenKey);
+      if (accessToken == null) {
+        throw Exception('Authentication token not found. Please log in again.');
+      }
+      
+      final response = await _dio.put(
+        '${ApiConstants.baseUrl}${ApiEndpoints.addresses}/$addressId',
         data: {
-          'id': addressId,
-          'address_line_1': addressLine1,
-          'address_line_2': addressLine2,
+          'fullName': fullName,
+          'addressLine1': addressLine1,
+          'addressLine2': addressLine2,
           'city': city,
           'state': state,
-          'country': 'IN',
-          'pincode': pincode,
-          'address_type': addressType,
+          'country': 'India',
+          'zipCode': pincode,
+          'phone': phone,
+          'isDefault': isDefault,
         },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cookie': 'token=$accessToken',
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
       );
 
+      debugPrint('Update address response: ${response.data}');
+
       if (response.statusCode == 200) {
-        return AddressModel.fromJson(response.data['data']);
+        if (response.data['data'] != null) {
+          return AddressModel.fromJson(response.data['data']);
+        }
+        throw Exception('Invalid response format');
       }
       
       throw Exception(response.data['message'] ?? 'Failed to update address');
@@ -182,15 +283,28 @@ class UserService {
     }
   }
 
-  Future<void> deleteAddress(int addressId) async {
+  Future<void> deleteAddress(String addressId) async {
     try {
+      // Get the auth token for the cookie header
+      final accessToken = await _cacheService.getString(_accessTokenKey);
+      if (accessToken == null) {
+        throw Exception('Authentication token not found. Please log in again.');
+      }
+      
       final response = await _dio.delete(
-        '${ApiConstants.baseUrl}${ApiEndpoints.userAddresses}',
-        data: {
-          'id': addressId,
-        },
+        '${ApiConstants.baseUrl}/address/$addressId',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Cookie': 'token=$accessToken',
+            'Authorization': 'Bearer $accessToken',
+          },
+        ),
       );
 
+      debugPrint('Delete address response: ${response.data}');
+      
       // Consider both 200 and 204 as success status codes for deletion
       if (response.statusCode != 200 && response.statusCode != 204) {
         throw Exception(response.data?['message'] ?? 'Failed to delete address');

@@ -263,12 +263,20 @@ class _OrderCard extends StatelessWidget {
                       // Product image
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: item.product.images.isNotEmpty
+                        child: (item.images.isNotEmpty || item.product.images.isNotEmpty)
                             ? Image.network(
-                                item.product.images.first,
+                                item.images.isNotEmpty ? item.images.first : item.product.images.first,
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 60,
+                                    height: 60,
+                                    color: Colors.grey[200],
+                                    child: const Icon(Icons.image_not_supported),
+                                  );
+                                },
                               )
                             : Container(
                                 width: 60,
@@ -284,7 +292,7 @@ class _OrderCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              item.product.name,
+                              item.title.isNotEmpty ? item.title : item.product.name,
                               style: AppFonts.paragraph.copyWith(
                                 fontSize: 14,
                                 color: AppColors.black,
@@ -355,7 +363,7 @@ class _OrderCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '₹${order.finalPrice.toStringAsFixed(2)}',
+                        '₹${order.priceToPay.toStringAsFixed(2)}',
                         style: AppFonts.paragraph.copyWith(
                           fontSize: 16,
                           color: AppColors.primaryRed,
@@ -379,18 +387,28 @@ class _OrderCard extends StatelessWidget {
     Color textColor;
     String displayText;
 
-    switch (status) {
-      case 'PENDING':
+    switch (status.toLowerCase()) {
+      case 'pending':
         backgroundColor = const Color(0xFFFFF4E5);
         textColor = const Color(0xFFFF9800);
         displayText = 'Pending';
         break;
-      case 'DELIVERED':
+      case 'placed':
+        backgroundColor = const Color(0xFFE3F2FD);
+        textColor = const Color(0xFF2196F3);
+        displayText = 'Placed';
+        break;
+      case 'shipped':
+        backgroundColor = const Color(0xFFF3E5F5);
+        textColor = const Color(0xFF9C27B0);
+        displayText = 'Shipped';
+        break;
+      case 'delivered':
         backgroundColor = const Color(0xFFE8F5E9);
         textColor = const Color(0xFF4CAF50);
         displayText = 'Delivered';
         break;
-      case 'CANCELLED':
+      case 'cancelled':
         backgroundColor = const Color(0xFFFFEBEE);
         textColor = const Color(0xFFE53935);
         displayText = 'Cancelled';

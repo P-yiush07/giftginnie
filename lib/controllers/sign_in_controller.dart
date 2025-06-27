@@ -1,48 +1,36 @@
 import 'package:flutter/material.dart';
 import '../models/sign_in_model.dart';
 import '../services/Auth/auth_service.dart';
-import '../models/otp_verification_model.dart';
 import '../config/auth_config.dart';
 
 class SignInController extends ChangeNotifier {
   final SignInModel _model = SignInModel();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _otpController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
   
   bool _isLoading = false;
-  bool _isPhoneVerified = false;
   String? _error;
-  OtpVerificationModel? _verificationData;
+  bool _obscurePassword = true;
 
   SignInController() {
     // Add listeners to controllers
-    _phoneController.addListener(_onPhoneChanged);
-    _otpController.addListener(_onOtpChanged);
+    _emailController.addListener(_onInputChanged);
+    _passwordController.addListener(_onInputChanged);
   }
 
-  void _onPhoneChanged() {
-    // Trigger UI update when phone number changes
-    notifyListeners();
-  }
-
-  void _onOtpChanged() {
-    // Trigger UI update when OTP changes
+  void _onInputChanged() {
+    // Trigger UI update when inputs change
     notifyListeners();
   }
 
   // Getters
   SignInModel get model => _model;
-  TextEditingController get phoneController => _phoneController;
-  TextEditingController get otpController => _otpController;
+  TextEditingController get emailController => _emailController;
+  TextEditingController get passwordController => _passwordController;
   bool get isLoading => _isLoading;
-  bool get isPhoneVerified => _isPhoneVerified;
-  String get formattedPhone {
-    if (_phoneController.text.isEmpty) return '';
-    return '+91 ${_phoneController.text}';
-  }
-
   String? get error => _error;
+  bool get obscurePassword => _obscurePassword;
 
   // Setters
   set isLoading(bool value) {
@@ -50,87 +38,81 @@ class SignInController extends ChangeNotifier {
     notifyListeners();
   }
 
-  set isPhoneVerified(bool value) {
-    _isPhoneVerified = value;
+  void togglePasswordVisibility() {
+    _obscurePassword = !_obscurePassword;
+    notifyListeners();
+  }
+
+  void setError(String? error) {
+    _error = error;
     notifyListeners();
   }
 
   @override
   void dispose() {
-    _phoneController.removeListener(_onPhoneChanged);
-    _otpController.removeListener(_onOtpChanged);
-    _phoneController.dispose();
-    _otpController.dispose();
+    _emailController.removeListener(_onInputChanged);
+    _passwordController.removeListener(_onInputChanged);
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> verifyPhone() async {
-    if (_phoneController.text.isEmpty) return;
-    
-    _error = null;
-    isLoading = true;
-
-    try {
-      // Check if using test credentials
-      if (_phoneController.text == AuthConfig.testPhoneNumber) {
-        _verificationData = OtpVerificationModel(
-          verificationId: 'dummy_id',
-          authToken: 'dummy_token'
-        );
-        isPhoneVerified = true;
-      } else {
-        _verificationData = await _authService.sendOTP(_phoneController.text);
-        isPhoneVerified = true;
-      }
-    } catch (e) {
-      debugPrint('Error during verification: $e');
-      _error = 'Please try again later.';
-      isPhoneVerified = false;
-    } finally {
-      isLoading = false;
-      notifyListeners();
+  bool _validateEmail() {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      setError('Email is required');
+      return false;
     }
+    
+    // Simple email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+    
+    return true;
   }
 
-  Future<bool> handlePhoneLogin() async {
-    if (_otpController.text.isEmpty || _verificationData == null) return false;
+  bool _validatePassword() {
+    if (_passwordController.text.isEmpty) {
+      setError('Password is required');
+      return false;
+    }
     
-    _error = null;
+    if (_passwordController.text.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+    
+    return true;
+  }
+
+  Future<bool> handleEmailLogin() async {
+    // Validate inputs
+    if (!_validateEmail() || !_validatePassword()) {
+      return false;
+    }
+    
+    setError(null);
     isLoading = true;
 
     try {
-      // Check if using test credentials
-      if (_phoneController.text == AuthConfig.testPhoneNumber && 
-          _otpController.text == AuthConfig.testOTP) {
-        // Get dummy tokens
-        final tokenResponse = await _authService.getDummyTokens();
-        await _authService.saveAuthData(
-          accessToken: tokenResponse['access'],
-          refreshToken: tokenResponse['refresh'],
-          userData: {
-            'user_id': 3, // Dummy user ID
-            'phone_number': _phoneController.text,
-          },
-        );
-        return true;
-      }
-
-      // Normal OTP verification flow
-      await _authService.verifyOTP(
-        phoneNumber: _phoneController.text,
-        otp: _otpController.text,
-        verificationId: _verificationData!.verificationId,
-        token: _verificationData!.authToken,
+      // Call login API
+      final loginResult = await _authService.loginWithEmail(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
       );
+      
+      // If we got here, login was successful
+      debugPrint('Login successful: $loginResult');
       return true;
     } catch (e) {
-      debugPrint('Error in handlePhoneLogin: $e');
-      _error = 'Wrong OTP, please re-enter';
-      _otpController.clear();
+      debugPrint('Error in handleEmailLogin: $e');
+      setError('Login failed. Please check your email and password.');
       return false;
     } finally {
       isLoading = false;
-      notifyListeners();
     }
   }
 
@@ -142,15 +124,7 @@ class SignInController extends ChangeNotifier {
     // TODO: Implement Google login
   }
 
-  Future<void> resendOTP() async {
-    // TODO: Implement OTP resend logic
-  }
-
-  void backToPhoneInput() {
-    isPhoneVerified = false;
-    _verificationData = null;
-    _otpController.clear();
-    _error = null;
-    notifyListeners();
+  Future<void> handleForgotPassword() async {
+    // TODO: Implement forgot password logic
   }
 }

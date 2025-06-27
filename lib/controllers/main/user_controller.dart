@@ -28,7 +28,6 @@ class UserController extends ChangeNotifier {
       notifyListeners();
 
       final profile = await _userService.getUserProfile();
-      debugPrint('Profile loaded: ${profile.profileImage}');
       _userProfile = profile;
       
     } catch (e) {
@@ -54,7 +53,6 @@ class UserController extends ChangeNotifier {
   void updateUserProfile(UserProfileModel updatedProfile) {
     _userProfile = updatedProfile;
     _isLoading = false;
-    debugPrint('Profile updated with image: ${updatedProfile.profileImage}');
     notifyListeners();
   }
 }

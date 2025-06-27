@@ -47,12 +47,66 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   late OrderModel order;
+  bool isLoading = false;
+  String? error;
 
   @override
   void initState() {
     super.initState();
-    // Create a copy of the order to modify locally
+    // Initialize with the passed order
     order = widget.order;
+    // Fetch fresh order details from API
+    _fetchOrderDetails();
+  }
+
+  Future<void> _fetchOrderDetails() async {
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+
+    try {
+      final freshOrder = await OrderService().getOrderById(order.id);
+      
+      // Log the address information from the parsed order
+      debugPrint('=== PARSED ORDER ADDRESS INFO ===');
+      if (freshOrder.deliveryAddress != null) {
+        final addr = freshOrder.deliveryAddress!;
+        debugPrint('Address parsed successfully:');
+        debugPrint('  - ID: "${addr.id}"');
+        debugPrint('  - Name: "${addr.name}"');
+        debugPrint('  - Phone: "${addr.phoneNumber}"');
+        debugPrint('  - Line 1: "${addr.addressLine1}"');
+        debugPrint('  - Line 2: "${addr.addressLine2}"');
+        debugPrint('  - City: "${addr.city}"');
+        debugPrint('  - State: "${addr.state}"');
+        debugPrint('  - Country: "${addr.country}"');
+        debugPrint('  - Zipcode: "${addr.pincode}"');
+        debugPrint('  - Type: "${addr.addressType}"');
+      } else {
+        debugPrint('No delivery address in parsed order');
+      }
+      debugPrint('=== END PARSED ORDER ADDRESS INFO ===');
+      
+      setState(() {
+        order = freshOrder;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        isLoading = false;
+      });
+      // Show error but keep the original order data
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to refresh order details: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -81,20 +135,44 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.pop(context),
           ),
+          actions: [
+            if (isLoading)
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.black,
+                  ),
+                ),
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.black),
+                onPressed: _fetchOrderDetails,
+              ),
+          ],
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildOrderHeader(),
-              const SizedBox(height: 16),
-              _buildOrderItems(),
-              const SizedBox(height: 16),
-              _buildDeliveryAddress(),
-              const SizedBox(height: 16),
-              _buildPaymentDetails(),
-            ],
+        body: RefreshIndicator(
+          onRefresh: _fetchOrderDetails,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 42),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildOrderHeader(),
+                const SizedBox(height: 16),
+                _buildOrderItems(),
+                const SizedBox(height: 16),
+                _buildDeliveryAddress(),
+                const SizedBox(height: 16),
+                _buildPaymentDetails(),
+                const SizedBox(height: 16), // Extra space at the bottom
+              ],
+            ),
           ),
         ),
       ),
@@ -192,19 +270,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: item.product.images.isNotEmpty
-                              ? Image.network(
-                                  item.product.images.first,
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                )
-                              : Container(
-                                  width: 60,
-                                  height: 60,
-                                  color: Colors.grey[200],
-                                  child: const Icon(Icons.image_not_supported),
-                                ),
+                          child: _getItemImage(item),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -212,7 +278,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.product.name,
+                                item.title.isNotEmpty ? item.title : item.product.name,
                                 style: AppFonts.paragraph.copyWith(
                                   fontSize: 14,
                                   color: AppColors.black,
@@ -229,6 +295,26 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 ),
                               ],
                               const SizedBox(height: 4),
+                              if (_getItemColor(item).isNotEmpty) ...[
+                                Text(
+                                  'Color: ${_getItemColor(item)}',
+                                  style: AppFonts.paragraph.copyWith(
+                                    fontSize: 12,
+                                    color: AppColors.textGrey,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                              ],
+                              if (item.variant != null) ...[
+                                Text(
+                                  'Price: ₹${item.variant!.price.toStringAsFixed(2)}',
+                                  style: AppFonts.paragraph.copyWith(
+                                    fontSize: 12,
+                                    color: AppColors.textGrey,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                              ],
                               Text(
                                 'Qty: ${item.quantity}',
                                 style: AppFonts.paragraph.copyWith(
@@ -236,7 +322,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   color: AppColors.textGrey,
                                 ),
                               ),
-                              if (order.status == 'DELIVERED') ...[
+                              if (item.isGift) ...[
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryRed.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'Gift Item',
+                                    style: AppFonts.paragraph.copyWith(
+                                      fontSize: 10,
+                                      color: AppColors.primaryRed,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              if (order.status.toLowerCase() == 'delivered') ...[
                                 const SizedBox(height: 8),
                                 if (item.myRating != null)
                                   Row(
@@ -259,7 +363,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   )
                                 else
                                   TextButton(
-                                    onPressed: () => _showRatingDialog(context, item.product.id),
+                                    onPressed: () => _showRatingDialog(context, item.productId),
                                     style: TextButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 12,
@@ -335,7 +439,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
               ),
               Text(
-                '₹${order.totalPrice.toStringAsFixed(2)}',
+                '₹${order.totalAmount.toStringAsFixed(2)}',
                 style: AppFonts.paragraph.copyWith(
                   fontSize: 14,
                   color: AppColors.black,
@@ -355,7 +459,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
               ),
               Text(
-                '-₹${order.discountApplied.toStringAsFixed(2)}',
+                '-₹${order.discount.toStringAsFixed(2)}',
                 style: AppFonts.paragraph.copyWith(
                   fontSize: 14,
                   color: Colors.green,
@@ -376,7 +480,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
               ),
               Text(
-                '₹${order.finalPrice.toStringAsFixed(2)}',
+                '₹${order.priceToPay.toStringAsFixed(2)}',
                 style: AppFonts.paragraph.copyWith(
                   fontSize: 16,
                   color: AppColors.primaryRed,
@@ -391,6 +495,47 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _buildDeliveryAddress() {
+    if (order.deliveryAddress == null) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Delivery Address',
+              style: AppFonts.paragraph.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Address information not available',
+              style: AppFonts.paragraph.copyWith(
+                fontSize: 14,
+                color: AppColors.textGrey,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final address = order.deliveryAddress!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -417,17 +562,58 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             ),
           ),
           const SizedBox(height: 16),
+          if (address.name.isNotEmpty) ...[
+            Text(
+              address.name,
+              style: AppFonts.paragraph.copyWith(
+                fontSize: 14,
+                color: AppColors.black,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 4),
+          ],
+          if (address.phoneNumber.isNotEmpty) ...[
+            Text(
+              address.phoneNumber,
+              style: AppFonts.paragraph.copyWith(
+                fontSize: 14,
+                color: AppColors.textGrey,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           Text(
-            '${order.deliveryAddress.addressLine1}\n'
-            '${order.deliveryAddress.addressLine2}\n'
-            '${order.deliveryAddress.city}, ${order.deliveryAddress.state}\n'
-            '${order.deliveryAddress.country} - ${order.deliveryAddress.pincode}',
+            [
+              if (address.addressLine1.isNotEmpty) address.addressLine1,
+              if (address.addressLine2.isNotEmpty) address.addressLine2,
+              if (address.city.isNotEmpty && address.state.isNotEmpty) '${address.city}, ${address.state}',
+              if (address.country.isNotEmpty && address.pincode.isNotEmpty) '${address.country} - ${address.pincode}',
+            ].where((line) => line.isNotEmpty).join('\n'),
             style: AppFonts.paragraph.copyWith(
               fontSize: 14,
               color: AppColors.textGrey,
               height: 1.5,
             ),
           ),
+          if (address.addressType.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primaryRed.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                address.addressType,
+                style: AppFonts.paragraph.copyWith(
+                  fontSize: 12,
+                  color: AppColors.primaryRed,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -478,6 +664,47 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Payment Status',
+                style: AppFonts.paragraph.copyWith(
+                  fontSize: 14,
+                  color: AppColors.textGrey,
+                ),
+              ),
+              _buildPaymentStatusChip(order.paymentStatus),
+            ],
+          ),
+          if (order.razorpayOrderId.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Transaction ID',
+                  style: AppFonts.paragraph.copyWith(
+                    fontSize: 14,
+                    color: AppColors.textGrey,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    order.razorpayOrderId,
+                    style: AppFonts.paragraph.copyWith(
+                      fontSize: 12,
+                      color: AppColors.black,
+                      fontFamily: 'monospace',
+                    ),
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -488,18 +715,28 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     Color textColor;
     String displayText;
 
-    switch (status) {
-      case 'PENDING':
+    switch (status.toLowerCase()) {
+      case 'pending':
         backgroundColor = const Color(0xFFFFF4E5);
         textColor = const Color(0xFFFF9800);
         displayText = 'Pending';
         break;
-      case 'DELIVERED':
+      case 'placed':
+        backgroundColor = const Color(0xFFE3F2FD);
+        textColor = const Color(0xFF2196F3);
+        displayText = 'Placed';
+        break;
+      case 'shipped':
+        backgroundColor = const Color(0xFFF3E5F5);
+        textColor = const Color(0xFF9C27B0);
+        displayText = 'Shipped';
+        break;
+      case 'delivered':
         backgroundColor = const Color(0xFFE8F5E9);
         textColor = const Color(0xFF4CAF50);
         displayText = 'Delivered';
         break;
-      case 'CANCELLED':
+      case 'cancelled':
         backgroundColor = const Color(0xFFFFEBEE);
         textColor = const Color(0xFFE53935);
         displayText = 'Cancelled';
@@ -527,7 +764,51 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  void _showRatingDialog(BuildContext context, int productId) {
+  Widget _buildPaymentStatusChip(String paymentStatus) {
+    Color backgroundColor;
+    Color textColor;
+    String displayText;
+
+    switch (paymentStatus.toLowerCase()) {
+      case 'paid':
+        backgroundColor = const Color(0xFFE8F5E9);
+        textColor = const Color(0xFF4CAF50);
+        displayText = 'Paid';
+        break;
+      case 'pending':
+        backgroundColor = const Color(0xFFFFF4E5);
+        textColor = const Color(0xFFFF9800);
+        displayText = 'Pending';
+        break;
+      case 'failed':
+        backgroundColor = const Color(0xFFFFEBEE);
+        textColor = const Color(0xFFE53935);
+        displayText = 'Failed';
+        break;
+      default:
+        backgroundColor = const Color(0xFFEFEFEF);
+        textColor = const Color(0xFF757575);
+        displayText = paymentStatus;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        displayText,
+        style: AppFonts.paragraph.copyWith(
+          fontSize: 12,
+          color: textColor,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  void _showRatingDialog(BuildContext context, String productId) {
     int selectedRating = 0;
     bool isLoading = false;
 
@@ -609,7 +890,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 
                                 try {
                                   await OrderService().rateProduct(
-                                    productId.toString(),
+                                    productId,
                                     selectedRating,
                                   );
                                   
@@ -675,5 +956,52 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         });
       }
     });
+  }
+
+  Widget _getItemImage(OrderItem item) {
+    String? imageUrl;
+    
+    // Priority: variant images > item images > product images
+    if (item.variant != null && item.variant!.images.isNotEmpty) {
+      imageUrl = item.variant!.images.first;
+    } else if (item.images.isNotEmpty) {
+      imageUrl = item.images.first;
+    } else if (item.product.images.isNotEmpty) {
+      imageUrl = item.product.images.first;
+    }
+
+    if (imageUrl != null) {
+      return Image.network(
+        imageUrl,
+        width: 60,
+        height: 60,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: 60,
+            height: 60,
+            color: Colors.grey[200],
+            child: const Icon(Icons.image_not_supported),
+          );
+        },
+      );
+    } else {
+      return Container(
+        width: 60,
+        height: 60,
+        color: Colors.grey[200],
+        child: const Icon(Icons.image_not_supported),
+      );
+    }
+  }
+
+  String _getItemColor(OrderItem item) {
+    // Priority: variant color > item color
+    if (item.variant != null && item.variant!.color.isNotEmpty) {
+      return item.variant!.color;
+    } else if (item.color.isNotEmpty) {
+      return item.color;
+    }
+    return '';
   }
 }

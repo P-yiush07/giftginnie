@@ -175,63 +175,7 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    // Profile Image
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.grey300,
-                          width: 1,
-                        ),
-                      ),
-                      child: Consumer<UserController>(
-                        builder: (context, userController, _) {
-                          return ClipOval(
-                            child: userController.isLoading
-                                ? Shimmer.fromColors(
-                                    baseColor: AppColors.grey300,
-                                    highlightColor: AppColors.grey100,
-                                    child: Container(
-                                      width: 64,
-                                      height: 64,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : userController.userProfile?.profileImage != null
-                                    ? CachedNetworkImage(
-                                        imageUrl: userController.userProfile!.profileImage!,
-                                        width: 64,
-                                        height: 64,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) => Shimmer.fromColors(
-                                          baseColor: AppColors.grey300,
-                                          highlightColor: AppColors.grey100,
-                                          child: Container(
-                                            width: 64,
-                                            height: 64,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        errorWidget: (context, url, error) => Image.asset(
-                                          'assets/images/placeholder.png',
-                                          width: 64,
-                                          height: 64,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                    : Image.asset(
-                                        'assets/images/placeholder.png',
-                                        width: 64,
-                                        height: 64,
-                                        fit: BoxFit.cover,
-                                      ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 8),
                     // User Info
                     Expanded(
                       child: Consumer<UserController>(
@@ -275,18 +219,13 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                           ),
                         );
                       },
-                      child: Consumer<UserController>(
-                        builder: (context, userController, _) {
-                          final bool hasProfileImage = userController.userProfile?.profileImage != null;
-                          return Text(
-                            hasProfileImage ? 'Edit' : 'Add',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 14,
-                              color: AppColors.primaryRed,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          );
-                        },
+                      child: Text(
+                        'Edit',
+                        style: AppFonts.paragraph.copyWith(
+                          fontSize: 14,
+                          color: AppColors.primaryRed,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],

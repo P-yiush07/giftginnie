@@ -30,11 +30,13 @@ class CouponService {
   Future<List<CouponModel>> getCoupons() async {
     try {
       final response = await _dio.get(
-        '${ApiConstants.baseUrl}${ApiEndpoints.coupons}',
+        '${ApiConstants.baseUrl}/coupons',
       );
 
-      if (response.statusCode == 200 && response.data['data'] != null) {
-        return (response.data['data'] as List)
+      debugPrint('Coupons response: ${response.data}');
+
+      if (response.statusCode == 200 && response.data != null) {
+        return (response.data as List)
             .map((json) => CouponModel.fromJson(json))
             .toList();
       }

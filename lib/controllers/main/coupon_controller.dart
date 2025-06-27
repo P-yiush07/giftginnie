@@ -9,18 +9,23 @@ import 'package:dio/dio.dart';
 import '../../widgets/Snackbar/snackbar_widget.dart';
 
 class CouponController extends ChangeNotifier {
+  // Use the singleton instance of CartService
   final CartService _cartService = CartService();
   final CouponService _couponService = CouponService();
   List<CouponModel> _coupons = [];
   List<CouponModel> _filteredCoupons = [];
   bool _isLoading = true;
   String? _error;
+  
+  // Debug identifier to track controller lifecycle
+  final String _id = DateTime.now().millisecondsSinceEpoch.toString();
 
   List<CouponModel> get coupons => _filteredCoupons;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
   CouponController() {
+    debugPrint('CouponController initialized [ID: $_id]');
     _loadCoupons();
   }
 
@@ -31,10 +36,10 @@ class CouponController extends ChangeNotifier {
 
       final allCoupons = await _couponService.getCoupons();
       
-      // Filter out expired coupons by checking validUntil date
+      // Filter out expired coupons by checking validTo date
       final now = DateTime.now();
       _coupons = allCoupons.where((coupon) => 
-        coupon.validUntil.isAfter(now)  // Only check if coupon is not expired
+        coupon.validTo.isAfter(now) && coupon.isActive  // Check if coupon is not expired and is active
       ).toList();
       
       _filteredCoupons = _coupons;
@@ -75,25 +80,48 @@ class CouponController extends ChangeNotifier {
     }
 
     try {
-      final success = await _cartService.applyCoupon(code);
+      debugPrint('CouponController [ID: $_id] applying coupon: $code');
+      final response = await _cartService.applyCoupon(code);
+      debugPrint('CouponController [ID: $_id] coupon apply response: ${response['success']}');
       
-      if (success && context.mounted) {
-        final coupon = _coupons.firstWhere((c) => c.code == code);
+      if (response['success'] && context.mounted) {
+        // Extract discount amount from the response
+        final double discount = (response['discount'] is int) 
+            ? (response['discount'] as int).toDouble()
+            : (response['discount'] as double);
+        
+        // Prepare coupon data to return
+        final finalPrice = response['priceToPay'] is int 
+            ? (response['priceToPay'] as int).toDouble() 
+            : (response['priceToPay'] as double);
+            
+        final couponData = {
+          'success': true,
+          'couponCode': code,
+          'discount': discount,
+          'finalPrice': finalPrice,
+        };
+        
+        // Store coupon data for immediate use
+        debugPrint('Storing coupon data for immediate use: $couponData');
         
         // Replace loading dialog with success dialog
         Navigator.of(context).pop(); // Remove loading dialog
+        
         final result = await showDialog<bool>(
           context: context,
-          barrierDismissible: false,
+          barrierDismissible: false, // Prevent tapping outside to dismiss
           builder: (context) => CouponSuccessDialog(
             code: code,
-            savedAmount: coupon.discountValue,
+            savedAmount: discount,
             isLoading: false,
           ),
         );
         
-        if (result == true && context.mounted) {
-          Navigator.of(context).pop(true);
+        if (context.mounted) {
+          // Always return coupon data whether user clicked Continue or used back button
+          // The WillPopScope in the dialog ensures we get a result in both cases
+          Navigator.of(context).pop(couponData);
         }
       }
     } catch (e) {
@@ -107,5 +135,11 @@ class CouponController extends ChangeNotifier {
         CustomSnackbar.show(context, errorMessage);
       }
     }
+  }
+  
+  @override
+  void dispose() {
+    debugPrint('CouponController disposed [ID: $_id]');
+    super.dispose();
   }
 }

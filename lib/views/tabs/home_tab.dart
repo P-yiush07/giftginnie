@@ -214,12 +214,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                                             ),
                                           )
                                         : CachedNetworkImage(
-                                            imageUrl: userController.userProfile
-                                                        ?.profileImage?.isNotEmpty ==
-                                                    true
-                                                ? userController
-                                                    .userProfile!.profileImage!
-                                                : 'https://static.vecteezy.com/system/resources/thumbnails/036/594/092/small_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg',
+                                            imageUrl: 'https://static.vecteezy.com/system/resources/thumbnails/036/594/092/small_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg',
                                             width: 40,
                                             height: 40,
                                             fit: BoxFit.cover,
@@ -473,8 +468,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                   ),
                   // Increased spacing before Top Products
                   const SizedBox(height: 40),
-                  // Top Products Section
-                  Padding(
+                  // Top Products Section - Commented out as requested
+                  /* Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -551,12 +546,12 @@ class _HomeTabViewState extends State<HomeTabView> {
                         ),
                       ],
                     ),
-                  ),
+                  ), */
                   // After the Top Products section, add:
                   const SizedBox(height: 40),
 
-                  // Popular Categories Section
-                  Container(
+                  // Popular Categories Section - Commented out as requested
+                  /* Container(
                     width: double.infinity,
                     height: 125,
                     padding: const EdgeInsets.fromLTRB(16.0, 28.0, 16.0, 16.0),
@@ -623,7 +618,7 @@ class _HomeTabViewState extends State<HomeTabView> {
                         ),
                       );
                     },
-                  ),
+                  ), */
                   // After the gift category ListView,
                   const SizedBox(height: 24),
                   Material(
@@ -892,10 +887,11 @@ class _HomeTabViewState extends State<HomeTabView> {
           SlidePageRoute(
             page: CategoryScreen(
               category: CategoryModel(
-                id: category.categoryId,
+                id: category.categoryId.toString(),
                 categoryName: category.categoryName,
                 description: category.categoryDescription,
                 image: category.image,
+                subCategories: [],
                 gifts: [],
               ),
             ),

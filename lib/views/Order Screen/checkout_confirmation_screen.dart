@@ -16,6 +16,7 @@ import 'order_failed_screen.dart';
 import '../../controllers/main/home_controller.dart';
 import '../home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:math' show min;
 
 class CheckoutConfirmationScreen extends StatefulWidget {
   final CartModel cartData;
@@ -103,7 +104,7 @@ class _CheckoutConfirmationScreenState
         );
       } catch (e) {
         if (mounted) {
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) => OrderFailedScreen(
@@ -118,9 +119,10 @@ class _CheckoutConfirmationScreenState
                     ),
                   );
                 },
-                showBackButton: false,
+                showBackButton: true,
               ),
             ),
+            (route) => false, // This removes all previous routes
           );
         }
       } finally {
@@ -133,7 +135,7 @@ class _CheckoutConfirmationScreenState
 
   void _handlePaymentError(PaymentFailureResponse response) {
     if (mounted) {
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (context) => OrderFailedScreen(
@@ -148,9 +150,10 @@ class _CheckoutConfirmationScreenState
                 ),
               );
             },
-            showBackButton: false,
+            showBackButton: true,
           ),
         ),
+        (route) => false, // This removes all previous routes
       );
     }
   }
@@ -181,14 +184,32 @@ class _CheckoutConfirmationScreenState
     setState(() => _isProcessing = true);
 
     try {
-      // Create order
+      // Calculate the final amount to be paid (with coupon discount if applicable)
+      final double amountToPay = widget.cartData.finalPrice ?? widget.cartData.totalPrice;
+      
+      // Debug log to verify the amount
+      debugPrint('Processing payment: Original price: ${widget.cartData.totalPrice}, '
+                'Final price: $amountToPay, '
+                'Coupon: ${widget.cartData.appliedCouponCode}');
+      
+      // Create order with address ID and coupon code if applicable
       final orderDetails = await _checkoutService.createOrder(
         Provider.of<AddressController>(context, listen: false).selectedAddress!.id,
+        couponCode: widget.cartData.appliedCouponCode,
       );
       
+      // Log order details received from the backend
+      debugPrint('Order created successfully with details:');
+      debugPrint('- Order ID: ${orderDetails['orderId']}');
+      debugPrint('- Razorpay Order ID: ${orderDetails['razorpayOrderId']}');
+      debugPrint('- Amount to Pay: ${orderDetails['amount']}');
+      debugPrint('- Discount Applied: ${orderDetails['discount']}');
+      
+      // Prepare Razorpay options
+      // Note: Razorpay requires amount in paise (multiply by 100)
       var options = {
         'key': dotenv.env['RAZORPAY_KEY'],
-        'amount': orderDetails['amount'] * 100,
+        'amount': orderDetails['amount'] * 100,  // Convert to paise
         'name': 'GiftGinnie',
         'order_id': orderDetails['razorpayOrderId'],
         'description': 'Order Payment',
@@ -198,13 +219,31 @@ class _CheckoutConfirmationScreenState
 
       _razorpay.open(options);
     } catch (e) {
+      // Detailed error logging
+      debugPrint('Error in _processPayment: $e');
+      
+      if (e.toString().contains('Authentication token not found')) {
+        // Handle authentication error
+        debugPrint('Authentication error detected');
+      } else if (e.toString().contains('DioError')) {
+        // Handle network errors
+        debugPrint('Network error detected');
+      }
+      
       if (mounted) {
+        // Show a more informative error message
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Something went wrong. Please try again later.'),
+          SnackBar(
+            content: Text('Payment initialization failed: ${e.toString().substring(0, min(e.toString().length, 100))}'),
             behavior: SnackBarBehavior.floating,
-            margin: EdgeInsets.only(bottom: 16, left: 16, right: 16),
-            duration: Duration(seconds: 3),
+            margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
           ),
         );
       }
@@ -297,9 +336,11 @@ class _CheckoutConfirmationScreenState
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: ImageService.getNetworkImage(
-                            imageUrl: item.product.images.isNotEmpty
-                                ? item.product.images[0]
-                                : 'assets/images/placeholder.png',
+                            imageUrl: item.variantImages.isNotEmpty
+                                ? item.variantImages[0]
+                                : item.productImages.isNotEmpty
+                                    ? item.productImages[0]
+                                    : 'assets/images/placeholder.png',
                             width: 60,
                             height: 60,
                           ),
@@ -310,7 +351,7 @@ class _CheckoutConfirmationScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item.product.name,
+                                item.title,
                                 style: AppFonts.paragraph.copyWith(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
@@ -326,7 +367,7 @@ class _CheckoutConfirmationScreenState
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '₹${item.product.sellingPrice.toStringAsFixed(2)}',
+                                '₹${item.variantPrice.toStringAsFixed(2)}',
                                 style: AppFonts.paragraph.copyWith(
                                   fontSize: 14,
                                   color: AppColors.primaryRed,
@@ -488,20 +529,21 @@ class _CheckoutConfirmationScreenState
   }
 
   Widget _buildBillDetails() {
-    final double originalPrice = widget.cartData.originalPrice;
-    final double discountedPrice = widget.cartData.discountedPrice;
-    final double discount = originalPrice - discountedPrice;
+    // Get the original total price
+    final double totalPrice = widget.cartData.totalPrice;
+    
+    // Check if we have a coupon applied
+    final bool hasCoupon = widget.cartData.appliedCouponCode != null && widget.cartData.discountAmount != null;
+    
+    // Set the prices based on coupon status
+    final double originalPrice = totalPrice;
+    final double discountedPrice = widget.cartData.finalPrice ?? totalPrice;
+    final double discount = widget.cartData.discountAmount ?? 0.0;
 
-    String discountLabel = 'Discount';
-    if (widget.cartData.coupon != null) {
-      if (widget.cartData.coupon!.discountType == 'FLAT') {
-        discountLabel =
-            'Discount (₹${widget.cartData.coupon!.discountValue.toStringAsFixed(0)} OFF)';
-      } else {
-        discountLabel =
-            'Discount (${widget.cartData.coupon!.discountValue.toStringAsFixed(0)}% OFF)';
-      }
-    }
+    // Set the discount label based on coupon status
+    String discountLabel = hasCoupon 
+        ? 'Discount (${widget.cartData.appliedCouponCode})' 
+        : 'Discount';
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -644,7 +686,7 @@ class _CheckoutConfirmationScreenState
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Pay ₹${widget.cartData.discountedPrice.toStringAsFixed(2)}',
+                          'Pay ₹${(widget.cartData.finalPrice ?? widget.cartData.totalPrice).toStringAsFixed(2)}',
                           style: AppFonts.paragraph.copyWith(
                             color: Colors.white,
                             fontSize: 18,

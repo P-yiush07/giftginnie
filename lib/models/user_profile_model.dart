@@ -1,47 +1,73 @@
 import 'package:giftginnie_ui/models/address_model.dart';
 
 class UserProfileModel {
-  final int id;
-  final String? email;
-  final String fullName;
-  final String phoneNumber;
-  final String countryCode;
-  final bool isActive;
-  final String? profileImage;
-  final bool isWholesaleCustomer;
-  final String? gender;
-  final DateTime dateJoined;
+  final String id;
+  final String name;
+  final String email;
+  final String phone;
+  final bool isVerified;
+  final String role;
   final List<AddressModel> addresses;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   UserProfileModel({
     required this.id,
-    this.email,
-    required this.fullName,
-    required this.phoneNumber,
-    required this.countryCode,
-    required this.isActive,
-    this.profileImage,
-    required this.isWholesaleCustomer,
-    this.gender,
-    required this.dateJoined,
+    required this.name,
+    required this.email,
+    required this.phone,
+    required this.isVerified,
+    required this.role,
     required this.addresses,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
     return UserProfileModel(
-      id: json['id'],
+      id: json['_id'] ?? '',
+      name: json['name'] ?? '',
       email: json['email'] ?? '',
-      fullName: json['full_name'] ?? '',
-      phoneNumber: json['phone_number'] ?? '',
-      countryCode: json['country_code'] ?? '91',
-      isActive: json['is_active'] ?? false,
-      profileImage: json['profile_image'],
-      isWholesaleCustomer: json['is_wholesale_customer'] ?? false,
-      gender: json['gender'],
-      dateJoined: DateTime.parse(json['date_joined'] ?? DateTime.now().toIso8601String()),
-      addresses: (json['addresses'] as List?)
-          ?.map((addr) => AddressModel.fromJson(addr))
-          .toList() ?? [],
+      phone: json['phone'] ?? '',
+      isVerified: json['isVerified'] ?? false,
+      role: json['role'] ?? 'user',
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
+      addresses: json['addresses'] != null 
+          ? (json['addresses'] as List).map<AddressModel>((addr) {
+              // Handle both address objects and address IDs
+              if (addr is String) {
+                // If it's just an ID, create a minimal address object
+                return AddressModel(
+                  id: addr,
+                  fullName: '',
+                  addressLine1: '',
+                  addressLine2: '',
+                  city: '',
+                  state: '',
+                  country: 'India',
+                  zipCode: '',
+                  phone: 0,
+                  isDefault: false,
+                  createdAt: '',
+                  updatedAt: '',
+                );
+              } else {
+                // If it's a full address object, parse it normally
+                return AddressModel.fromJson(addr);
+              }
+            }).toList()
+          : [],
     );
   }
+  
+  // Add compatibility getters for existing code
+  String get fullName => name;
+  String get phoneNumber => phone;
+  DateTime get dateJoined => createdAt;
+  String get countryCode => '91'; // Default country code
+  bool get isActive => isVerified;
+  String? get gender => null; // No gender info in new API
+  bool get isWholesaleCustomer => false; // No wholesale info in new API
+  String? get profileImage => null; // No profile image in new API
 }

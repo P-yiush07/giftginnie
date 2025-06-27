@@ -1,23 +1,23 @@
 class SignInModel {
   final String title;
   final String subtitle;
-  final String phoneLabel;
-  final String otpLabel;
+  final String emailLabel;
+  final String passwordLabel;
   final String loginButtonText;
   final String orText;
   final String facebookButtonText;
   final String googleButtonText;
-  final String resendOtpText;
+  final String forgotPasswordText;
 
   SignInModel({
     this.title = 'Welcome 😉',
     this.subtitle = 'Log in to your account to start gifting joy and surprises to your loved ones.',
-    this.phoneLabel = 'Phone Number',
-    this.otpLabel = 'OTP Verification',
+    this.emailLabel = 'Email',
+    this.passwordLabel = 'Password',
     this.loginButtonText = 'Log in',
     this.orText = 'OR',
     this.facebookButtonText = 'Continue with Facebook',
     this.googleButtonText = 'Continue with Google',
-    this.resendOtpText = 'Resend OTP',
+    this.forgotPasswordText = 'Forgot Password?',
   });
 }

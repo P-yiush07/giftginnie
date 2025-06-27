@@ -59,68 +59,7 @@ class EditProfileView extends StatelessWidget {
           return SingleChildScrollView(
             child: Column(
               children: [
-                // Profile Image Section
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 24, 0, 24),
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.grey300,
-                            width: 1,
-                          ),
-                        ),
-                        child: ClipOval(
-                          child: Consumer<EditProfileController>(
-                            builder: (context, controller, _) {
-                              if (controller.selectedImageFile != null) {
-                                return Image.file(
-                                  controller.selectedImageFile!,
-                                  fit: BoxFit.cover,
-                                );
-                              }
-                              return userController.userProfile?.profileImage != null
-                                  ? Image.network(
-                                      userController.userProfile!.profileImage!,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.asset(
-                                      'assets/images/placeholder.png',
-                                      fit: BoxFit.cover,
-                                    );
-                            },
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            final controller = context.read<EditProfileController>();
-                            controller.pickImage();
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryRed,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.edit,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                SizedBox(height: 24),
 
                 const SizedBox(height: 8),
 
@@ -143,6 +82,7 @@ class EditProfileView extends StatelessWidget {
                             icon: Icons.email_outlined,
                             controller: controller.emailController,
                             keyboardType: TextInputType.emailAddress,
+                            enabled: false,
                           ),
                           const SizedBox(height: 16),
                           _buildFormField(
@@ -150,47 +90,7 @@ class EditProfileView extends StatelessWidget {
                             icon: Icons.phone_outlined,
                             controller: controller.phoneController,
                             keyboardType: TextInputType.phone,
-                            enabled: false,
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            'Gender',
-                            style: AppFonts.paragraph.copyWith(
-                              fontSize: 16,
-                              color: AppColors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(26),
-                            ),
-                            child: Row(
-                              children: [
-                                _buildGenderOption(
-                                  label: 'Male',
-                                  value: Gender.male,
-                                  groupValue: controller.selectedGender,
-                                  onChanged: controller.setGender,
-                                ),
-                                const SizedBox(width: 24),
-                                _buildGenderOption(
-                                  label: 'Female',
-                                  value: Gender.female,
-                                  groupValue: controller.selectedGender,
-                                  onChanged: controller.setGender,
-                                ),
-                                const SizedBox(width: 24),
-                                _buildGenderOption(
-                                  label: 'Other',
-                                  value: Gender.other,
-                                  groupValue: controller.selectedGender,
-                                  onChanged: controller.setGender,
-                                ),
-                              ],
-                            ),
+                            enabled: true, // Allow phone number editing
                           ),
                         ],
                       );

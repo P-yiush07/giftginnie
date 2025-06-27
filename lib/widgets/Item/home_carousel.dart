@@ -106,6 +106,9 @@ class _HomeCarouselState extends State<HomeCarousel> with AutomaticKeepAliveClie
                       height: 210,
                       fit: BoxFit.contain,
                       alignment: Alignment.center,
+                      cacheKey: item.id, // Use banner ID as cache key
+                      maxHeightDiskCache: 1000, // Limit disk cache size
+                      maxWidthDiskCache: 1000,
                       placeholder: (context, url) => Shimmer.fromColors(
                         baseColor: AppColors.grey300,
                         highlightColor: AppColors.grey100,

@@ -56,11 +56,13 @@ class AuthService {
   // Token Management
   Future<void> _saveAuthData({
     required String accessToken,
-    required String refreshToken,
+    String? refreshToken,
     required Map<String, dynamic> userData,
   }) async {
     await _cacheService.saveString(_accessTokenKey, accessToken);
-    await _cacheService.saveString(_refreshTokenKey, refreshToken);
+    if (refreshToken != null) {
+      await _cacheService.saveString(_refreshTokenKey, refreshToken);
+    }
     await _cacheService.saveAuthData(token: accessToken, userData: userData);
   }
 
@@ -78,7 +80,7 @@ class AuthService {
 
   Future<void> saveAuthData({
     required String accessToken,
-    required String refreshToken,
+    String? refreshToken,
     required Map<String, dynamic> userData,
   }) async {
     await _saveAuthData(
@@ -100,7 +102,7 @@ class AuthService {
 
     try {
       final response = await _dio.post(
-        ApiEndpoints.sendOTP,
+        ApiEndpoints.verifyEmailOTP,
         data: {
           'phone_number': phoneNumber,
           'country_code': '91',
@@ -146,7 +148,7 @@ class AuthService {
       debugPrint('Token: $token');
 
       final response = await _dio.post(
-        ApiEndpoints.verifyOTP,
+        ApiEndpoints.verifyEmailOTP,
         data: {
           'phone_number': phoneNumber.toString(),
           'country_code': '91',
@@ -219,6 +221,65 @@ class AuthService {
     } catch (e) {
       await logout();
       return false;
+    }
+  }
+  
+  // Email login method
+  Future<Map<String, dynamic>> loginWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      debugPrint('Logging in with email: $email');
+      
+      final response = await _dio.post(
+        ApiEndpoints.login,
+        data: {
+          'email': email,
+          'password': password,
+        },
+      );
+      
+      debugPrint('Login response status: ${response.statusCode}');
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        debugPrint('Login successful, data: $data');
+        
+        final userData = data['data'];
+        final token = data['token'];
+        
+        // Save the user data and token
+        await _saveAuthData(
+          accessToken: token,
+          // We don't have refresh token in this API
+          userData: {
+            'user_id': userData['_id'],
+            'phone': userData['phone'],
+            'name': userData['name'],
+            'email': userData['email'],
+          },
+        );
+        
+        return data;
+      } else {
+        debugPrint('Login failed with status: ${response.statusCode}');
+        throw Exception(response.data['message'] ?? 'Login failed');
+      }
+    } on DioException catch (e) {
+      debugPrint('DioException in login: $e');
+      debugPrint('Error response: ${e.response?.data}');
+      
+      if (e.response?.statusCode == 401) {
+        throw Exception('Invalid email or password');
+      } else if (e.response?.statusCode == 400) {
+        throw Exception(e.response?.data['message'] ?? 'Invalid login credentials');
+      } else {
+        throw Exception('Login failed. Please try again later.');
+      }
+    } catch (e) {
+      debugPrint('Unexpected error in login: $e');
+      throw Exception('An unexpected error occurred. Please try again.');
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/models/auth_home_model.dart';
 import 'package:giftginnie_ui/views/onboarding_screen.dart';
 import 'package:giftginnie_ui/views/Auth%20Screen/sign_in_screen.dart';
+import 'package:giftginnie_ui/views/Auth%20Screen/sign_up_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';
 import '../../../constants/icons.dart';
@@ -39,6 +40,29 @@ class AuthHomeView extends StatelessWidget {
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => 
           const SignInScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(begin: begin, end: end)
+              .chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
+  }
+  
+  void navigateToSignUp(BuildContext context) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => 
+          const SignUpScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
           const end = Offset.zero;
@@ -124,6 +148,25 @@ class AuthHomeView extends StatelessWidget {
             style: AppFonts.paragraph.copyWith(
               fontSize: 16,
               color: AppColors.authTitleText,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton(
+          onPressed: () => navigateToSignUp(context),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 56),
+            side: BorderSide(color: AppColors.primary, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+          ),
+          child: Text(
+            "Sign Up",
+            style: AppFonts.paragraph.copyWith(
+              fontSize: 16,
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:giftginnie_ui/controllers/main/user_controller.dart';
 import 'package:giftginnie_ui/services/User/user_service.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:giftginnie_ui/widgets/Snackbar/snackbar_widget.dart';
 import 'package:giftginnie_ui/services/Cache/cache_service.dart';
@@ -16,7 +14,6 @@ class EditProfileController extends ChangeNotifier {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController countryCodeController = TextEditingController();
-  File? selectedImageFile;
   bool _isLoading = false;
   String? _error;
   
@@ -35,21 +32,8 @@ class EditProfileController extends ChangeNotifier {
       phoneController.text = profile.phoneNumber;
       countryCodeController.text = profile.countryCode;
       
-      // Set gender based on user profile
-      if (profile.gender != null) {
-        switch (profile.gender!.toLowerCase()) {
-          case 'm':
-          case 'male':
-            _selectedGender = Gender.male;
-            break;
-          case 'f':
-          case 'female':
-            _selectedGender = Gender.female;
-            break;
-          default:
-            _selectedGender = Gender.other;
-        }
-      }
+      // Set default gender as we don't have gender info in new API
+      _selectedGender = Gender.other;
       notifyListeners();
     } else {
       // If no profile is available, try to get phone number from cache
@@ -72,36 +56,42 @@ class EditProfileController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateProfileImage(File imageFile) async {
-    selectedImageFile = imageFile;
-    notifyListeners();
-  }
-
   Future<void> saveProfile(BuildContext context) async {
     try {
       _isLoading = true;
       notifyListeners();
 
+      debugPrint('EditProfileController: Starting profile update');
+      debugPrint('Name: ${nameController.text}');
+      debugPrint('Phone: ${phoneController.text}');
+      debugPrint('Country Code: ${countryCodeController.text}');
+
       final updatedProfile = await _userService.updateUserProfile(
-        email: emailController.text,
+        // Email is now read-only, so we're not sending it for update
+        // email: emailController.text,
         fullName: nameController.text,
         phoneNumber: phoneController.text,
         countryCode: countryCodeController.text,
-        gender: _selectedGender == Gender.male ? 'M' : 
-                _selectedGender == Gender.female ? 'F' : 'O',
+        // Gender removed from edit options
         isWholesaleCustomer: false,
-        imageFile: selectedImageFile,
       );
+
+      debugPrint('EditProfileController: Profile update successful, updating UserController');
 
       // Update the UserController with new data
       final userController = Provider.of<UserController>(context, listen: false);
       userController.updateUserProfile(updatedProfile);
+
+      debugPrint('EditProfileController: UserController updated successfully');
 
       if (context.mounted) {
         CustomSnackbar.show(context, 'Profile updated successfully');
         Navigator.pop(context);
       }
     } catch (e) {
+      debugPrint('EditProfileController: Error occurred: $e');
+      debugPrint('EditProfileController: Error type: ${e.runtimeType}');
+      
       if (context.mounted) {
         CustomSnackbar.show(
           context, 
@@ -114,23 +104,7 @@ class EditProfileController extends ChangeNotifier {
     }
   }
 
-  Future<void> pickImage() async {
-    try {
-      debugPrint('Picking image...');
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png'],
-      );
-
-      debugPrint('Pick result: $result');
-      if (result != null && result.files.single.path != null) {
-        selectedImageFile = File(result.files.single.path!);
-        notifyListeners();
-      }
-    } catch (e) {
-      debugPrint('Error picking image: $e');
-    }
-  }
+  // Image picking functionality removed
 
   @override
   void dispose() {

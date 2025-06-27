@@ -1,15 +1,15 @@
 abstract class ApiConstants {
-  static const String baseUrl = 'https://ip.giftginnie.in/api/v1';
+  static const String baseUrl = 'https://api.giftginnie.in/api';
 }
 
 abstract class ApiEndpoints {
   // Auth endpoints
-  static const String sendOTP = '/users/auth/sendOTP/';
-  static const String verifyOTP = '/users/auth/verifyOTP/';
+  static const String register = '/auth/register';
+  static const String verifyEmailOTP = '/auth/verify';
   static const String refreshToken = '/users/auth/tokens/refresh/';
-
+  static const String login = '/auth/login';
   // User endpoints
-  static const String userProfile = '/users/profile/';
+  static String userProfile(String userId) => '/user/$userId';
 
   // Product endpoints
   static const String products = '/products';
@@ -35,20 +35,26 @@ abstract class ApiEndpoints {
   // Popular categories endpoint
   static const String popularCategories = '/products/popular-categories/';
 
-  // User address endpoints
+  // User address endpoints (old)
   static const String userAddresses = '/users/profile/address/';
+  
+  // New address endpoints
+  static const String addresses = '/address';
 
-  // profile update endpoint
+  // profile update endpoint (old)
   static const String updateUserProfile = '/users/profile/update/';
+  
+  // new profile update endpoint
+  static const String updateUser = '/user';
 
   // Cart endpoints
   static const String cart = '/cart/';
 
   // Carousel items endpoint
-  static const String carouselItems = '/products/carausel-items/';
+  static const String carouselItems = '/banner';
 
   // Coupon Fetch
-  static const String coupons = '/coupon/';
+  static const String coupons = '/coupons';
 
   static const String cartApplyCoupon = '/cart/applyCoupon/';
 

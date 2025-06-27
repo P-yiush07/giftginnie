@@ -13,15 +13,15 @@ class AddAddressScreen extends StatefulWidget {
 }
 
 class _AddAddressScreenState extends State<AddAddressScreen> {
-  String selectedType = 'Home';
-  TextEditingController otherAddressController = TextEditingController();
+  TextEditingController fullNameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
   TextEditingController stateController = TextEditingController();
   TextEditingController pincodeController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   TextEditingController areaController = TextEditingController();
-  TextEditingController landmarkController = TextEditingController();
   TextEditingController cityController = TextEditingController();
   bool isLoading = false;
+  bool isDefault = false;
 
   final List<String> indianStates = AddressTexts.indianStates;
 
@@ -60,23 +60,40 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Save Address as*',
-                  style: AppFonts.paragraph.copyWith(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
+                _buildTextField(
+                  label: 'Full Name',
+                  hint: 'Enter your full name',
+                  required: true,
+                  controller: fullNameController,
                 ),
-                const SizedBox(height: 12),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildAddressTypeChip('Home'),
-                      _buildAddressTypeChip('Work'),
-                      _buildAddressTypeChip('Other'),
-                    ],
-                  ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  label: 'Phone Number',
+                  hint: 'Enter your phone number',
+                  required: true,
+                  controller: phoneController,
+                  isPhoneNumber: true,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isDefault,
+                      onChanged: (value) {
+                        setState(() {
+                          isDefault = value ?? false;
+                        });
+                      },
+                      activeColor: AppColors.primary,
+                    ),
+                    Text(
+                      'Save as default address',
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 24),
                 _buildTextField(
@@ -99,12 +116,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                   required: true,
                   controller: cityController,
                 ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  label: 'Landmark',
-                  hint: 'Nearby Landmark (Optional)',
-                  controller: landmarkController,
-                ),
+
                 const SizedBox(height: 16),
                 _buildStateDropdown(),
                 const SizedBox(height: 16),
@@ -170,56 +182,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     );
   }
 
-  Widget _buildAddressTypeChip(String type) {
-    final isSelected = selectedType == type;
-    return Padding(
-      padding: const EdgeInsets.only(right: 12.0),
-      child: GestureDetector(
-        onTap: () => setState(() => selectedType = type),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : Colors.grey.shade300,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _getIconForType(type),
-                size: 16,
-                color: isSelected ? Colors.white : Colors.grey,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                type,
-                style: AppFonts.paragraph.copyWith(
-                  fontSize: 14,
-                  color: isSelected ? Colors.white : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  IconData _getIconForType(String type) {
-    switch (type) {
-      case 'Home':
-        return Icons.home_outlined;
-      case 'Work':
-        return Icons.work_outline;
-      case 'Hotel':
-        return Icons.hotel_outlined;
-      default:
-        return Icons.location_on_outlined;
-    }
-  }
+  // Address type removed
 
   Widget _buildTextField({
     required String label,
@@ -392,16 +355,15 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     });
 
     try {
-      String addressType = selectedType == 'Home' ? 'H' : 
-                          selectedType == 'Work' ? 'B' : 'O';
-
       await userService.addAddress(
+        fullName: fullNameController.text,
+        phone: phoneController.text,
         addressLine1: addressController.text,
         addressLine2: areaController.text,
         city: cityController.text,
         state: stateController.text,
         pincode: pincodeController.text,
-        addressType: addressType,
+        isDefault: isDefault,
       );
 
       if (mounted) {
@@ -469,15 +431,18 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     addressController.dispose();
     areaController.dispose();
     cityController.dispose();
-    landmarkController.dispose();
     stateController.dispose();
     pincodeController.dispose();
-    otherAddressController.dispose();
+    fullNameController.dispose();
+    phoneController.dispose();
     super.dispose();
   }
 
   bool _isFormValid() {
-    return addressController.text.isNotEmpty &&
+    return fullNameController.text.isNotEmpty &&
+        phoneController.text.isNotEmpty && 
+        phoneController.text.length == 10 &&
+        addressController.text.isNotEmpty &&
         areaController.text.isNotEmpty &&
         cityController.text.isNotEmpty &&
         stateController.text.isNotEmpty &&

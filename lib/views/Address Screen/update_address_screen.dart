@@ -21,28 +21,34 @@ class UpdateAddressScreen extends StatefulWidget {
 }
 
 class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
-  String selectedType = '';
+  TextEditingController fullNameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
   TextEditingController addressController = TextEditingController();
   TextEditingController areaController = TextEditingController();
   TextEditingController cityController = TextEditingController();
-  TextEditingController landmarkController = TextEditingController();
   TextEditingController stateController = TextEditingController();
   TextEditingController pincodeController = TextEditingController();
   bool isLoading = false;
+  bool isDefault = false;
   final List<String> indianStates = AddressTexts.indianStates;
   List<String> filteredStates = [];
 
   @override
   void initState() {
     super.initState();
-    selectedType = _getAddressTypeFromCode(widget.address.addressType);
+    // Initialize values from existing address
+    isDefault = widget.address.isDefault;
+    fullNameController.text = widget.address.fullName?.toString() ?? '';
+    phoneController.text = widget.address.phone?.toString() ?? '';
     addressController.text = widget.address.addressLine1;
     areaController.text = widget.address.addressLine2 ?? '';
     cityController.text = widget.address.city;
     stateController.text = widget.address.state;
-    pincodeController.text = widget.address.pincode;
+    pincodeController.text = widget.address.zipCode;
 
     // Add listeners to all required controllers
+    fullNameController.addListener(() => setState(() {}));
+    phoneController.addListener(() => setState(() {}));
     addressController.addListener(() => setState(() {}));
     areaController.addListener(() => setState(() {}));
     cityController.addListener(() => setState(() {}));
@@ -50,17 +56,10 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
     pincodeController.addListener(() => setState(() {}));
   }
 
-  String _getAddressTypeFromCode(String code) {
-    switch (code.toLowerCase()) {
-      case 'h':
-        return 'Home';
-      case 'b':
-        return 'Work';
-      case 'o':
-        return 'Other';
-      default:
-        return 'Home';
-    }
+  // No longer needed but keeping for reference
+  String _getAddressTypeFromCode(String? code) {
+    // We'll just return Home for default addresses and Other for non-default
+    return 'Home';
   }
 
   @override
@@ -96,23 +95,40 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Save Address as*',
-                  style: AppFonts.paragraph.copyWith(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
+                _buildTextField(
+                  label: 'Full Name',
+                  hint: 'Enter your full name',
+                  required: true,
+                  controller: fullNameController,
                 ),
-                const SizedBox(height: 12),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildAddressTypeChip('Home'),
-                      _buildAddressTypeChip('Work'),
-                      _buildAddressTypeChip('Other'),
-                    ],
-                  ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  label: 'Phone Number',
+                  hint: 'Enter your phone number',
+                  required: true,
+                  controller: phoneController,
+                  isPhoneNumber: true,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isDefault,
+                      onChanged: (value) {
+                        setState(() {
+                          isDefault = value ?? false;
+                        });
+                      },
+                      activeColor: AppColors.primary,
+                    ),
+                    Text(
+                      'Save as default address',
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 24),
                 _buildTextField(
@@ -134,12 +150,6 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
                   hint: 'Enter city name',
                   required: true,
                   controller: cityController,
-                ),
-                const SizedBox(height: 16),
-                _buildTextField(
-                  label: 'Landmark',
-                  hint: 'Nearby Landmark (Optional)',
-                  controller: landmarkController,
                 ),
                 const SizedBox(height: 16),
                 _buildStateDropdown(),
@@ -206,56 +216,7 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
     );
   }
 
-  Widget _buildAddressTypeChip(String type) {
-    final isSelected = selectedType == type;
-    return Padding(
-      padding: const EdgeInsets.only(right: 12.0),
-      child: GestureDetector(
-        onTap: () => setState(() => selectedType = type),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : Colors.grey.shade300,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _getIconForType(type),
-                size: 16,
-                color: isSelected ? Colors.white : Colors.grey,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                type,
-                style: AppFonts.paragraph.copyWith(
-                  fontSize: 14,
-                  color: isSelected ? Colors.white : Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  IconData _getIconForType(String type) {
-    switch (type) {
-      case 'Home':
-        return Icons.home_outlined;
-      case 'Work':
-        return Icons.work_outline;
-      case 'Hotel':
-        return Icons.hotel_outlined;
-      default:
-        return Icons.location_on_outlined;
-    }
-  }
+  // Address type removed
 
   Widget _buildTextField({
     required String label,
@@ -423,17 +384,16 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
     });
 
     try {
-      String addressType = selectedType == 'Home' ? 'H' : 
-                          selectedType == 'Work' ? 'B' : 'O';
-
       await userService.updateAddress(
         addressId: widget.address.id,
+        fullName: fullNameController.text,
+        phone: phoneController.text,
         addressLine1: addressController.text,
         addressLine2: areaController.text,
         city: cityController.text,
         state: stateController.text,
         pincode: pincodeController.text,
-        addressType: addressType,
+        isDefault: isDefault,
       );
 
       if (mounted) {
@@ -485,26 +445,31 @@ class _UpdateAddressScreenState extends State<UpdateAddressScreen> {
 
   // Add this method to check if all required fields are filled
   bool _isFormValid() {
-    return addressController.text.isNotEmpty &&
+    return fullNameController.text.isNotEmpty &&
+        phoneController.text.isNotEmpty && 
+        phoneController.text.length == 10 &&
+        addressController.text.isNotEmpty &&
         areaController.text.isNotEmpty &&
         cityController.text.isNotEmpty &&
         stateController.text.isNotEmpty &&
-        pincodeController.text.length == 6 &&
-        selectedType.isNotEmpty;
+        pincodeController.text.length == 6;
   }
 
   @override
   void dispose() {
+    fullNameController.removeListener(() => setState(() {}));
+    phoneController.removeListener(() => setState(() {}));
     addressController.removeListener(() => setState(() {}));
     areaController.removeListener(() => setState(() {}));
     cityController.removeListener(() => setState(() {}));
     stateController.removeListener(() => setState(() {}));
     pincodeController.removeListener(() => setState(() {}));
     
+    fullNameController.dispose();
+    phoneController.dispose();
     addressController.dispose();
     areaController.dispose();
     cityController.dispose();
-    landmarkController.dispose();
     stateController.dispose();
     pincodeController.dispose();
     super.dispose();

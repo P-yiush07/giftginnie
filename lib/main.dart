@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/controllers/authHome_controller.dart';
 import 'package:giftginnie_ui/controllers/main/address_controller.dart';
 import 'package:giftginnie_ui/controllers/main/product_controller.dart';
+import 'package:giftginnie_ui/controllers/main/home_controller.dart';
 import 'package:giftginnie_ui/widgets/Splash%20Screen/splash_screen.dart';
 import 'constants/colors.dart';
 import 'utils/global.dart';
@@ -46,6 +47,7 @@ void main() async {
           ChangeNotifierProvider(create: (_) => UserController()),
           ChangeNotifierProvider(create: (_) => AddressController()),
           ChangeNotifierProvider(create: (_) => ProductController()),
+          ChangeNotifierProvider(create: (_) => HomeController()),
           // Add other global providers
           // ChangeNotifierProvider(create: (_) => CartController()),
           // ChangeNotifierProvider(create: (_) => UserController()),
@@ -64,6 +66,7 @@ void main() async {
           ChangeNotifierProvider(create: (_) => UserController()),
           ChangeNotifierProvider(create: (_) => AddressController()),
           ChangeNotifierProvider(create: (_) => ProductController()),
+          ChangeNotifierProvider(create: (_) => HomeController()),
           // Add other global providers
           // ChangeNotifierProvider(create: (_) => CartController()),
           // ChangeNotifierProvider(create: (_) => UserController()),
@@ -79,18 +82,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ConnectivityService()),
-        ChangeNotifierProvider(create: (_) => AuthController()),
-        ChangeNotifierProvider(create: (_) => UserController()),
-        ChangeNotifierProvider(create: (_) => AddressController()),
-        ChangeNotifierProvider(create: (_) => ProductController()),
-        // Add other global providers
-        // ChangeNotifierProvider(create: (_) => CartController()),
-        // ChangeNotifierProvider(create: (_) => UserController()),
-      ],
-      child: MaterialApp(
+    return MaterialApp(
         navigatorKey: navigatorKey,
         title: 'Gift App',
         theme: ThemeData(
@@ -110,7 +102,6 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Colors.transparent,
         ),
         home: const SplashScreen(),
-      ),
-    );
+      );
   }
 }
