@@ -8,6 +8,9 @@ abstract class ApiEndpoints {
   static const String verifyEmailOTP = '/auth/verify';
   static const String refreshToken = '/users/auth/tokens/refresh/';
   static const String login = '/auth/login';
+  static const String forgotPasswordSendOtp = '/auth/send-otp';
+  static const String verifyOtpResetPassword = '/auth/verifyOtpResetPassword';
+  static const String resetPassword = '/auth/resetpassword';
   // User endpoints
   static String userProfile(String userId) => '/user/$userId';
 

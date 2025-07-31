@@ -10,11 +10,13 @@ import '../models/success_model.dart';
 class SuccessScreen extends StatelessWidget {
   final SuccessModel? model;
   final VoidCallback? onButtonPressed;
+  final String? message;
 
   const SuccessScreen({
     super.key,
     this.model,
     this.onButtonPressed,
+    this.message,
   });
 
   @override
@@ -24,13 +26,14 @@ class SuccessScreen extends StatelessWidget {
         model: model,
         onButtonPressed: onButtonPressed,
       ),
-      child: const SuccessView(),
+      child: SuccessView(message: message),
     );
   }
 }
 
 class SuccessView extends StatelessWidget {
-  const SuccessView({super.key});
+  final String? message;
+  const SuccessView({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {

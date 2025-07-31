@@ -3,6 +3,8 @@ import '../models/sign_in_model.dart';
 import '../services/Auth/auth_service.dart';
 import '../config/auth_config.dart';
 
+import 'package:giftginnie_ui/views/Auth%20Screen/forgot_password_screen.dart';
+
 class SignInController extends ChangeNotifier {
   final SignInModel _model = SignInModel();
   final TextEditingController _emailController = TextEditingController();
@@ -124,7 +126,10 @@ class SignInController extends ChangeNotifier {
     // TODO: Implement Google login
   }
 
-  Future<void> handleForgotPassword() async {
-    // TODO: Implement forgot password logic
+  void handleForgotPassword(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+    );
   }
 }

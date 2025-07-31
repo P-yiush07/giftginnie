@@ -84,7 +84,7 @@ class SignInView extends StatelessWidget {
                       const SizedBox(height: 32),
                       _buildEmailInput(controller),
                       const SizedBox(height: 16),
-                      _buildPasswordInput(controller),
+                      _buildPasswordInput(context, controller),
                       const SizedBox(height: 24),
                       _buildLoginButton(controller),
                     ],
@@ -166,7 +166,7 @@ class SignInView extends StatelessWidget {
     );
   }
   
-  Widget _buildPasswordInput(SignInController controller) {
+  Widget _buildPasswordInput(BuildContext context, SignInController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -254,7 +254,7 @@ class SignInView extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: controller.handleForgotPassword,
+            onPressed: () => controller.handleForgotPassword(context),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               minimumSize: Size.zero,

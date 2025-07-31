@@ -282,4 +282,40 @@ class AuthService {
       throw Exception('An unexpected error occurred. Please try again.');
     }
   }
+
+  Future<void> forgotPasswordSendOtp({required String email}) async {
+    try {
+      await _dio.post(
+        ApiEndpoints.forgotPasswordSendOtp,
+        data: {'email': email},
+      );
+    } on DioException catch (e) {
+      debugPrint('Error sending password reset email: $e');
+      throw Exception('Failed to send password reset email. Please try again.');
+    }
+  }
+
+  Future<void> verifyOtpResetPassword({required String email, required String otp}) async {
+    try {
+      await _dio.post(
+        ApiEndpoints.verifyOtpResetPassword,
+        data: {'email': email, 'otp': otp},
+      );
+    } on DioException catch (e) {
+      debugPrint('Error verifying OTP: $e');
+      throw Exception('Failed to verify OTP. Please try again.');
+    }
+  }
+
+  Future<void> resetPassword({required String email, required String newPassword, required String otp}) async {
+    try {
+      await _dio.post(
+        ApiEndpoints.resetPassword,
+        data: {'email': email, 'newPassword': newPassword, 'otp': otp},
+      );
+    } on DioException catch (e) {
+      debugPrint('Error resetting password: $e');
+      throw Exception('Failed to reset password. Please try again.');
+    }
+  }
 }
