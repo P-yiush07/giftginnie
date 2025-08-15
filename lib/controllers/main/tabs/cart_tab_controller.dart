@@ -10,6 +10,7 @@ class CartTabController extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   CartModel? _cartData;
+  Set<String> _loadingItemIds = {}; 
   
   // Debug identifier
   final String _id = DateTime.now().millisecondsSinceEpoch.toString();
@@ -74,22 +75,30 @@ class CartTabController extends ChangeNotifier {
     }
   }
 
-  Future<void> removeItem(String itemId, String variantId) async {
-    try {
-      _isLoading = true; // Set loading state immediately
-      notifyListeners();
-      
-      await _cartService.removeItem(itemId, variantId);
-      await initializeData(); // Refresh cart data
-    } catch (e) {
-      _error = 'Failed to remove item: ${e.toString()}';
-      notifyListeners();
-      rethrow; // Rethrow to handle in UI
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+Future<void> removeItem(String productId, String variantId) async {
+  final itemKey = "$productId-$variantId";
+
+  _loadingItemIds.add(itemKey);
+  notifyListeners();
+
+  try {
+    await _cartService.removeItem(productId, variantId);
+   _cartData?.items.removeWhere(
+    (item) => item.productId == productId && item.variantId == variantId,
+  );
+  _error = null;
+  } catch (e) {
+    _error = e.toString().replaceAll('Exception: ', '');
+  } finally {
+    // Stop loading for this specific item
+    _loadingItemIds.remove(itemKey);
+    notifyListeners();
   }
+}
+
+bool isItemLoading(String productId, String variantId) {
+  return _loadingItemIds.contains("$productId-$variantId");
+}
 
   Future<void> addItem(String productId, int quantity) async {
     try {

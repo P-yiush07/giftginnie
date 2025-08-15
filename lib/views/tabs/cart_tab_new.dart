@@ -722,6 +722,9 @@ class _CartTabViewState extends State<CartTabView> {
     required CartItem item,
     required CartTabController controller,
   }) {
+
+     final isLoading = controller.isItemLoading(item.productId, item.variantId);
+
     return Container(
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 16),
@@ -736,7 +739,12 @@ class _CartTabViewState extends State<CartTabView> {
           ),
         ],
       ),
-      child: Column(
+      child: isLoading ? 
+      SizedBox(
+            height: 80,
+            child: Center(child: CircularProgressIndicator()), // shimmer here
+          )
+      : Column(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
