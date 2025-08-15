@@ -192,11 +192,26 @@ class CartService {
     }
   }
 
-  Future<void> removeItem(int itemId) async {
+  Future<void> removeItem(String itemId, String variantId) async {
     try {
-      await _dio.delete(
-        '${ApiConstants.baseUrl}${ApiEndpoints.cartItem(itemId)}',
+
+      final Map<String, dynamic> payload = {
+        'productId': itemId,
+        'variantId': variantId
+      };
+
+      final response = await _dio.delete(
+        'https://api.giftginnie.in/api/cart',
+        data: payload
       );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        debugPrint('Item deleted successfully');
+      } else {
+        debugPrint('Failed to update item: ${response.statusMessage}');
+        throw Exception('Failed to update item quantity');
+      }
+
     } catch (e) {
       debugPrint('Error removing cart item: $e');
       throw Exception('Failed to remove item from cart');

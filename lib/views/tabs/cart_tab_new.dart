@@ -92,7 +92,7 @@ class _CartTabViewState extends State<CartTabView> {
                             ],
                           ),
                           const SizedBox(height: 24),
-                          
+
                           // Address shimmer
                           Shimmer.fromColors(
                             baseColor: Colors.grey[300]!,
@@ -107,11 +107,11 @@ class _CartTabViewState extends State<CartTabView> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          
+
                           // Cart items shimmer
                           const CartItemsShimmer(),
                           const SizedBox(height: 16),
-                          
+
                           // Offers section shimmer
                           Shimmer.fromColors(
                             baseColor: Colors.grey[300]!,
@@ -126,7 +126,7 @@ class _CartTabViewState extends State<CartTabView> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          
+
                           // Bill details shimmer
                           Shimmer.fromColors(
                             baseColor: Colors.grey[300]!,
@@ -172,7 +172,7 @@ class _CartTabViewState extends State<CartTabView> {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        
+
                         if (controller.error != null)
                           SizedBox(
                             height: MediaQuery.of(context).size.height - 300,
@@ -181,7 +181,8 @@ class _CartTabViewState extends State<CartTabView> {
                               onRetry: () => controller.initializeData(),
                             ),
                           )
-                        else if (controller.cartData == null || controller.cartData!.items.isEmpty)
+                        else if (controller.cartData == null ||
+                            controller.cartData!.items.isEmpty)
                           SizedBox(
                             height: MediaQuery.of(context).size.height - 300,
                             child: Center(
@@ -228,7 +229,8 @@ class _CartTabViewState extends State<CartTabView> {
                                         borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.05),
+                                            color:
+                                                Colors.black.withOpacity(0.05),
                                             blurRadius: 4,
                                             offset: const Offset(0, 2),
                                           ),
@@ -237,11 +239,16 @@ class _CartTabViewState extends State<CartTabView> {
                                       child: addressController.isLoading
                                           ? _buildAddressShimmer()
                                           : Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  addressController.selectedAddress?.getAddressLabel() ?? 'Select Address',
-                                                  style: AppFonts.paragraph.copyWith(
+                                                  addressController
+                                                          .selectedAddress
+                                                          ?.getAddressLabel() ??
+                                                      'Select Address',
+                                                  style: AppFonts.paragraph
+                                                      .copyWith(
                                                     fontSize: 14,
                                                     color: AppColors.textGrey,
                                                   ),
@@ -252,19 +259,28 @@ class _CartTabViewState extends State<CartTabView> {
                                                     Icon(
                                                       Icons.location_on,
                                                       size: 18,
-                                                      color: AppColors.primaryRed,
+                                                      color:
+                                                          AppColors.primaryRed,
                                                     ),
                                                     const SizedBox(width: 4),
                                                     Expanded(
                                                       child: Text(
-                                                        addressController.selectedAddress?.fullAddress ?? 'Tap to select delivery address',
-                                                        style: AppFonts.paragraph.copyWith(
+                                                        addressController
+                                                                .selectedAddress
+                                                                ?.fullAddress ??
+                                                            'Tap to select delivery address',
+                                                        style: AppFonts
+                                                            .paragraph
+                                                            .copyWith(
                                                           fontSize: 15,
-                                                          fontWeight: FontWeight.w500,
-                                                          color: AppColors.black,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color:
+                                                              AppColors.black,
                                                         ),
                                                         maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
                                                       ),
                                                     ),
                                                     const Icon(
@@ -281,22 +297,22 @@ class _CartTabViewState extends State<CartTabView> {
                                 },
                               ),
                               const SizedBox(height: 24),
-                              
+
                               // Cart items list - new implementation for updated API
-                              ...controller.cartData!.items.map((item) => 
-                                _buildNewCartItem(
-                                  item: item,
-                                  controller: controller,
-                                )
-                              ).toList(),
-                              
+                              ...controller.cartData!.items
+                                  .map((item) => _buildNewCartItem(
+                                        item: item,
+                                        controller: controller,
+                                      ))
+                                  .toList(),
+
                               const SizedBox(height: 16),
-                              
+
                               // Offers and coupon section
                               _buildOffersSection(),
-                              
+
                               const SizedBox(height: 24),
-                              
+
                               // Bill details section
                               Container(
                                 padding: const EdgeInsets.all(16),
@@ -311,110 +327,122 @@ class _CartTabViewState extends State<CartTabView> {
                                     ),
                                   ],
                                 ),
-                                child: Builder(
-                                  builder: (context) {
-                                    // Debug print to verify we have coupon data
-                                    debugPrint('Displaying cart with: ' +
+                                child: Builder(builder: (context) {
+                                  // Debug print to verify we have coupon data
+                                  debugPrint('Displaying cart with: ' +
                                       'Coupon: ${controller.cartData!.appliedCouponCode}, ' +
                                       'Discount: ${controller.cartData!.discountAmount}, ' +
                                       'Final Price: ${controller.cartData!.finalPrice}');
-                                    
-                                    return Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                    Text(
-                                      'Price Details',
-                                      style: AppFonts.paragraph.copyWith(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
+
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Price Details',
+                                        style: AppFonts.paragraph.copyWith(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    
-                                    // Item total
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Item Total (${controller.cartData!.totalItems} items)',
-                                          style: AppFonts.paragraph.copyWith(
-                                            color: AppColors.textGrey,
-                                          ),
-                                        ),
-                                        Text(
-                                          '₹${controller.cartData!.totalPrice.toStringAsFixed(2)}',
-                                          style: AppFonts.paragraph.copyWith(
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    
-                                    // Discount (only if a coupon is applied)
-                                    if (controller.cartData!.discountAmount != null && controller.cartData!.discountAmount! > 0) ...[
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 16),
+
+                                      // Item total
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                'Discount ',
-                                                style: AppFonts.paragraph.copyWith(
-                                                  color: Colors.green,
-                                                ),
-                                              ),
-                                              if (controller.cartData!.appliedCouponCode != null)
-                                                Text(
-                                                  '(${controller.cartData!.appliedCouponCode})',
-                                                  style: AppFonts.paragraph.copyWith(
-                                                    color: Colors.green,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                            ],
+                                          Text(
+                                            'Item Total (${controller.cartData!.totalItems} items)',
+                                            style: AppFonts.paragraph.copyWith(
+                                              color: AppColors.textGrey,
+                                            ),
                                           ),
                                           Text(
-                                            '- ₹${controller.cartData!.discountAmount!.toStringAsFixed(2)}',
+                                            '₹${controller.cartData!.totalPrice.toStringAsFixed(2)}',
                                             style: AppFonts.paragraph.copyWith(
                                               fontWeight: FontWeight.w500,
-                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      // Discount (only if a coupon is applied)
+                                      if (controller.cartData!.discountAmount !=
+                                              null &&
+                                          controller.cartData!.discountAmount! >
+                                              0) ...[
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  'Discount ',
+                                                  style: AppFonts.paragraph
+                                                      .copyWith(
+                                                    color: Colors.green,
+                                                  ),
+                                                ),
+                                                if (controller.cartData!
+                                                        .appliedCouponCode !=
+                                                    null)
+                                                  Text(
+                                                    '(${controller.cartData!.appliedCouponCode})',
+                                                    style: AppFonts.paragraph
+                                                        .copyWith(
+                                                      color: Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                            Text(
+                                              '- ₹${controller.cartData!.discountAmount!.toStringAsFixed(2)}',
+                                              style:
+                                                  AppFonts.paragraph.copyWith(
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.green,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+
+                                      const Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 8),
+                                        child: Divider(),
+                                      ),
+
+                                      // Total amount (with discount if applicable)
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Total Amount',
+                                            style: AppFonts.paragraph.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          Text(
+                                            '₹${(controller.cartData!.finalPrice ?? controller.cartData!.totalPrice).toStringAsFixed(2)}',
+                                            style: AppFonts.paragraph.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16,
+                                              color: AppColors.primaryRed,
                                             ),
                                           ),
                                         ],
                                       ),
                                     ],
-                                    
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(vertical: 8),
-                                      child: Divider(),
-                                    ),
-                                    
-                                    // Total amount (with discount if applicable)
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Total Amount',
-                                          style: AppFonts.paragraph.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        Text(
-                                          '₹${(controller.cartData!.finalPrice ?? controller.cartData!.totalPrice).toStringAsFixed(2)}',
-                                          style: AppFonts.paragraph.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
-                                            color: AppColors.primaryRed,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                    );
-                                  }
-                                ),
+                                  );
+                                }),
                               ),
                             ],
                           ),
@@ -427,7 +455,9 @@ class _CartTabViewState extends State<CartTabView> {
           ),
           Consumer<CartTabController>(
             builder: (context, controller, _) {
-              if (controller.isLoading || controller.error != null || controller.cartData?.items.isEmpty != false) {
+              if (controller.isLoading ||
+                  controller.error != null ||
+                  controller.cartData?.items.isEmpty != false) {
                 return const SizedBox.shrink();
               }
 
@@ -470,7 +500,7 @@ class _CartTabViewState extends State<CartTabView> {
       ),
     );
   }
-  
+
   Widget _buildAddressShimmer() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -520,15 +550,16 @@ class _CartTabViewState extends State<CartTabView> {
       ],
     );
   }
-  
+
   Widget _buildOffersSection() {
     return Consumer<CartTabController>(
       builder: (context, controller, _) {
         // Check if there's an applied coupon in the cart data
         final hasCoupon = controller.cartData?.appliedCouponCode != null;
-        
+
         // Debug print to verify coupon status
-        debugPrint('Building offers section - Has coupon: $hasCoupon, Code: ${controller.cartData?.appliedCouponCode}');
+        debugPrint(
+            'Building offers section - Has coupon: $hasCoupon, Code: ${controller.cartData?.appliedCouponCode}');
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -543,42 +574,50 @@ class _CartTabViewState extends State<CartTabView> {
             ),
             const SizedBox(height: 12),
             GestureDetector(
-              onTap: hasCoupon ? null : () async {
-                try {
-                  final result = await Navigator.push(
-                    context,
-                    SlidePageRoute(
-                      page: const CouponScreen(),
-                      direction: SlideDirection.right,
-                    ),
-                  );
-                  
-                  debugPrint('Returned from coupon screen with result: $result');
-                  
-                  if (result != null) {
-                    // Get the controller
-                    final controller = Provider.of<CartTabController>(context, listen: false);
-                    
-                    // Check if we received coupon data map
-                    if (result is Map<String, dynamic> && result['success'] == true) {
-                      debugPrint('Applying coupon data to cart: ${result['couponCode']}');
-                      
-                      // Update the controller with coupon data without fetching from server
-                      controller.updateWithCouponData(
-                        result['couponCode'] as String,
-                        result['discount'] as double,
-                        result['finalPrice'] as double,
-                      );
-                    } else if (result == true) {
-                      // Fallback to old behavior if we just get a boolean result
-                      debugPrint('Received boolean result, triggering simple UI update');
-                      controller.notifyListeners();
-                    }
-                  }
-                } catch (e) {
-                  debugPrint('Error handling coupon result: $e');
-                }
-              },
+              onTap: hasCoupon
+                  ? null
+                  : () async {
+                      try {
+                        final result = await Navigator.push(
+                          context,
+                          SlidePageRoute(
+                            page: const CouponScreen(),
+                            direction: SlideDirection.right,
+                          ),
+                        );
+
+                        debugPrint(
+                            'Returned from coupon screen with result: $result');
+
+                        if (result != null) {
+                          // Get the controller
+                          final controller = Provider.of<CartTabController>(
+                              context,
+                              listen: false);
+
+                          // Check if we received coupon data map
+                          if (result is Map<String, dynamic> &&
+                              result['success'] == true) {
+                            debugPrint(
+                                'Applying coupon data to cart: ${result['couponCode']}');
+
+                            // Update the controller with coupon data without fetching from server
+                            controller.updateWithCouponData(
+                              result['couponCode'] as String,
+                              result['discount'] as double,
+                              result['finalPrice'] as double,
+                            );
+                          } else if (result == true) {
+                            // Fallback to old behavior if we just get a boolean result
+                            debugPrint(
+                                'Received boolean result, triggering simple UI update');
+                            controller.notifyListeners();
+                          }
+                        }
+                      } catch (e) {
+                        debugPrint('Error handling coupon result: $e');
+                      }
+                    },
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -593,83 +632,83 @@ class _CartTabViewState extends State<CartTabView> {
                   ],
                 ),
                 child: hasCoupon
-                  ? Row(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/images/coupon.svg',
-                          width: 20,
-                          height: 20,
-                          color: AppColors.primaryRed,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Coupon ${controller.cartData?.appliedCouponCode ?? ""} Applied',
-                            style: AppFonts.paragraph.copyWith(
-                              color: AppColors.primaryRed,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            try {
-                              await controller.removeCoupon();
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(e.toString())),
-                                );
-                              }
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'Remove',
-                            style: AppFonts.paragraph.copyWith(
-                              color: AppColors.primaryRed,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  : Row(
-                      children: [
-                        SvgPicture.asset(
-                          'assets/images/coupon.svg',
-                          width: 20,
-                          height: 20,
-                          color: AppColors.primaryRed,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Apply Coupon',
-                            style: AppFonts.paragraph.copyWith(
-                              color: AppColors.black,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          'Apply',
-                          style: AppFonts.paragraph.copyWith(
+                    ? Row(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/coupon.svg',
+                            width: 20,
+                            height: 20,
                             color: AppColors.primaryRed,
-                            fontWeight: FontWeight.w500,
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.chevron_right,
-                          color: AppColors.primaryRed,
-                          size: 20,
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Coupon ${controller.cartData?.appliedCouponCode ?? ""} Applied',
+                              style: AppFonts.paragraph.copyWith(
+                                color: AppColors.primaryRed,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              try {
+                                await controller.removeCoupon();
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(e.toString())),
+                                  );
+                                }
+                              }
+                            },
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              'Remove',
+                              style: AppFonts.paragraph.copyWith(
+                                color: AppColors.primaryRed,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/images/coupon.svg',
+                            width: 20,
+                            height: 20,
+                            color: AppColors.primaryRed,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Apply Coupon',
+                              style: AppFonts.paragraph.copyWith(
+                                color: AppColors.black,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            'Apply',
+                            style: AppFonts.paragraph.copyWith(
+                              color: AppColors.primaryRed,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.chevron_right,
+                            color: AppColors.primaryRed,
+                            size: 20,
+                          ),
+                        ],
+                      ),
               ),
             ),
           ],
@@ -677,7 +716,7 @@ class _CartTabViewState extends State<CartTabView> {
       },
     );
   }
-  
+
   // New cart item builder for the updated API response format
   Widget _buildNewCartItem({
     required CartItem item,
@@ -715,7 +754,8 @@ class _CartTabViewState extends State<CartTabView> {
                       ? Image.network(
                           item.variantImages.first,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const Icon(
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
                             Icons.image_not_supported,
                             color: AppColors.grey300,
                           ),
@@ -724,7 +764,8 @@ class _CartTabViewState extends State<CartTabView> {
                           ? Image.network(
                               item.productImages.first,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => const Icon(
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
                                 Icons.image_not_supported,
                                 color: AppColors.grey300,
                               ),
@@ -787,7 +828,8 @@ class _CartTabViewState extends State<CartTabView> {
                     context: context,
                     builder: (context) => AlertDialog(
                       title: const Text('Remove Item'),
-                      content: const Text('Are you sure you want to remove this item from your cart?'),
+                      content: const Text(
+                          'Are you sure you want to remove this item from your cart?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
@@ -800,13 +842,18 @@ class _CartTabViewState extends State<CartTabView> {
                       ],
                     ),
                   );
-                  
+
                   if (shouldDelete == true) {
                     try {
-                      // TODO: Implement removeItem with new API
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Remove functionality will be implemented soon')),
-                      );
+                     await controller.removeItem(item.productId, item.variantId);
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text(
+                                  'Item Deleted')),
+                        );
+                      }
                     } catch (e) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -821,9 +868,9 @@ class _CartTabViewState extends State<CartTabView> {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
                 icon: const Icon(Icons.delete_outline, size: 20),
-                label: const Text('Remove'),
+                label: const Text('Remove item'),
               ),
-              
+
               // Quantity selector
               Container(
                 decoration: BoxDecoration(
@@ -834,31 +881,35 @@ class _CartTabViewState extends State<CartTabView> {
                   children: [
                     // Minus button
                     InkWell(
-                      onTap: item.quantity > 1 ? () async {
-                        try {
-                      controller.updateItemQuantity(
-                        item.productId,
-                        item.variantId,
-                        item.quantity - 1,
-                      );
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
-                            );
-                          }
-                        }
-                      } : null,
+                      onTap: item.quantity > 1
+                          ? () async {
+                              try {
+                                controller.updateItemQuantity(
+                                  item.productId,
+                                  item.variantId,
+                                  item.quantity - 1,
+                                );
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(e.toString())),
+                                  );
+                                }
+                              }
+                            }
+                          : null,
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         child: Icon(
                           Icons.remove,
                           size: 16,
-                          color: item.quantity > 1 ? AppColors.black : AppColors.grey300,
+                          color: item.quantity > 1
+                              ? AppColors.black
+                              : AppColors.grey300,
                         ),
                       ),
                     ),
-                    
+
                     // Quantity text
                     Container(
                       constraints: const BoxConstraints(minWidth: 30),
@@ -871,30 +922,34 @@ class _CartTabViewState extends State<CartTabView> {
                         ),
                       ),
                     ),
-                    
+
                     // Plus button
                     InkWell(
-                      onTap: item.quantity < (item.variantStock) ? () async {
-                        try {
-                        controller.updateItemQuantity(
-                        item.productId,
-                        item.variantId,
-                        item.quantity + 1,
-                      );
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
-                            );
-                          }
-                        }
-                      } : null,
+                      onTap: item.quantity < (item.variantStock)
+                          ? () async {
+                              try {
+                                controller.updateItemQuantity(
+                                  item.productId,
+                                  item.variantId,
+                                  item.quantity + 1,
+                                );
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(e.toString())),
+                                  );
+                                }
+                              }
+                            }
+                          : null,
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         child: Icon(
                           Icons.add,
                           size: 16,
-                          color: item.quantity < (item.variantStock) ? AppColors.black : AppColors.grey300,
+                          color: item.quantity < (item.variantStock)
+                              ? AppColors.black
+                              : AppColors.grey300,
                         ),
                       ),
                     ),

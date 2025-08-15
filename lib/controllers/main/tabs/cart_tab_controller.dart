@@ -74,12 +74,12 @@ class CartTabController extends ChangeNotifier {
     }
   }
 
-  Future<void> removeItem(int itemId) async {
+  Future<void> removeItem(String itemId, String variantId) async {
     try {
       _isLoading = true; // Set loading state immediately
       notifyListeners();
       
-      await _cartService.removeItem(itemId);
+      await _cartService.removeItem(itemId, variantId);
       await initializeData(); // Refresh cart data
     } catch (e) {
       _error = 'Failed to remove item: ${e.toString()}';
