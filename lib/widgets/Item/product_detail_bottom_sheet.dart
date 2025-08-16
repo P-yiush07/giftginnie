@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
+import 'package:giftginnie_ui/controllers/main/tabs/cart_tab_controller.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/image_service.dart';
 import 'package:giftginnie_ui/services/Product/product_service.dart';
 import 'package:giftginnie_ui/widgets/Item/favourite_button.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 import 'package:giftginnie_ui/services/Cart/cart_service.dart';
+import 'package:provider/provider.dart';
+
 
 class ProductDetailBottomSheet extends StatefulWidget {
   final Product product;
@@ -506,12 +509,15 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             child: (_product.selectedVariant?.inStock ?? _product.inStock)
                               ? ElevatedButton(
                                   onPressed: _isAddingToCart ? null : () async {
+
+                                    final cartController = context.read<CartTabController>();
+
                                     setState(() {
                                       _isAddingToCart = true;
                                     });
                                     
                                     try {
-                                      final cartService = CartService();
+                                      // final cartService = CartService();
                                       
                                       // Get variant ID if available
                                       String? variantId;
@@ -527,7 +533,9 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                         throw Exception('No variant selected or invalid variant');
                                       }
                                       
-                                      await cartService.addToCart(_product.id, variantId, 1);
+                                      // await cartService.addToCart(_product.id, variantId, 1);
+
+                                      await cartController.addToCart(_product.id, variantId, 1);
                                       
                                       if (mounted) {
                                         setState(() {

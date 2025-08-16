@@ -35,10 +35,7 @@ class CartTab extends StatelessWidget {
           systemNavigationBarColor: AppColors.white,
           systemNavigationBarIconBrightness: Brightness.dark,
         ),
-        child: ChangeNotifierProvider(
-          create: (_) => CartTabController(context.read<HomeController>()),
-          child: const CartTabView(),
-        ),
+        child: const CartTabView(),
       ),
     );
   }

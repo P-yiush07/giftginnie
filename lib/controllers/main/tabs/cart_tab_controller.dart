@@ -83,10 +83,14 @@ Future<void> removeItem(String productId, String variantId) async {
 
   try {
     await _cartService.removeItem(productId, variantId);
-   _cartData?.items.removeWhere(
+
+    _cartData?.items.removeWhere(
     (item) => item.productId == productId && item.variantId == variantId,
   );
-  _error = null;
+
+    await initializeData();
+    
+    _error = null;
   } catch (e) {
     _error = e.toString().replaceAll('Exception: ', '');
   } finally {
@@ -100,15 +104,24 @@ bool isItemLoading(String productId, String variantId) {
   return _loadingItemIds.contains("$productId-$variantId");
 }
 
-  Future<void> addItem(String productId, int quantity) async {
-    try {
-      await _cartService.addItem(productId, quantity);
-      await initializeData(); // Refresh cart data
-    } catch (e) {
-      _error = 'Failed to add item: ${e.toString()}';
-      notifyListeners();
-    }
+Future<void> addToCart(String productId, String variantId, int quantity) async {
+  try{
+    await _cartService.addToCart(productId, variantId, quantity);
+    await initializeData();
+  } catch (e){
+      _error = 'Failed adding to cart: ${e.toString()}';
   }
+}
+
+  // Future<void> addItem(String productId, int quantity) async {
+  //   try {
+  //     await _cartService.addItem(productId, quantity);
+  //     await initializeData(); // Refresh cart data
+  //   } catch (e) {
+  //     _error = 'Failed to add item: ${e.toString()}';
+  //     notifyListeners();
+  //   }
+  // }
 
   // Future<void> applyCoupon(String couponCode) async {
   //   try {

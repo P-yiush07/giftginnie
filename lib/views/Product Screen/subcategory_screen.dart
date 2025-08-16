@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
+import 'package:giftginnie_ui/controllers/main/tabs/cart_tab_controller.dart';
 import 'package:giftginnie_ui/models/category_model.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/Product/product_service.dart';
+import 'package:giftginnie_ui/views/Product%20Screen/floating_cart_widget.dart';
 import 'package:giftginnie_ui/widgets/Item/favourite_button.dart';
 import 'package:giftginnie_ui/widgets/Item/product_detail_bottom_sheet.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 class SubcategoryScreen extends StatefulWidget {
@@ -46,48 +49,69 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
         ),
         surfaceTintColor: Colors.white,
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          // For now, just a dummy refresh
-          return Future.delayed(const Duration(seconds: 1));
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 32.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Subcategory Title and Description
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.subcategoryName,
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 24,
-                          color: AppColors.black,
-                        ),
+      body: Stack(
+        children: [
+          RefreshIndicator(
+            onRefresh: () async {
+              // For now, just a dummy refresh
+              return Future.delayed(const Duration(seconds: 1));
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 32.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Subcategory Title and Description
+                    Padding(
+                      padding:
+                          const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.subcategoryName,
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 24,
+                              color: AppColors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.subcategoryDescription,
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 14,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.subcategoryDescription,
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: AppColors.textGrey,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildProductGrid(),
+                    const SizedBox(height: 50),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                _buildProductGrid(),
-              ],
+              ),
             ),
           ),
-        ),
+          // Floating Cart
+          Consumer<CartTabController>(
+            builder: (context, cartController, child) {
+              if (cartController.isLoading) {
+                return const SizedBox.shrink(); // hide while loading
+              }
+
+              if (cartController.cartData == null ||
+                  cartController.cartData!.items.isEmpty) {
+                return const SizedBox.shrink(); // hide if empty
+              }
+
+              return FloatingCartWidget(cartController: cartController);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -166,7 +190,9 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
                   width: MediaQuery.of(context).size.width / 2 - 24,
                   height: 210,
                   child: Image.network(
-                    product.images.isNotEmpty ? product.images[0] : 'assets/images/placeholder.png',
+                    product.images.isNotEmpty
+                        ? product.images[0]
+                        : 'assets/images/placeholder.png',
                     fit: BoxFit.cover,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
@@ -245,11 +271,10 @@ class _SubcategoryScreenState extends State<SubcategoryScreen> {
                         Text(
                           '₹${product.originalPrice.toStringAsFixed(2)}',
                           style: AppFonts.paragraph.copyWith(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            decoration: TextDecoration.lineThrough,
-                            decorationColor: AppColors.black
-                          ),
+                              fontSize: 12,
+                              color: Colors.grey,
+                              decoration: TextDecoration.lineThrough,
+                              decorationColor: AppColors.black),
                         ),
                       ],
                     ),
