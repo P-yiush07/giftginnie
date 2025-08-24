@@ -281,14 +281,9 @@ class _CartTabViewState extends State<CartTabView> {
                               ),
                               const SizedBox(height: 24),
                               ...controller.cartData!.items.map((item) => 
-                                _buildCartItem(
-                                  id: item.id,
-                                  name: item.product.name,
-                                  brand: item.product.brand,
-                                  originalPrice: item.product.originalPrice,
-                                  sellingPrice: item.product.sellingPrice,
-                                  quantity: item.quantity,
-                                  imageUrl: item.product.images.isNotEmpty ? item.product.images.first : null,
+                                _buildNewCartItem(
+                                  item: item,
+                                  controller: controller,
                                 )
                               ).toList(),
                               const SizedBox(height: 16),
@@ -334,7 +329,7 @@ class _CartTabViewState extends State<CartTabView> {
                     minimumSize: const Size(double.infinity, 48),
                   ),
                   child: Text(
-                    'Proceed to Pay (₹${controller.cartData?.discountedPrice.toStringAsFixed(2) ?? "0.00"})',
+                    'Proceed to Pay (₹${controller.cartData?.totalPrice.toStringAsFixed(2) ?? "0.00"})',
                     style: AppFonts.paragraph.copyWith(
                       color: Colors.white,
                       fontSize: 16,

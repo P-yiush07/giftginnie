@@ -6,7 +6,9 @@ import 'package:giftginnie_ui/constants/icons.dart';
 import 'package:giftginnie_ui/controllers/main/category_controller.dart';
 import 'package:giftginnie_ui/models/category_model.dart';
 import 'package:flutter/services.dart';
+import 'package:giftginnie_ui/services/Product/category_service.dart';
 import 'package:giftginnie_ui/services/Product/product_service.dart';
+import 'package:giftginnie_ui/views/Product%20Screen/subcategory_screen.dart';
 import 'package:giftginnie_ui/widgets/Item/favourite_button.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 import 'package:shimmer/shimmer.dart';
@@ -31,8 +33,6 @@ class CategoryScreen extends StatefulWidget {
 
 class _CategoryScreenState extends State<CategoryScreen> {
   late CategoryController _controller;
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
 
   @override
   void initState() {
@@ -53,7 +53,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -61,13 +60,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
   List<GiftItem> _getFilteredGifts() {
     final categoryData = _controller.categoryData;
     if (categoryData == null) return [];
-    
-    if (_searchQuery.isEmpty) return categoryData.gifts;
-    
-    return categoryData.gifts.where((gift) {
-      return gift.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-             gift.brand.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    return categoryData.gifts;
   }
 
   @override
@@ -130,21 +123,35 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Category Title
+                    // Category Title and Description
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 24.0),
-                      child: Text(
-                        '${widget.category.categoryName} Category',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 24,
-                          color: AppColors.black,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${widget.category.categoryName} Category',
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 24,
+                              color: AppColors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            widget.category.description,
+                            style: AppFonts.paragraph.copyWith(
+                              fontSize: 14,
+                              color: AppColors.textGrey,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    // Search Bar
-                    _buildSearchBar(),
                     const SizedBox(height: 24),
-                    _buildProductGrid(widget.category),
+                    // Display subcategories if available
+                    _controller.subCategories.isNotEmpty 
+                        ? _buildSubCategories(_controller.subCategories)
+                        : _buildProductGrid(widget.category),
                   ],
                 ),
               ),
@@ -155,65 +162,21 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: TextField(
-          controller: _searchController,
-          style: AppFonts.paragraph.copyWith(
-            color: AppColors.black,
-          ),
-          onChanged: (value) {
-            setState(() {
-              _searchQuery = value;
-            });
-          },
-          decoration: InputDecoration(
-            hintText: 'Search Gift, Restaurant, Dish....',
-            hintStyle: AppFonts.paragraph.copyWith(
-              color: AppColors.textGrey,
-            ),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: SvgPicture.asset(
-                AppIcons.svg_searchTabIcon,
-                colorFilter: ColorFilter.mode(
-                  AppColors.textGrey,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildProductGrid(CategoryModel categoryData) {
     final filteredGifts = _getFilteredGifts();
     
-    // Only show shimmer during initial load, not during search
-    if (_controller.isLoading && _searchQuery.isEmpty) {
+    if (_controller.isLoading) {
       return const CategoryShimmer();
     }
     
-    if (filteredGifts.isEmpty && _searchQuery.isNotEmpty) {
+    if (filteredGifts.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.only(top: 32.0),
           child: Text(
-            'No results found',
+            'No products found',
             style: AppFonts.paragraph.copyWith(
               color: AppColors.textGrey,
               fontSize: 16,
@@ -240,6 +203,175 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
+  Widget _buildSubCategories(List<Map<String, dynamic>> subCategories) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Subcategories',
+            style: AppFonts.paragraph.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppColors.black,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: subCategories.length,
+          itemBuilder: (context, index) {
+            final subCategory = subCategories[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: GestureDetector(
+                onTap: () {
+                  // Navigate to subcategory products
+                  _navigateToSubcategoryProducts(subCategory);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          bottomLeft: Radius.circular(12),
+                        ),
+                        child: Image.network(
+                          subCategory['image'] ?? 'assets/images/placeholder.png',
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/placeholder.png',
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                subCategory['name'] ?? '',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.black,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                subCategory['description'] ?? '',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 12,
+                                  color: AppColors.textGrey,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${(subCategory['products'] as List?)?.length ?? 0} products',
+                                style: AppFonts.paragraph.copyWith(
+                                  fontSize: 12,
+                                  color: AppColors.primaryRed,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: Icon(
+                          Icons.chevron_right,
+                          color: AppColors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+  
+  void _navigateToSubcategoryProducts(Map<String, dynamic> subCategory) {
+    debugPrint('Navigating to subcategory: ${subCategory['name']} with ID: ${subCategory['id']}');
+    
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primaryRed,
+        ),
+      ),
+    );
+    
+    // Fetch subcategory data with products
+    CategoryService().getSubCategoryData(subCategory['id']).then((data) {
+      // Close loading dialog
+      Navigator.pop(context);
+      
+      final subCategoryData = data['subCategory'] as Map<String, dynamic>;
+      final products = data['products'] as List<Product>;
+      
+      debugPrint('Fetched ${products.length} products for subcategory: ${subCategoryData['name']}');
+      
+      // Navigate to SubcategoryScreen directly with the products
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SubcategoryScreen(
+            subcategoryName: subCategoryData['name'],
+            subcategoryDescription: subCategoryData['description'],
+            products: products,
+          ),
+        ),
+      );
+    }).catchError((error) {
+      // Close loading dialog
+      Navigator.pop(context);
+      
+      // Show error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading subcategory products: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    });
+  }
+  
   Widget _buildGiftItem(GiftItem gift, int index) {
     return GestureDetector(
       onTap: () {

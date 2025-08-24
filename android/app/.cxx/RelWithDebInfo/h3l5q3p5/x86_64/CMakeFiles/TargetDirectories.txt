@@ -1,0 +1,2 @@
+C:/Users/Piyus/OneDrive/Desktop/giftginnie/android/app/.cxx/RelWithDebInfo/h3l5q3p5/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/Piyus/OneDrive/Desktop/giftginnie/android/app/.cxx/RelWithDebInfo/h3l5q3p5/x86_64/CMakeFiles/rebuild_cache.dir

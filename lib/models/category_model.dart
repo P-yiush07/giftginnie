@@ -1,28 +1,36 @@
 class CategoryModel {
-  final int id;
+  final String id;
   final String categoryName;
   final String description;
-  final String image;
+  final String? image;
+  final List<String> subCategories;
   final List<GiftItem> gifts;
 
   CategoryModel({
     required this.id,
     required this.categoryName,
     required this.description,
-    required this.image,
+    this.image,
+    required this.subCategories,
     required this.gifts,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      id: json['id'] as int,
+      id: json['_id'] as String,
       categoryName: json['name'] as String,
       description: json['description'] as String,
-      image: json['image'] as String,
-      gifts: (json['gifts'] as List?)
-              ?.map((gift) => GiftItem.fromJson(gift))
-              .toList() ??
-          [],
+      image: json['image'] as String?,
+      // Handle both string IDs and full subCategory objects
+      subCategories: (json['subCategories'] as List?)?.map((subCat) {
+        if (subCat is String) {
+          return subCat;
+        } else if (subCat is Map<String, dynamic>) {
+          return subCat['_id'] as String;
+        }
+        return subCat.toString();
+      }).toList() ?? [],
+      gifts: [], // No gifts in the new API response
     );
   }
 }

@@ -42,10 +42,6 @@ class SignInView extends StatelessWidget {
 
     return WillPopScope(
       onWillPop: () async {
-        if (controller.isPhoneVerified) {
-          controller.backToPhoneInput();
-          return false;
-        }
         return true;
       },
       child: Scaffold(
@@ -59,12 +55,7 @@ class SignInView extends StatelessWidget {
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.black),
                   onPressed: () {
-                    final controller = Provider.of<SignInController>(context, listen: false);
-                    if (controller.isPhoneVerified) {
-                      controller.backToPhoneInput();
-                    } else {
-                      Navigator.of(context).pop();
-                    }
+                    Navigator.of(context).pop();
                   },
                 ),
               ),
@@ -91,13 +82,11 @@ class SignInView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      if (!controller.isPhoneVerified) ...[
-                        _buildPhoneInput(controller),
-                        const SizedBox(height: 24),
-                        _buildVerifyButton(controller),
-                      ] else ...[
-                        _buildOTPInput(controller),
-                      ],
+                      _buildEmailInput(controller),
+                      const SizedBox(height: 16),
+                      _buildPasswordInput(context, controller),
+                      const SizedBox(height: 24),
+                      _buildLoginButton(controller),
                     ],
                   ),
                 ),
@@ -109,12 +98,12 @@ class SignInView extends StatelessWidget {
     );
   }
 
-  Widget _buildPhoneInput(SignInController controller) {
+  Widget _buildEmailInput(SignInController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          controller.model.phoneLabel,
+          controller.model.emailLabel,
           style: const TextStyle(
             fontSize: 14,
             color: Colors.black87,
@@ -136,25 +125,19 @@ class SignInView extends StatelessWidget {
             ],
           ),
           child: TextFormField(
-            controller: controller.phoneController,
-            keyboardType: TextInputType.phone,
+            controller: controller.emailController,
+            keyboardType: TextInputType.emailAddress,
             style: const TextStyle(
               fontSize: 16,
               color: Colors.black87,
             ),
             decoration: InputDecoration(
               prefixIcon: const Icon(
-                Icons.call_outlined,
+                Icons.email_outlined,
                 color: Colors.black54,
                 size: 22,
               ),
-              prefixText: '+91 ',
-              prefixStyle: const TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-                fontWeight: FontWeight.w400,
-              ),
-              hintText: '1234567890',
+              hintText: 'example@email.com',
               hintStyle: TextStyle(
                 fontSize: 16,
                 color: Colors.black.withOpacity(0.5),
@@ -177,33 +160,18 @@ class SignInView extends StatelessWidget {
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(10),
-            ],
           ),
         ),
-        if (controller.error != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            controller.error!,
-            style: const TextStyle(
-              color: Colors.red,
-              fontSize: 14,
-            ),
-          ),
-        ],
       ],
     );
   }
-
-  Widget _buildOTPInput(SignInController controller) {
+  
+  Widget _buildPasswordInput(BuildContext context, SignInController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // OTP Input Group
         Text(
-          controller.model.otpLabel,
+          controller.model.passwordLabel,
           style: const TextStyle(
             fontSize: 14,
             color: Colors.black87,
@@ -225,8 +193,8 @@ class SignInView extends StatelessWidget {
             ],
           ),
           child: TextFormField(
-            controller: controller.otpController,
-            keyboardType: TextInputType.number,
+            controller: controller.passwordController,
+            obscureText: controller.obscurePassword,
             style: const TextStyle(
               fontSize: 16,
               color: Colors.black87,
@@ -237,7 +205,17 @@ class SignInView extends StatelessWidget {
                 color: Colors.black54,
                 size: 22,
               ),
-              hintText: 'Enter OTP',
+              suffixIcon: IconButton(
+                icon: Icon(
+                  controller.obscurePassword 
+                    ? Icons.visibility_outlined 
+                    : Icons.visibility_off_outlined,
+                  color: Colors.black54,
+                  size: 22,
+                ),
+                onPressed: controller.togglePasswordVisibility,
+              ),
+              hintText: '••••••••',
               hintStyle: TextStyle(
                 fontSize: 16,
                 color: Colors.black.withOpacity(0.5),
@@ -260,10 +238,6 @@ class SignInView extends StatelessWidget {
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(6),
-            ],
           ),
         ),
         if (controller.error != null) ...[
@@ -276,57 +250,41 @@ class SignInView extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Text(
-              'OTP sent to ${controller.formattedPhone}',
+        // Forgot password
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: () => controller.handleForgotPassword(context),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              controller.model.forgotPasswordText,
               style: TextStyle(
-                fontSize: 13,
-                color: Colors.black54,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.w400,
+                color: AppColors.primary,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const Spacer(),
-            TextButton(
-              onPressed: controller.backToPhoneInput,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Text(
-                'Change',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-
-        // Spacer between groups
-        const SizedBox(height: 32),
-
-        // Action Buttons Group
-        _buildLoginButton(controller),
-        const SizedBox(height: 16),
       ],
     );
   }
 
+  // OTP functionality removed - now using email/password authentication
+
   Widget _buildLoginButton(SignInController controller) {
-    final bool isEnabled = controller.otpController.text.length == 6;
     return Builder(
       builder: (context) => FilledButton(
-        onPressed: isEnabled
-            ? () async {
+        onPressed: controller.isLoading
+            ? null
+            : () async {
                 // Dismiss keyboard
                 FocusScope.of(context).unfocus();
-                final success = await controller.handlePhoneLogin();
+                final success = await controller.handleEmailLogin();
                 if (success && context.mounted) {
                   Navigator.pushReplacement(
                     context,
@@ -352,10 +310,9 @@ class SignInView extends StatelessWidget {
                     ),
                   );
                 }
-              }
-            : null,
+              },
         style: FilledButton.styleFrom(
-          backgroundColor: isEnabled ? AppColors.primary : Colors.grey,
+          backgroundColor: AppColors.primary,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
@@ -365,45 +322,14 @@ class SignInView extends StatelessWidget {
             ? const CircularProgressIndicator(color: Colors.white)
             : Text(
                 controller.model.loginButtonText,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: isEnabled ? Colors.white : Colors.grey,
+                  color: Colors.white,
                 ),
               ),
       ),
     );
   }
 
-  Widget _buildVerifyButton(SignInController controller) {
-    return Builder(
-      builder: (context) {
-        final bool isEnabled = controller.phoneController.text.length == 10;
-        return FilledButton(
-          onPressed: isEnabled ? () async {
-            // Dismiss keyboard
-            FocusScope.of(context).unfocus();
-            await controller.verifyPhone();
-          } : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: isEnabled ? AppColors.primary : Colors.grey,
-            minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-          ),
-          child: controller.isLoading
-              ? const CircularProgressIndicator(color: Colors.white)
-              : Text(
-                  'Verify Phone',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: isEnabled ? Colors.white : Colors.grey,
-                  ),
-                ),
-        );
-      }
-    );
-  }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/icons.dart';
 import 'package:giftginnie_ui/controllers/main/tabs/home_tab_controller.dart';
 import 'package:giftginnie_ui/services/connectivity_service.dart';
-import 'package:giftginnie_ui/views/tabs/cart_tab.dart';
+import 'package:giftginnie_ui/views/tabs/cart_tab_new.dart';
 import 'package:giftginnie_ui/views/tabs/order_tab.dart';
 import 'package:giftginnie_ui/views/tabs/profile_tab.dart';
 import 'package:giftginnie_ui/widgets/Internet/connectivity_wrapper.dart';
@@ -25,11 +25,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   DateTime? _lastBackPressTime;
-  final HomeController _homeController = HomeController();
 
   Future<bool> _onWillPop() async {
-    if (_homeController.currentIndex != 0) {
-      _homeController.setCurrentIndex(0);
+    final homeController = Provider.of<HomeController>(context, listen: false);
+    if (homeController.currentIndex != 0) {
+      homeController.setCurrentIndex(0);
       return false;
     }
     
@@ -53,17 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
-      child: ChangeNotifierProvider.value(
-        value: _homeController,
-        child: const HomeView(),
-      ),
+      child: const HomeView(),
     );
-  }
-
-  @override
-  void dispose() {
-    _homeController.dispose();
-    super.dispose();
   }
 }
 

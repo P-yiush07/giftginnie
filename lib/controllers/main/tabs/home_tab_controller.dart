@@ -8,6 +8,7 @@ import 'package:giftginnie_ui/services/Product/category_service.dart';
 import 'package:giftginnie_ui/services/Product/product_service.dart';
 import 'package:giftginnie_ui/utils/global.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:giftginnie_ui/controllers/main/product_controller.dart';
 import 'package:giftginnie_ui/services/connectivity_service.dart';
 
@@ -71,8 +72,9 @@ class HomeTabController extends ChangeNotifier {
       // Then fetch the rest in parallel
       await Future.wait([
         _fetchCategories(),
-        _fetchPopularProducts(),
-        _fetchPopularCategories(),
+        // Commented out as requested
+        // _fetchPopularProducts(),
+        // _fetchPopularCategories(),
       ]);
     } catch (e) {
       _error = e.toString();
@@ -88,7 +90,9 @@ class HomeTabController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _categories = await _categoryService.getCategories();
+      // Use the categoryService instead of direct _dio
+      final response = await _categoryService.fetchCategoriesFromNewApi();
+      _categories = response;
       
       _isLoadingCategories = false;
       notifyListeners();
@@ -134,6 +138,9 @@ class HomeTabController extends ChangeNotifier {
         _carouselItems = items;
         _isLoadingCarousel = false;
         notifyListeners();
+        
+        // Preload carousel images for better performance
+        _preloadCarouselImages();
       }
     } catch (e) {
       debugPrint('Error fetching carousel items: $e');
@@ -142,6 +149,26 @@ class HomeTabController extends ChangeNotifier {
         notifyListeners();
       }
       rethrow;
+    }
+  }
+  
+  void _preloadCarouselImages() {
+    if (_carouselItems.isEmpty) return;
+    
+    debugPrint('Preloading ${_carouselItems.length} carousel images');
+    for (final item in _carouselItems) {
+      try {
+        // Preload images to cache
+        CachedNetworkImageProvider(
+          item.image,
+          cacheKey: item.id,
+          maxHeight: 1000,
+          maxWidth: 1000,
+        );
+        debugPrint('Preloading image: ${item.image}');
+      } catch (e) {
+        debugPrint('Error preloading image ${item.image}: $e');
+      }
     }
   }
 
@@ -183,7 +210,8 @@ class HomeTabController extends ChangeNotifier {
       await Future.wait([
         _fetchCarouselItems(),
         _fetchCategories(),
-        _fetchPopularProducts(),
+        // Commented out as requested
+        // _fetchPopularProducts(),
       ]);
 
     } catch (e) {
@@ -197,8 +225,14 @@ class HomeTabController extends ChangeNotifier {
     }
   }
 
-  void handleCategoryTap(String categoryId) {
-    // TODO: Implement category navigation
+  Future<void> handleCategoryTap(String categoryId) async {
+    try {
+      final result = await _categoryService.getCategoryData(categoryId);
+      // You can implement navigation to the category details screen here
+      // using the result which now contains both the category and its subcategories
+    } catch (e) {
+      debugPrint('Error handling category tap: $e');
+    }
   }
 
   void handleProductTap(String productId) {

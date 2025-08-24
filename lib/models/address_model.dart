@@ -1,47 +1,64 @@
 class AddressModel {
-  final int id;
+  final String id;
+  final String fullName;
   final String addressLine1;
   final String? addressLine2;
   final String city;
   final String state;
   final String country;
-  final String pincode;
-  final String addressType;
+  final String zipCode;
+  final int phone;
+  final bool isDefault;
+  final String? addressType;  // We'll keep this for backward compatibility
+  final String createdAt;
+  final String updatedAt;
 
   AddressModel({
     required this.id,
+    required this.fullName,
     required this.addressLine1,
     this.addressLine2,
     required this.city,
     required this.state,
     required this.country,
-    required this.pincode,
-    required this.addressType,
+    required this.zipCode,
+    required this.phone,
+    required this.isDefault,
+    this.addressType,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory AddressModel.fromJson(Map<String, dynamic> json) {
     return AddressModel(
-      id: json['id'],
-      addressLine1: json['address_line_1'] ?? '',
-      addressLine2: json['address_line_2'],
+      id: json['_id'] ?? '',
+      fullName: json['fullName'] ?? '',
+      addressLine1: json['addressLine1'] ?? '',
+      addressLine2: json['addressLine2'],
       city: json['city'] ?? '',
       state: json['state'] ?? '',
       country: json['country'] ?? 'India',
-      pincode: json['pincode'] ?? '',
-      addressType: json['address_type'] ?? 'O',
+      zipCode: json['zipCode'] ?? '',
+      phone: json['phone'] is int ? json['phone'] : int.tryParse(json['phone'].toString()) ?? 0,
+      isDefault: json['isDefault'] ?? false,
+      addressType: 'O',  // Default to "Other" since new API doesn't have address type
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'address_line_1': addressLine1,
-      'address_line_2': addressLine2,
+      '_id': id,
+      'fullName': fullName,
+      'addressLine1': addressLine1,
+      'addressLine2': addressLine2,
       'city': city,
       'state': state,
       'country': country,
-      'pincode': pincode,
-      'address_type': addressType,
+      'zipCode': zipCode,
+      'phone': phone,
+      'isDefault': isDefault,
     };
   }
 
@@ -52,21 +69,14 @@ class AddressModel {
       city,
       state,
       country,
-      pincode,
+      zipCode,
     ];
     return parts.where((part) => part.isNotEmpty).join(', ');
   }
 
   String getAddressLabel() {
-    switch (addressType.toLowerCase()) {
-      case 'h':
-        return 'Home';
-      case 'b':
-        return 'Work';
-      case 'o':
-        return 'Other';
-      default:
-        return 'Other';
-    }
+    // Since we don't have address type in the new API, we'll return "Home" for default addresses
+    // and "Other" for non-default addresses
+    return isDefault ? 'Home' : 'Other';
   }
 }

@@ -154,23 +154,14 @@ class AddressSelectionScreen extends StatelessWidget {
   Widget _buildAddressItem(BuildContext context, AddressController controller, {
     required String label,
     required String address,
-    required int addressId,
+    required String addressId,
   }) {
     final addressModel = controller.addresses.firstWhere((a) => a.id == addressId);
     final isSelected = controller.isAddressSelected(addressModel);
     
-    // Convert address type code to label
-    String getAddressTypeLabel(String type) {
-      switch (type.toLowerCase()) {
-        case 'h':
-          return 'Home';
-        case 'b':
-          return 'Work';
-        case 'o':
-          return 'Other';
-        default:
-          return 'Other';
-      }
+    // Get address label based on isDefault flag
+    String getAddressLabel() {
+      return addressModel.isDefault ? 'Home' : 'Other';
     }
 
     return GestureDetector(
@@ -211,7 +202,7 @@ class AddressSelectionScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      getAddressTypeLabel(addressModel.addressType),
+                      getAddressLabel(),
                       style: AppFonts.paragraph.copyWith(
                         fontSize: 14,
                         color: AppColors.textGrey,

@@ -47,7 +47,7 @@ class AddressController extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteAddress(int addressId) async {
+  Future<void> deleteAddress(String addressId) async {
     try {
       // First remove from local state
       final addressToDelete = addresses.firstWhere((address) => address.id == addressId);
@@ -98,23 +98,37 @@ class AddressController extends ChangeNotifier {
     return 'Other';
   }
 
-  Future<void> _saveSelectedAddressId(int? addressId) async {
+  Future<void> _saveSelectedAddressId(String? addressId) async {
     if (addressId != null) {
-      await _cacheService.saveInt(_selectedAddressKey, addressId);
+      await _cacheService.saveString(_selectedAddressKey, addressId);
     } else {
       await _cacheService.remove(_selectedAddressKey);
     }
   }
 
   Future<void> loadSavedAddress() async {
-    final savedAddressId = await _cacheService.getInt(_selectedAddressKey);
+    final savedAddressId = await _cacheService.getString(_selectedAddressKey);
     
     if (savedAddressId != null && addresses.isNotEmpty) {
-      final savedAddress = addresses.firstWhere(
-        (address) => address.id == savedAddressId,
-        orElse: () => addresses.first,
-      );
-      selectedAddress = savedAddress;
+      try {
+        final savedAddress = addresses.firstWhere(
+          (address) => address.id == savedAddressId,
+          orElse: () => addresses.first,
+        );
+        selectedAddress = savedAddress;
+        notifyListeners();
+      } catch (e) {
+        // If we can't find the saved address, just use the first one
+        if (addresses.isNotEmpty) {
+          selectedAddress = addresses.first;
+          _saveSelectedAddressId(addresses.first.id);
+          notifyListeners();
+        }
+      }
+    } else if (addresses.isNotEmpty) {
+      // If no saved address, use the first one
+      selectedAddress = addresses.first;
+      _saveSelectedAddressId(addresses.first.id);
       notifyListeners();
     }
   }

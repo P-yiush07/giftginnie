@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
+import 'package:giftginnie_ui/controllers/main/tabs/cart_tab_controller.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/image_service.dart';
 import 'package:giftginnie_ui/services/Product/product_service.dart';
 import 'package:giftginnie_ui/widgets/Item/favourite_button.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 import 'package:giftginnie_ui/services/Cart/cart_service.dart';
+import 'package:provider/provider.dart';
+
 
 class ProductDetailBottomSheet extends StatefulWidget {
   final Product product;
@@ -27,11 +30,25 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
   int _currentImageIndex = 0;
   late Product _product;
   bool _isAddingToCart = false;
+  bool _isDescriptionExpanded = false;
+  static const int _descriptionMaxLines = 2;
+  int _selectedVariantIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _product = widget.product;
+    // Initialize with the first variant if available
+    if (_product.variants.isNotEmpty) {
+      debugPrint('Product has ${_product.variants.length} variants');
+      _product.selectVariant(0);
+      final variant = _product.selectedVariant;
+      if (variant != null) {
+        debugPrint('Selected variant: ${variant.color}, Price: ${variant.price}');
+      }
+    } else {
+      debugPrint('Product has no variants');
+    }
   }
 
   @override
@@ -46,6 +63,24 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
     });
     if (widget.onProductUpdated != null) {
       widget.onProductUpdated!(updatedProduct);
+    }
+  }
+  
+  void _selectVariant(int index) {
+    if (index >= 0 && index < _product.variants.length) {
+      setState(() {
+        _product.selectVariant(index);
+        _selectedVariantIndex = index;
+        // Reset image index when variant changes
+        _currentImageIndex = 0;
+        _imageController.jumpToPage(0);
+        
+        // Debug variant selection
+        final variant = _product.selectedVariant;
+        if (variant != null) {
+          debugPrint('Changed to variant: ${variant.color}, Price: ${variant.price}');
+        }
+      });
     }
   }
 
@@ -83,12 +118,17 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                     _currentImageIndex = index;
                                   });
                                 },
-                                itemCount: _product.images.length,
+                                itemCount: _product.selectedVariant != null && _product.selectedVariant!.images.isNotEmpty
+                                    ? _product.selectedVariant!.images.length
+                                    : _product.images.length,
                                 itemBuilder: (context, index) {
+                                  // Use variant images if available, otherwise use product images
+                                  final imageUrl = _product.selectedVariant != null && _product.selectedVariant!.images.isNotEmpty
+                                      ? _product.selectedVariant!.images[index]
+                                      : _product.images[index];
+                                  
                                   return ImageService.getNetworkImage(
-                                    imageUrl: _product.images[index],
-                                    // width: MediaQuery.of(context).size.width,
-                                    // height: 300,
+                                    imageUrl: imageUrl,
                                     fit: BoxFit.cover,
                                     errorWidget: Image.asset(
                                       'assets/images/placeholder.png',
@@ -147,7 +187,9 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(
-                                _product.images.length,
+                                _product.selectedVariant != null && _product.selectedVariant!.images.isNotEmpty
+                                    ? _product.selectedVariant!.images.length
+                                    : _product.images.length,
                                 (index) => Container(
                                   width: 8,
                                   height: 8,
@@ -182,27 +224,131 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             textBaseline: TextBaseline.alphabetic,
                             children: [
-                              Text(
-                                '₹${_product.sellingPrice.toStringAsFixed(2)}',
-                                style: AppFonts.heading1.copyWith(
-                                  fontSize: 20,
-                                  color: AppColors.primaryRed,
-                                ),
+                              Builder(
+                                builder: (context) {
+                                  // Calculate the prices
+                                  double displayPrice;
+                                  
+                                  if (_product.selectedVariant != null) {
+                                    displayPrice = _product.selectedVariant!.price;
+                                    debugPrint('Using variant price: $displayPrice');
+                                  } else {
+                                    displayPrice = _product.sellingPrice;
+                                    debugPrint('Using product price: $displayPrice');
+                                  }
+                                  
+                                  return Text(
+                                    '₹${displayPrice.toStringAsFixed(2)}',
+                                    style: AppFonts.heading1.copyWith(
+                                      fontSize: 20,
+                                      color: AppColors.primaryRed,
+                                    ),
+                                  );
+                                }
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '₹${_product.originalPrice.toStringAsFixed(2)}',
-                                style: AppFonts.paragraph.copyWith(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                  decoration: TextDecoration.lineThrough,
-                                  decorationColor: AppColors.black
-                                ),
-                              ),
+                              // We're not showing a strikethrough price anymore since we don't have discounted prices
                             ],
                           ),
                           const SizedBox(height: 24),
-                          // Highlights Section
+                          
+                          // Always display the variant information
+                          if (_product.variants.isNotEmpty)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      _product.variants.length > 1 ? 'Available Colors' : 'Selected Variant',
+                                      style: AppFonts.heading1.copyWith(
+                                        fontSize: 18,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    if (_product.selectedVariant != null && _product.selectedVariant!.isGift)
+                                      Container(
+                                        margin: const EdgeInsets.only(left: 10),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.amber.shade100,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          'Gift',
+                                          style: AppFonts.paragraph.copyWith(
+                                            color: Colors.amber.shade800,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                if (_product.variants.length > 1)
+                                  // Multiple variants - show selector
+                                  SizedBox(
+                                    height: 44,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: _product.variants.length,
+                                      itemBuilder: (context, index) {
+                                        final variant = _product.variants[index];
+                                        final isSelected = index == _selectedVariantIndex;
+                                        
+                                        return GestureDetector(
+                                          onTap: () => _selectVariant(index),
+                                          child: Container(
+                                            margin: const EdgeInsets.only(right: 10),
+                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: isSelected ? AppColors.primaryRed : Colors.white,
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: isSelected ? AppColors.primaryRed : Colors.grey.shade300,
+                                              ),
+                                            ),
+                                            child: Text(
+                                              variant.color,
+                                              style: AppFonts.paragraph.copyWith(
+                                                color: isSelected ? Colors.white : Colors.black87,
+                                                fontSize: 14,
+                                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                else if (_product.selectedVariant != null)
+                                  // Single variant - show chip
+                                  Wrap(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          _product.selectedVariant!.color,
+                                          style: AppFonts.paragraph.copyWith(
+                                            color: Colors.black87,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                const SizedBox(height: 24),
+                              ],
+                            ),
+                          
+                          // Description Section
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
@@ -213,50 +359,183 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Highlights',
-                                  style: AppFonts.heading1.copyWith(
-                                    fontSize: 18,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                _buildHighlightRow('Brand', _product.brand),
-                                const SizedBox(height: 12),
-                                _buildHighlightRow('Product Type', _product.productType),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Information',
+                                  'Product Description',
                                   style: AppFonts.heading1.copyWith(
                                     fontSize: 18,
                                     color: Colors.black,
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                Text(
-                                  _product.description,
-                                  style: AppFonts.paragraph.copyWith(
-                                    color: AppColors.textGrey,
-                                    height: 1.5,
-                                  ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        // Get the primary description text
+                                        String primaryDescription = _product.selectedVariant?.description ?? _product.description;
+                                        
+                                        // Get the secondary description if available
+                                        String? secondaryDescription = _product.selectedVariant?.descriptionSecond;
+                                        
+                                        // Format the secondary description to display bullet points properly
+                                        if (secondaryDescription != null) {
+                                          // Replace tab characters with spaces
+                                          secondaryDescription = secondaryDescription.replaceAll(r'\t', '  ');
+                                          
+                                          // Replace bullet points with proper line breaks
+                                          secondaryDescription = secondaryDescription.replaceAll('•', '\n•');
+                                          
+                                          // Ensure the first bullet point doesn't have a leading newline if it's at the start
+                                          if (secondaryDescription.startsWith('\n')) {
+                                            secondaryDescription = secondaryDescription.substring(1);
+                                          }
+                                        }
+                                        
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              primaryDescription,
+                                              maxLines: _isDescriptionExpanded ? null : _descriptionMaxLines,
+                                              overflow: _isDescriptionExpanded ? null : TextOverflow.ellipsis,
+                                              style: AppFonts.paragraph.copyWith(
+                                                color: AppColors.textGrey,
+                                                height: 1.5,
+                                              ),
+                                            ),
+                                            
+                                            if (_isDescriptionExpanded && 
+                                                secondaryDescription != null && 
+                                                secondaryDescription.isNotEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 16.0),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Divider(height: 1),
+                                                    const SizedBox(height: 16),
+                                                    Text(
+                                                      'Additional Details:',
+                                                      style: AppFonts.heading1.copyWith(
+                                                        fontSize: 16,
+                                                        color: Colors.black87,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    Text(
+                                                      secondaryDescription,
+                                                      style: AppFonts.paragraph.copyWith(
+                                                        color: AppColors.textGrey,
+                                                        height: 1.8,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                          ],
+                                        );
+                                      }
+                                    ),
+                                    const SizedBox(height: 12),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _isDescriptionExpanded = !_isDescriptionExpanded;
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(vertical: 6),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              _isDescriptionExpanded ? 'Read Less' : 'Read More',
+                                              style: AppFonts.paragraph.copyWith(
+                                                color: AppColors.primaryRed,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Icon(
+                                              _isDescriptionExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                              size: 16,
+                                              color: AppColors.primaryRed,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 24),
+                          // Add stock indicator if using variant
+                          if (_product.selectedVariant != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: _product.selectedVariant!.inStock ? Colors.green : Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    _product.selectedVariant!.inStock 
+                                        ? 'In Stock (${_product.selectedVariant!.stock} available)' 
+                                        : 'Out of Stock',
+                                    style: AppFonts.paragraph.copyWith(
+                                      color: _product.selectedVariant!.inStock ? Colors.green : Colors.red,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            
                           // Add to Cart Button
                           SizedBox(
                             width: double.infinity,
                             height: 56,
-                            child: _product.inStock
+                            child: (_product.selectedVariant?.inStock ?? _product.inStock)
                               ? ElevatedButton(
                                   onPressed: _isAddingToCart ? null : () async {
+
+                                    final cartController = context.read<CartTabController>();
+
                                     setState(() {
                                       _isAddingToCart = true;
                                     });
                                     
                                     try {
-                                      final cartService = CartService();
-                                      await cartService.addToCart(_product.id, 1);
+                                      // final cartService = CartService();
+                                      
+                                      // Get variant ID if available
+                                      String? variantId;
+                                      if (_product.selectedVariant != null) {
+                                        variantId = _product.selectedVariant!.id;
+                                        debugPrint('Selected variant ID: $variantId');
+                                      } else {
+                                        debugPrint('No variant selected');
+                                      }
+                                      
+                                      // Check if we have a valid variant ID
+                                      if (variantId == null || variantId.isEmpty) {
+                                        throw Exception('No variant selected or invalid variant');
+                                      }
+                                      
+                                      // await cartService.addToCart(_product.id, variantId, 1);
+
+                                      await cartController.addToCart(_product.id, variantId, 1);
                                       
                                       if (mounted) {
                                         setState(() {
@@ -465,32 +744,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
     );
   }
 
-  Widget _buildHighlightRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: AppFonts.paragraph.copyWith(
-              color: Colors.black87,
-              fontSize: 14,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: AppFonts.paragraph.copyWith(
-              color: Colors.black,
-              fontSize: 14,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildRatingBar(int rating, int count, double percentage) {
     return Padding(

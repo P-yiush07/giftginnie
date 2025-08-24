@@ -16,13 +16,21 @@ class CouponSuccessDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      elevation: 0,
-      child: Container(
+    return WillPopScope(
+      // Prevent accidental dismissal without data passing
+      onWillPop: () async {
+        if (!isLoading) {
+          Navigator.of(context).pop(true); // Return success on back button
+        }
+        return false; // Don't actually pop - let our handler do it
+      },
+      child: Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        elevation: 0,
+        child: Container(
         padding: const EdgeInsets.all(24.0),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -119,6 +127,7 @@ class CouponSuccessDialog extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

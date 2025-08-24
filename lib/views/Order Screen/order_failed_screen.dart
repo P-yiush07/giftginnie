@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants/colors.dart';
 import '../../constants/fonts.dart';
 import '../../controllers/main/home_controller.dart';
+import '../home_screen.dart';
 import 'package:provider/provider.dart';
 
 class OrderFailedScreen extends StatelessWidget {
@@ -18,19 +19,27 @@ class OrderFailedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => HomeController(),
+    return WillPopScope(
+      onWillPop: () async {
+        // Handle system back button - take user to home instead of closing app
+        try {
+          final homeController = Provider.of<HomeController>(context, listen: false);
+          homeController.setCurrentIndex(0);
+        } catch (e) {
+          print('HomeController not found: $e');
+        }
+        // Navigate to home screen
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
+        return false; // Prevent default back behavior
+      },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: showBackButton ? AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-          ),
         ) : null,
         body: SafeArea(
           child: Padding(
@@ -78,34 +87,41 @@ class OrderFailedScreen extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Back to Home Button
-                Consumer<HomeController>(
-                  builder: (context, homeController, _) {
-                    return SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          homeController.setCurrentIndex(0);
-                          Navigator.of(context).popUntil((route) => route.isFirst);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryRed,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                          ),
-                        ),
-                        child: Text(
-                          'Back to Home',
-                          style: AppFonts.paragraph.copyWith(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Get the existing HomeController instance and set index to 0
+                      try {
+                        final homeController = Provider.of<HomeController>(context, listen: false);
+                        homeController.setCurrentIndex(0);
+                      } catch (e) {
+                        // If HomeController is not found in the widget tree, just navigate
+                        print('HomeController not found: $e');
+                      }
+                      // Since we cleared the navigation stack, we need to push a new home screen
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => const HomeScreen()),
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryRed,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
                       ),
-                    );
-                  },
+                    ),
+                    child: Text(
+                      'Back to Home',
+                      style: AppFonts.paragraph.copyWith(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
