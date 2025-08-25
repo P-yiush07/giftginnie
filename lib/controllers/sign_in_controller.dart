@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/controllers/authHome_controller.dart';
+import 'package:giftginnie_ui/services/Cache/cache_service.dart';
+import 'package:provider/provider.dart';
 import '../models/sign_in_model.dart';
 import '../services/Auth/auth_service.dart';
 import '../config/auth_config.dart';
@@ -90,7 +93,7 @@ class SignInController extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> handleEmailLogin() async {
+  Future<bool> handleEmailLogin(BuildContext context) async {
     // Validate inputs
     if (!_validateEmail() || !_validatePassword()) {
       return false;
@@ -105,6 +108,9 @@ class SignInController extends ChangeNotifier {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+
+      final authController = Provider.of<AuthController>(context, listen: false);
+     authController.login();
       
       // If we got here, login was successful
       debugPrint('Login successful: $loginResult');

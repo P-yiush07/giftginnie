@@ -3,15 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
+import 'package:giftginnie_ui/controllers/authHome_controller.dart';
+import 'package:giftginnie_ui/services/Cache/cache_service.dart';
 import 'package:giftginnie_ui/views/Address%20Screen/address_selection_screen.dart';
 import 'package:provider/provider.dart';
 import '../../../controllers/main/tabs/profile_tab_controller.dart';
 import '../Profile Screen/edit_profile_screen.dart';
 import '../Profile Screen/favourite_gifts_screen.dart';
 import '../../../controllers/main/user_controller.dart';
-import '../../../services/image_service.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../Profile Screen/about_screen.dart';
 import '../../widgets/Internet/connectivity_wrapper.dart';
 import '../../../services/connectivity_service.dart';
@@ -128,15 +128,27 @@ class _ProfileTabViewState extends State<ProfileTabView> {
   String _formatJoinDate(DateTime date) {
     // Format date as "Joined January 16, 2025"
     final months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
     ];
-    
+
     return 'Joined ${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final authController = context.watch<AuthController>();
+    final userController = context.watch<UserController>();
     return Scaffold(
       backgroundColor: const Color(0xFFF9F9F9),
       body: SafeArea(
@@ -178,56 +190,56 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                     const SizedBox(width: 8),
                     // User Info
                     Expanded(
-                      child: Consumer<UserController>(
-                        builder: (context, userController, _) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              userController.isLoading
-                                  ? Shimmer.fromColors(
-                                      baseColor: AppColors.grey300,
-                                      highlightColor: AppColors.grey100,
-                                      child: Container(
-                                        width: 120,
-                                        height: 20,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                      ),
-                                    )
-                                  : Text(
-                                      userController.userProfile?.fullName ?? '',
-                                      style: AppFonts.heading1.copyWith(
-                                        fontSize: 18,
-                                        color: AppColors.black,
-                                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          userController.isLoading
+                              ? Shimmer.fromColors(
+                                  baseColor: AppColors.grey300,
+                                  highlightColor: AppColors.grey100,
+                                  child: Container(
+                                    width: 120,
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
-                            ],
-                          );
-                        },
+                                  ),
+                                )
+                              : Text(
+                                  authController.isGuest
+                                      ? "Guest User"
+                                      : userController.userProfile?.fullName ??
+                                          '',
+                                  style: AppFonts.heading1.copyWith(
+                                    fontSize: 18,
+                                    color: AppColors.black,
+                                  ),
+                                ),
+                        ],
                       ),
                     ),
                     // Edit Button
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          SlidePageRoute(
-                            page: const EditProfileScreen(),
-                            direction: SlideDirection.right,
+                    if (!authController.isGuest)
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            SlidePageRoute(
+                              page: const EditProfileScreen(),
+                              direction: SlideDirection.right,
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Edit',
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 14,
+                            color: AppColors.primaryRed,
+                            fontWeight: FontWeight.w500,
                           ),
-                        );
-                      },
-                      child: Text(
-                        'Edit',
-                        style: AppFonts.paragraph.copyWith(
-                          fontSize: 14,
-                          color: AppColors.primaryRed,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -239,40 +251,44 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                 color: Colors.white,
                 child: Column(
                   children: [
-                    _buildProfileOption(
-                      title: 'My Favourite Gift',
-                      subtitle: 'Manage your favourite Gift.',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          SlidePageRoute(
-                            page: const FavouriteGiftsScreen(),
-                            direction: SlideDirection.right,
-                          ),
-                        );
-                      },
-                    ),
+                    if (!authController.isGuest)
+                      _buildProfileOption(
+                        title: 'My Favourite Gift',
+                        subtitle: 'Manage your favourite Gift.',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            SlidePageRoute(
+                              page: const FavouriteGiftsScreen(),
+                              direction: SlideDirection.right,
+                            ),
+                          );
+                        },
+                      ),
+                    if (!authController.isGuest) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: const Divider(height: 1, thickness: 0.5),
+                      ),
+                      _buildProfileOption(
+                        title: 'Addresses',
+                        subtitle: 'Share, edit and add a new Address.',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            SlidePageRoute(
+                              page: const AddressSelectionScreen(),
+                              direction: SlideDirection.right,
+                            ),
+                          );
+                        },
+                      ),
+                    
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: const Divider(height: 1, thickness: 0.5),
                     ),
-                    _buildProfileOption(
-                      title: 'Addresses',
-                      subtitle: 'Share, edit and add a new Address.',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          SlidePageRoute(
-                            page: const AddressSelectionScreen(),
-                            direction: SlideDirection.right,
-                          ),
-                        );
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: const Divider(height: 1, thickness: 0.5),
-                    ),
+                    ],
                     // Removed Settings Option
                     // _buildProfileOption(
                     //   title: 'Settings',
@@ -331,7 +347,7 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
 
               // Join Date
@@ -344,7 +360,8 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: Text(
-                              _formatJoinDate(userController.userProfile!.dateJoined),
+                              _formatJoinDate(
+                                  userController.userProfile!.dateJoined),
                               style: AppFonts.paragraph.copyWith(
                                 fontSize: 14,
                                 color: AppColors.textGrey,
@@ -361,19 +378,22 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                             children: [
                               _buildSocialMediaButton(
                                 icon: FontAwesomeIcons.instagram,
-                                url: 'https://www.instagram.com/giftginnie1/profilecard/?igsh=MnowdXowaXk3OWRu',
+                                url:
+                                    'https://www.instagram.com/giftginnie1/profilecard/?igsh=MnowdXowaXk3OWRu',
                                 color: const Color(0xFFE4405F),
                               ),
                               const SizedBox(width: 32),
                               _buildSocialMediaButton(
                                 icon: FontAwesomeIcons.facebook,
-                                url: 'https://www.facebook.com/profile.php?id=61566517247110',
+                                url:
+                                    'https://www.facebook.com/profile.php?id=61566517247110',
                                 color: const Color(0xFF1877F2),
                               ),
                               const SizedBox(width: 32),
                               _buildSocialMediaButton(
                                 icon: FontAwesomeIcons.youtube,
-                                url: 'https://youtube.com/@giftginnie?si=oloUJ-NgEC5ickPJ',
+                                url:
+                                    'https://youtube.com/@giftginnie?si=oloUJ-NgEC5ickPJ',
                                 color: const Color(0xFFFF0000),
                               ),
                             ],

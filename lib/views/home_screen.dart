@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/icons.dart';
+import 'package:giftginnie_ui/controllers/authHome_controller.dart';
 import 'package:giftginnie_ui/controllers/main/tabs/home_tab_controller.dart';
 import 'package:giftginnie_ui/services/connectivity_service.dart';
 import 'package:giftginnie_ui/views/tabs/cart_tab_new.dart';
@@ -14,7 +15,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart';
 import 'package:giftginnie_ui/views/Product%20Screen/search_screen.dart';
 import 'package:flutter/services.dart';
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,9 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
       homeController.setCurrentIndex(0);
       return false;
     }
-    
-    if (_lastBackPressTime == null || 
-        DateTime.now().difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+
+    if (_lastBackPressTime == null ||
+        DateTime.now().difference(_lastBackPressTime!) >
+            const Duration(seconds: 2)) {
       _lastBackPressTime = DateTime.now();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       return false;
     }
-    
+
     await SystemNavigator.pop(animated: true);
     return true;
   }
@@ -68,7 +69,7 @@ class HomeView extends StatelessWidget {
     required bool isActive,
   }) {
     final color = isActive ? AppColors.primary : Colors.grey;
-    
+
     return Material(
       type: MaterialType.transparency,
       child: SizedBox(
@@ -77,7 +78,7 @@ class HomeView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 6), 
+            const SizedBox(height: 6),
             SvgPicture.asset(
               icon,
               colorFilter: ColorFilter.mode(
@@ -104,72 +105,72 @@ class HomeView extends StatelessWidget {
 
   // Getter for bottom navigation items
   List<BottomNavigationBarItem> get _navigationItems => [
-    BottomNavigationBarItem(
-      icon: _buildTabItem(
-        icon: AppIcons.svg_homeTabIcon,
-        label: 'Home',
-        isActive: false,
-      ),
-      activeIcon: _buildTabItem(
-        icon: AppIcons.svg_homeTabIcon,
-        label: 'Home',
-        isActive: true,
-      ),
-      label: '',
-    ),
-    BottomNavigationBarItem(
-      icon: _buildTabItem(
-        icon: AppIcons.svg_cartTabIcon,
-        label: 'Cart',
-        isActive: false,
-      ),
-      activeIcon: _buildTabItem(
-        icon: AppIcons.svg_cartTabIcon,
-        label: 'Cart',
-        isActive: true,
-      ),
-      label: '',
-    ),
-    BottomNavigationBarItem(
-      icon: _buildTabItem(
-        icon: AppIcons.svg_searchTabIcon,
-        label: 'Search',
-        isActive: false,
-      ),
-      activeIcon: _buildTabItem(
-        icon: AppIcons.svg_searchTabIcon,
-        label: 'Search',
-        isActive: true,
-      ),
-      label: '',
-    ),
-    BottomNavigationBarItem(
-      icon: _buildTabItem(
-        icon: AppIcons.svg_orderTabIcon,
-        label: 'Orders',
-        isActive: false,
-      ),
-      activeIcon: _buildTabItem(
-        icon: AppIcons.svg_orderTabIcon,
-        label: 'Orders',
-        isActive: true,
-      ),
-      label: '',
-    ),
-    BottomNavigationBarItem(
-      icon: _buildTabItem(
-        icon: AppIcons.svg_profileTabIcon,
-        label: 'Profile',
-        isActive: false,
-      ),
-      activeIcon: _buildTabItem(
-        icon: AppIcons.svg_profileTabIcon,
-        label: 'Profile',
-        isActive: true,
-      ),
-      label: '',
-    ),
-  ];
+        BottomNavigationBarItem(
+          icon: _buildTabItem(
+            icon: AppIcons.svg_homeTabIcon,
+            label: 'Home',
+            isActive: false,
+          ),
+          activeIcon: _buildTabItem(
+            icon: AppIcons.svg_homeTabIcon,
+            label: 'Home',
+            isActive: true,
+          ),
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          icon: _buildTabItem(
+            icon: AppIcons.svg_cartTabIcon,
+            label: 'Cart',
+            isActive: false,
+          ),
+          activeIcon: _buildTabItem(
+            icon: AppIcons.svg_cartTabIcon,
+            label: 'Cart',
+            isActive: true,
+          ),
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          icon: _buildTabItem(
+            icon: AppIcons.svg_searchTabIcon,
+            label: 'Search',
+            isActive: false,
+          ),
+          activeIcon: _buildTabItem(
+            icon: AppIcons.svg_searchTabIcon,
+            label: 'Search',
+            isActive: true,
+          ),
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          icon: _buildTabItem(
+            icon: AppIcons.svg_orderTabIcon,
+            label: 'Orders',
+            isActive: false,
+          ),
+          activeIcon: _buildTabItem(
+            icon: AppIcons.svg_orderTabIcon,
+            label: 'Orders',
+            isActive: true,
+          ),
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          icon: _buildTabItem(
+            icon: AppIcons.svg_profileTabIcon,
+            label: 'Profile',
+            isActive: false,
+          ),
+          activeIcon: _buildTabItem(
+            icon: AppIcons.svg_profileTabIcon,
+            label: 'Profile',
+            isActive: true,
+          ),
+          label: '',
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +220,22 @@ class HomeView extends StatelessWidget {
                 child: BottomNavigationBar(
                   elevation: 0,
                   currentIndex: controller.currentIndex,
-                  onTap: controller.setCurrentIndex,
+                  onTap: (index) {
+                    final authController = context.read<AuthController>();
+
+                    if ((index == 1 || index == 3) && authController.isGuest) {
+                      // Cart tab tapped by guest
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Login is required"),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      return; // prevent navigation
+                    }
+
+                    controller.setCurrentIndex(index);
+                  },
                   type: BottomNavigationBarType.fixed,
                   backgroundColor: Colors.white,
                   selectedItemColor: AppColors.primary,

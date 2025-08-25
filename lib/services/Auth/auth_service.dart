@@ -88,6 +88,9 @@ class AuthService {
       refreshToken: refreshToken,
       userData: userData,
     );
+
+    await _cacheService.saveBool("isGuest", false);
+    await _cacheService.saveBool("isGuest", true);
   }
 
   // API Methods

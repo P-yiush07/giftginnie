@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/config/route_transitions.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/constants/images.dart';
+import 'package:giftginnie_ui/controllers/authHome_controller.dart';
 import 'package:giftginnie_ui/controllers/main/user_controller.dart';
 import 'package:giftginnie_ui/models/popular_category_model.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
@@ -165,7 +166,8 @@ class _HomeTabViewState extends State<HomeTabView> {
             return SizedBox(
               height: MediaQuery.of(context).size.height,
               child: ErrorState(
-                message: 'Unable to load content. Please check your connection and try again.',
+                message:
+                    'Unable to load content. Please check your connection and try again.',
                 onRetry: () => controller.refreshData(),
               ),
             );
@@ -186,7 +188,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                     child: SafeArea(
                       bottom: false,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16.0, 5.0, 16.0, 16.0),
+                        padding:
+                            const EdgeInsets.fromLTRB(16.0, 5.0, 16.0, 16.0),
                         child: Row(
                           children: [
                             // Profile Image
@@ -214,7 +217,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                                             ),
                                           )
                                         : CachedNetworkImage(
-                                            imageUrl: 'https://static.vecteezy.com/system/resources/thumbnails/036/594/092/small_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg',
+                                            imageUrl:
+                                                'https://static.vecteezy.com/system/resources/thumbnails/036/594/092/small_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg',
                                             width: 40,
                                             height: 40,
                                             fit: BoxFit.cover,
@@ -228,8 +232,9 @@ class _HomeTabViewState extends State<HomeTabView> {
                                                 color: Colors.white,
                                               ),
                                             ),
-                                            errorWidget: (context, url, error) =>
-                                                Image.asset(
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    Image.asset(
                                               'assets/images/placeholder.png',
                                               width: 40,
                                               height: 40,
@@ -242,18 +247,30 @@ class _HomeTabViewState extends State<HomeTabView> {
                             ),
                             const SizedBox(width: 12),
                             // Location Info
-                            Consumer<AddressController>(
-                              builder: (context, addressController, _) {
+                            Consumer2<AddressController, AuthController>(
+                              builder: (context, addressController,
+                                  authController, _) {
                                 return Expanded(
                                   child: GestureDetector(
                                     onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        SlidePageRoute(
-                                          page: const AddressSelectionScreen(),
-                                          direction: SlideDirection.bottom,
-                                        ),
-                                      );
+                                      if (!authController.isGuest) {
+                                        Navigator.push(
+                                          context,
+                                          SlidePageRoute(
+                                            page:
+                                                const AddressSelectionScreen(),
+                                            direction: SlideDirection.bottom,
+                                          ),
+                                        );
+                                      } else {
+                                        // Optional: Show a snackbar / dialog to tell user to login
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  "Please login to select an address")),
+                                        );
+                                      }
                                     },
                                     child: addressController.isLoading
                                         ? _buildAddressShimmer()
@@ -262,10 +279,12 @@ class _HomeTabViewState extends State<HomeTabView> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                addressController.selectedAddress
+                                                addressController
+                                                        .selectedAddress
                                                         ?.getAddressLabel() ??
                                                     'Select Address',
-                                                style: AppFonts.paragraph.copyWith(
+                                                style:
+                                                    AppFonts.paragraph.copyWith(
                                                   fontSize: 14,
                                                   color: AppColors.textGrey,
                                                 ),
@@ -285,14 +304,16 @@ class _HomeTabViewState extends State<HomeTabView> {
                                                               .selectedAddress
                                                               ?.fullAddress ??
                                                           'Tap to select delivery address',
-                                                      style:
-                                                          AppFonts.paragraph.copyWith(
+                                                      style: AppFonts.paragraph
+                                                          .copyWith(
                                                         fontSize: 15,
-                                                        fontWeight: FontWeight.w500,
+                                                        fontWeight:
+                                                            FontWeight.w500,
                                                         color: AppColors.black,
                                                       ),
                                                       maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                     ),
                                                   ),
                                                   const Icon(
@@ -316,7 +337,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                               ),
                               onPressed: () {
                                 // Get the HomeController instance and set the index to 4 (Profile tab)
-                                Provider.of<HomeController>(context, listen: false)
+                                Provider.of<HomeController>(context,
+                                        listen: false)
                                     .setCurrentIndex(4);
                               },
                             ),
@@ -383,7 +405,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                   // Carousel Section
                   Consumer<HomeTabController>(
                     builder: (context, controller, _) {
-                      if (controller.isLoading || controller.isLoadingCarousel) {
+                      if (controller.isLoading ||
+                          controller.isLoadingCarousel) {
                         return const CarouselShimmer();
                       }
 
@@ -449,13 +472,16 @@ class _HomeTabViewState extends State<HomeTabView> {
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               physics: const BouncingScrollPhysics(),
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               itemCount: mainCategories.length,
                               itemBuilder: (context, index) {
                                 final category = mainCategories[index];
                                 return Padding(
                                   padding: EdgeInsets.only(
-                                    right: index != mainCategories.length - 1 ? 16.0 : 0,
+                                    right: index != mainCategories.length - 1
+                                        ? 16.0
+                                        : 0,
                                   ),
                                   child: _buildCategoryItem(category: category),
                                 );
@@ -625,7 +651,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                     color: Colors.white,
                     child: GestureDetector(
                       onTap: () async {
-                        final whatsappUrl = 'https://api.whatsapp.com/send?phone=918000932933';
+                        final whatsappUrl =
+                            'https://api.whatsapp.com/send?phone=918000932933';
                         if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
                           await launchUrl(
                             Uri.parse(whatsappUrl),
@@ -654,7 +681,8 @@ class _HomeTabViewState extends State<HomeTabView> {
                                 'For Bulk Orders',
                                 style: AppFonts.paragraph.copyWith(
                                   fontSize: 14,
-                                  color: AppColors.textDarkGrey.withOpacity(0.8),
+                                  color:
+                                      AppColors.textDarkGrey.withOpacity(0.8),
                                 ),
                               ),
                               const SizedBox(height: 8),

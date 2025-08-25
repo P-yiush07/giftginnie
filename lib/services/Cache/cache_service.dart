@@ -19,12 +19,15 @@ class CacheService {
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'user_data';
   static const String searchHistoryKey = 'search_history';
+  static const String _isGuestKey = 'is_guest';
 
   // Initialize method that needs to be called at app startup
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     await _loadFromCache();
   }
+
+  bool get isGuest => _prefs.getBool("isGuest") ?? false;
 
   Future<void> _loadFromCache() async {
     try {
