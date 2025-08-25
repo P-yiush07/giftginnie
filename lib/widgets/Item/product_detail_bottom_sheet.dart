@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
+import 'package:giftginnie_ui/controllers/authHome_controller.dart';
 import 'package:giftginnie_ui/controllers/main/tabs/cart_tab_controller.dart';
 import 'package:giftginnie_ui/models/product_model.dart';
 import 'package:giftginnie_ui/services/image_service.dart';
@@ -9,7 +10,6 @@ import 'package:giftginnie_ui/widgets/Item/favourite_button.dart';
 import 'package:giftginnie_ui/widgets/shimmer/product_detail_shimmer.dart';
 import 'package:giftginnie_ui/services/Cart/cart_service.dart';
 import 'package:provider/provider.dart';
-
 
 class ProductDetailBottomSheet extends StatefulWidget {
   final Product product;
@@ -22,7 +22,8 @@ class ProductDetailBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<ProductDetailBottomSheet> createState() => _ProductDetailBottomSheetState();
+  State<ProductDetailBottomSheet> createState() =>
+      _ProductDetailBottomSheetState();
 }
 
 class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
@@ -44,7 +45,8 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
       _product.selectVariant(0);
       final variant = _product.selectedVariant;
       if (variant != null) {
-        debugPrint('Selected variant: ${variant.color}, Price: ${variant.price}');
+        debugPrint(
+            'Selected variant: ${variant.color}, Price: ${variant.price}');
       }
     } else {
       debugPrint('Product has no variants');
@@ -65,7 +67,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
       widget.onProductUpdated!(updatedProduct);
     }
   }
-  
+
   void _selectVariant(int index) {
     if (index >= 0 && index < _product.variants.length) {
       setState(() {
@@ -74,11 +76,12 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
         // Reset image index when variant changes
         _currentImageIndex = 0;
         _imageController.jumpToPage(0);
-        
+
         // Debug variant selection
         final variant = _product.selectedVariant;
         if (variant != null) {
-          debugPrint('Changed to variant: ${variant.color}, Price: ${variant.price}');
+          debugPrint(
+              'Changed to variant: ${variant.color}, Price: ${variant.price}');
         }
       });
     }
@@ -107,7 +110,8 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                         children: [
                           // Image slider
                           ClipRRect(
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(20)),
                             child: Container(
                               height: 400,
                               color: Colors.grey[200],
@@ -118,15 +122,20 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                     _currentImageIndex = index;
                                   });
                                 },
-                                itemCount: _product.selectedVariant != null && _product.selectedVariant!.images.isNotEmpty
+                                itemCount: _product.selectedVariant != null &&
+                                        _product
+                                            .selectedVariant!.images.isNotEmpty
                                     ? _product.selectedVariant!.images.length
                                     : _product.images.length,
                                 itemBuilder: (context, index) {
                                   // Use variant images if available, otherwise use product images
-                                  final imageUrl = _product.selectedVariant != null && _product.selectedVariant!.images.isNotEmpty
+                                  final imageUrl = _product.selectedVariant !=
+                                              null &&
+                                          _product.selectedVariant!.images
+                                              .isNotEmpty
                                       ? _product.selectedVariant!.images[index]
                                       : _product.images[index];
-                                  
+
                                   return ImageService.getNetworkImage(
                                     imageUrl: imageUrl,
                                     fit: BoxFit.cover,
@@ -187,13 +196,16 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(
-                                _product.selectedVariant != null && _product.selectedVariant!.images.isNotEmpty
+                                _product.selectedVariant != null &&
+                                        _product
+                                            .selectedVariant!.images.isNotEmpty
                                     ? _product.selectedVariant!.images.length
                                     : _product.images.length,
                                 (index) => Container(
                                   width: 8,
                                   height: 8,
-                                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                                  margin:
+                                      const EdgeInsets.symmetric(horizontal: 4),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: _currentImageIndex == index
@@ -224,33 +236,34 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             textBaseline: TextBaseline.alphabetic,
                             children: [
-                              Builder(
-                                builder: (context) {
-                                  // Calculate the prices
-                                  double displayPrice;
-                                  
-                                  if (_product.selectedVariant != null) {
-                                    displayPrice = _product.selectedVariant!.price;
-                                    debugPrint('Using variant price: $displayPrice');
-                                  } else {
-                                    displayPrice = _product.sellingPrice;
-                                    debugPrint('Using product price: $displayPrice');
-                                  }
-                                  
-                                  return Text(
-                                    '₹${displayPrice.toStringAsFixed(2)}',
-                                    style: AppFonts.heading1.copyWith(
-                                      fontSize: 20,
-                                      color: AppColors.primaryRed,
-                                    ),
-                                  );
+                              Builder(builder: (context) {
+                                // Calculate the prices
+                                double displayPrice;
+
+                                if (_product.selectedVariant != null) {
+                                  displayPrice =
+                                      _product.selectedVariant!.price;
+                                  debugPrint(
+                                      'Using variant price: $displayPrice');
+                                } else {
+                                  displayPrice = _product.sellingPrice;
+                                  debugPrint(
+                                      'Using product price: $displayPrice');
                                 }
-                              ),
+
+                                return Text(
+                                  '₹${displayPrice.toStringAsFixed(2)}',
+                                  style: AppFonts.heading1.copyWith(
+                                    fontSize: 20,
+                                    color: AppColors.primaryRed,
+                                  ),
+                                );
+                              }),
                               // We're not showing a strikethrough price anymore since we don't have discounted prices
                             ],
                           ),
                           const SizedBox(height: 24),
-                          
+
                           // Always display the variant information
                           if (_product.variants.isNotEmpty)
                             Column(
@@ -259,19 +272,24 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                 Row(
                                   children: [
                                     Text(
-                                      _product.variants.length > 1 ? 'Available Colors' : 'Selected Variant',
+                                      _product.variants.length > 1
+                                          ? 'Available Colors'
+                                          : 'Selected Variant',
                                       style: AppFonts.heading1.copyWith(
                                         fontSize: 18,
                                         color: Colors.black,
                                       ),
                                     ),
-                                    if (_product.selectedVariant != null && _product.selectedVariant!.isGift)
+                                    if (_product.selectedVariant != null &&
+                                        _product.selectedVariant!.isGift)
                                       Container(
                                         margin: const EdgeInsets.only(left: 10),
-                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
                                           color: Colors.amber.shade100,
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
                                         ),
                                         child: Text(
                                           'Gift',
@@ -293,27 +311,41 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                       scrollDirection: Axis.horizontal,
                                       itemCount: _product.variants.length,
                                       itemBuilder: (context, index) {
-                                        final variant = _product.variants[index];
-                                        final isSelected = index == _selectedVariantIndex;
-                                        
+                                        final variant =
+                                            _product.variants[index];
+                                        final isSelected =
+                                            index == _selectedVariantIndex;
+
                                         return GestureDetector(
                                           onTap: () => _selectVariant(index),
                                           child: Container(
-                                            margin: const EdgeInsets.only(right: 10),
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                            margin: const EdgeInsets.only(
+                                                right: 10),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 8),
                                             decoration: BoxDecoration(
-                                              color: isSelected ? AppColors.primaryRed : Colors.white,
-                                              borderRadius: BorderRadius.circular(8),
+                                              color: isSelected
+                                                  ? AppColors.primaryRed
+                                                  : Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
                                               border: Border.all(
-                                                color: isSelected ? AppColors.primaryRed : Colors.grey.shade300,
+                                                color: isSelected
+                                                    ? AppColors.primaryRed
+                                                    : Colors.grey.shade300,
                                               ),
                                             ),
                                             child: Text(
                                               variant.color,
-                                              style: AppFonts.paragraph.copyWith(
-                                                color: isSelected ? Colors.white : Colors.black87,
+                                              style:
+                                                  AppFonts.paragraph.copyWith(
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : Colors.black87,
                                                 fontSize: 14,
-                                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.w600
+                                                    : FontWeight.normal,
                                               ),
                                             ),
                                           ),
@@ -326,10 +358,12 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                   Wrap(
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 8),
                                         decoration: BoxDecoration(
                                           color: Colors.grey.shade100,
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                           border: Border.all(
                                             color: Colors.grey.shade300,
                                           ),
@@ -347,7 +381,7 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                 const SizedBox(height: 24),
                               ],
                             ),
-                          
+
                           // Description Section
                           Container(
                             padding: const EdgeInsets.all(16),
@@ -370,89 +404,111 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     LayoutBuilder(
-                                      builder: (context, constraints) {
-                                        // Get the primary description text
-                                        String primaryDescription = _product.selectedVariant?.description ?? _product.description;
-                                        
-                                        // Get the secondary description if available
-                                        String? secondaryDescription = _product.selectedVariant?.descriptionSecond;
-                                        
-                                        // Format the secondary description to display bullet points properly
-                                        if (secondaryDescription != null) {
-                                          // Replace tab characters with spaces
-                                          secondaryDescription = secondaryDescription.replaceAll(r'\t', '  ');
-                                          
-                                          // Replace bullet points with proper line breaks
-                                          secondaryDescription = secondaryDescription.replaceAll('•', '\n•');
-                                          
-                                          // Ensure the first bullet point doesn't have a leading newline if it's at the start
-                                          if (secondaryDescription.startsWith('\n')) {
-                                            secondaryDescription = secondaryDescription.substring(1);
-                                          }
+                                        builder: (context, constraints) {
+                                      // Get the primary description text
+                                      String primaryDescription = _product
+                                              .selectedVariant?.description ??
+                                          _product.description;
+
+                                      // Get the secondary description if available
+                                      String? secondaryDescription = _product
+                                          .selectedVariant?.descriptionSecond;
+
+                                      // Format the secondary description to display bullet points properly
+                                      if (secondaryDescription != null) {
+                                        // Replace tab characters with spaces
+                                        secondaryDescription =
+                                            secondaryDescription.replaceAll(
+                                                r'\t', '  ');
+
+                                        // Replace bullet points with proper line breaks
+                                        secondaryDescription =
+                                            secondaryDescription.replaceAll(
+                                                '•', '\n•');
+
+                                        // Ensure the first bullet point doesn't have a leading newline if it's at the start
+                                        if (secondaryDescription
+                                            .startsWith('\n')) {
+                                          secondaryDescription =
+                                              secondaryDescription.substring(1);
                                         }
-                                        
-                                        return Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              primaryDescription,
-                                              maxLines: _isDescriptionExpanded ? null : _descriptionMaxLines,
-                                              overflow: _isDescriptionExpanded ? null : TextOverflow.ellipsis,
-                                              style: AppFonts.paragraph.copyWith(
-                                                color: AppColors.textGrey,
-                                                height: 1.5,
+                                      }
+
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            primaryDescription,
+                                            maxLines: _isDescriptionExpanded
+                                                ? null
+                                                : _descriptionMaxLines,
+                                            overflow: _isDescriptionExpanded
+                                                ? null
+                                                : TextOverflow.ellipsis,
+                                            style: AppFonts.paragraph.copyWith(
+                                              color: AppColors.textGrey,
+                                              height: 1.5,
+                                            ),
+                                          ),
+                                          if (_isDescriptionExpanded &&
+                                              secondaryDescription != null &&
+                                              secondaryDescription.isNotEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 16.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  const Divider(height: 1),
+                                                  const SizedBox(height: 16),
+                                                  Text(
+                                                    'Additional Details:',
+                                                    style: AppFonts.heading1
+                                                        .copyWith(
+                                                      fontSize: 16,
+                                                      color: Colors.black87,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Text(
+                                                    secondaryDescription,
+                                                    style: AppFonts.paragraph
+                                                        .copyWith(
+                                                      color: AppColors.textGrey,
+                                                      height: 1.8,
+                                                      fontSize: 14,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                            
-                                            if (_isDescriptionExpanded && 
-                                                secondaryDescription != null && 
-                                                secondaryDescription.isNotEmpty)
-                                              Padding(
-                                                padding: const EdgeInsets.only(top: 16.0),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    const Divider(height: 1),
-                                                    const SizedBox(height: 16),
-                                                    Text(
-                                                      'Additional Details:',
-                                                      style: AppFonts.heading1.copyWith(
-                                                        fontSize: 16,
-                                                        color: Colors.black87,
-                                                        fontWeight: FontWeight.w600,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 8),
-                                                    Text(
-                                                      secondaryDescription,
-                                                      style: AppFonts.paragraph.copyWith(
-                                                        color: AppColors.textGrey,
-                                                        height: 1.8,
-                                                        fontSize: 14,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                          ],
-                                        );
-                                      }
-                                    ),
+                                        ],
+                                      );
+                                    }),
                                     const SizedBox(height: 12),
                                     GestureDetector(
                                       onTap: () {
                                         setState(() {
-                                          _isDescriptionExpanded = !_isDescriptionExpanded;
+                                          _isDescriptionExpanded =
+                                              !_isDescriptionExpanded;
                                         });
                                       },
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 6),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 6),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                              _isDescriptionExpanded ? 'Read Less' : 'Read More',
-                                              style: AppFonts.paragraph.copyWith(
+                                              _isDescriptionExpanded
+                                                  ? 'Read Less'
+                                                  : 'Read More',
+                                              style:
+                                                  AppFonts.paragraph.copyWith(
                                                 color: AppColors.primaryRed,
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 13,
@@ -460,7 +516,9 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                             ),
                                             const SizedBox(width: 4),
                                             Icon(
-                                              _isDescriptionExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                              _isDescriptionExpanded
+                                                  ? Icons.keyboard_arrow_up
+                                                  : Icons.keyboard_arrow_down,
                                               size: 16,
                                               color: AppColors.primaryRed,
                                             ),
@@ -485,176 +543,182 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
                                     height: 10,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: _product.selectedVariant!.inStock ? Colors.green : Colors.red,
+                                      color: _product.selectedVariant!.inStock
+                                          ? Colors.green
+                                          : Colors.red,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    _product.selectedVariant!.inStock 
-                                        ? 'In Stock (${_product.selectedVariant!.stock} available)' 
+                                    _product.selectedVariant!.inStock
+                                        ? 'In Stock (${_product.selectedVariant!.stock} available)'
                                         : 'Out of Stock',
                                     style: AppFonts.paragraph.copyWith(
-                                      color: _product.selectedVariant!.inStock ? Colors.green : Colors.red,
+                                      color: _product.selectedVariant!.inStock
+                                          ? Colors.green
+                                          : Colors.red,
                                       fontSize: 14,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            
+
                           // Add to Cart Button
                           SizedBox(
                             width: double.infinity,
                             height: 56,
-                            child: (_product.selectedVariant?.inStock ?? _product.inStock)
-                              ? ElevatedButton(
-                                  onPressed: _isAddingToCart ? null : () async {
-
-                                    final cartController = context.read<CartTabController>();
-
-                                    setState(() {
-                                      _isAddingToCart = true;
-                                    });
-                                    
-                                    try {
-                                      // final cartService = CartService();
-                                      
-                                      // Get variant ID if available
-                                      String? variantId;
-                                      if (_product.selectedVariant != null) {
-                                        variantId = _product.selectedVariant!.id;
-                                        debugPrint('Selected variant ID: $variantId');
-                                      } else {
-                                        debugPrint('No variant selected');
-                                      }
-                                      
-                                      // Check if we have a valid variant ID
-                                      if (variantId == null || variantId.isEmpty) {
-                                        throw Exception('No variant selected or invalid variant');
-                                      }
-                                      
-                                      // await cartService.addToCart(_product.id, variantId, 1);
-
-                                      await cartController.addToCart(_product.id, variantId, 1);
-                                      
-                                      if (mounted) {
-                                        setState(() {
-                                          _isAddingToCart = false;
-                                        });
-                                        
-                                        if (context.mounted) {
-                                          final overlay = Overlay.of(context);
-                                          final overlayEntry = OverlayEntry(
-                                            builder: (context) => Positioned(
-                                              bottom: MediaQuery.of(context).viewInsets.bottom + 100,
-                                              left: 16,
-                                              right: 16,
-                                              child: Material(
-                                                color: Colors.transparent,
-                                                child: Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: 24,
-                                                    vertical: 16,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.green,
-                                                    borderRadius: BorderRadius.circular(12),
-                                                    boxShadow: [
-                                                      BoxShadow(
-                                                        color: Colors.black.withOpacity(0.1),
-                                                        blurRadius: 8,
-                                                        offset: const Offset(0, 4),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  child: Row(
-                                                    children: [
-                                                      const Icon(
-                                                        Icons.check_circle_outline,
-                                                        color: Colors.white,
-                                                      ),
-                                                      const SizedBox(width: 12),
-                                                      Text(
-                                                        'Item added to cart successfully',
-                                                        style: AppFonts.paragraph.copyWith(
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          );
-
-                                          overlay.insert(overlayEntry);
-                                          await Future.delayed(const Duration(seconds: 2));
-                                          overlayEntry.remove();
-                                        }
-                                      }
-                                    } catch (e) {
-                                      if (mounted) {
-                                        setState(() {
-                                          _isAddingToCart = false;
-                                        });
-                                        
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Failed to add item to cart',
-                                                style: AppFonts.paragraph.copyWith(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryRed,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(28),
-                                    ),
-                                  ),
-                                  child: _isAddingToCart
-                                    ? const SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
+                            child: Consumer<AuthController>(
+                              builder: (context, authController, _) {
+                                if (authController.isGuest) {
+                                  // Guest user → show login required button
+                                  return ElevatedButton(
+                                    onPressed: () {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              "Login is required to add items to cart"),
+                                          duration: Duration(seconds: 2),
                                         ),
-                                      )
-                                    : Text(
-                                        'Add to Cart',
-                                        style: AppFonts.heading1.copyWith(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.grey.shade400,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(28),
                                       ),
-                                )
-                              : ElevatedButton(
-                                  onPressed: null,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFE0E0E0),
-                                    disabledBackgroundColor: const Color(0xFFE0E0E0),
-                                    disabledForegroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(28),
                                     ),
-                                  ),
-                                  child: Text(
-                                    'Out of Stock',
-                                    style: AppFonts.heading1.copyWith(
-                                      color: const Color(0xFF757575),
-                                      fontSize: 16,
+                                    child: Text(
+                                      'Login to Add to Cart',
+                                      style: AppFonts.heading1.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                }
+
+                                // Normal logged-in flow
+                                return (_product.selectedVariant?.inStock ??
+                                        _product.inStock)
+                                    ? ElevatedButton(
+                                        onPressed: _isAddingToCart
+                                            ? null
+                                            : () async {
+                                                final cartController = context
+                                                    .read<CartTabController>();
+
+                                                setState(() {
+                                                  _isAddingToCart = true;
+                                                });
+
+                                                try {
+                                                  String? variantId;
+                                                  if (_product
+                                                          .selectedVariant !=
+                                                      null) {
+                                                    variantId = _product
+                                                        .selectedVariant!.id;
+                                                  }
+
+                                                  if (variantId == null ||
+                                                      variantId.isEmpty) {
+                                                    throw Exception(
+                                                        'No variant selected or invalid variant');
+                                                  }
+
+                                                  await cartController
+                                                      .addToCart(_product.id,
+                                                          variantId, 1);
+
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      _isAddingToCart = false;
+                                                    });
+
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                            "Item added to cart"),
+                                                        duration: Duration(
+                                                            seconds: 2),
+                                                        backgroundColor:
+                                                            Colors.green,
+                                                      ),
+                                                    );
+                                                  }
+                                                } catch (e) {
+                                                  if (mounted) {
+                                                    setState(() {
+                                                      _isAddingToCart = false;
+                                                    });
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                            "Failed to add item to cart"),
+                                                        duration: Duration(
+                                                            seconds: 2),
+                                                        backgroundColor:
+                                                            Colors.red,
+                                                      ),
+                                                    );
+                                                  }
+                                                }
+                                              },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.primaryRed,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(28),
+                                          ),
+                                        ),
+                                        child: _isAddingToCart
+                                            ? const SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  color: Colors.white,
+                                                  strokeWidth: 2,
+                                                ),
+                                              )
+                                            : Text(
+                                                'Add to Cart',
+                                                style:
+                                                    AppFonts.heading1.copyWith(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                      )
+                                    : ElevatedButton(
+                                        onPressed: null,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xFFE0E0E0),
+                                          disabledBackgroundColor:
+                                              const Color(0xFFE0E0E0),
+                                          disabledForegroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(28),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Out of Stock',
+                                          style: AppFonts.heading1.copyWith(
+                                            color: const Color(0xFF757575),
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      );
+                              },
+                            ),
                           ),
                           const SizedBox(height: 50),
                           // Ratings Header
@@ -743,8 +807,6 @@ class _ProductDetailBottomSheetState extends State<ProductDetailBottomSheet> {
       },
     );
   }
-
-
 
   Widget _buildRatingBar(int rating, int count, double percentage) {
     return Padding(

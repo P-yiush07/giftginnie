@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/controllers/authHome_controller.dart';
+import 'package:provider/provider.dart';
 import '../config/api.dart';
 import '../models/sign_up_model.dart';
 import '../services/Auth/auth_service.dart';
@@ -66,7 +68,7 @@ class SignUpController extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> handleSignUp() async {
+  Future<bool> handleSignUp(BuildContext context) async {
     // Validate all inputs first
     if (!_validateInputs()) {
       return false;
@@ -119,6 +121,9 @@ class SignUpController extends ChangeNotifier {
               'phone': phoneController.text,
             },
           );
+
+          final authController = Provider.of<AuthController>(context, listen: false);
+         authController.login();
           return true;
         } else {
           // Generic success case

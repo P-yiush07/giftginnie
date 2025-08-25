@@ -381,7 +381,7 @@ class SignUpView extends StatelessWidget {
             : () async {
                 // Dismiss keyboard
                 FocusScope.of(context).unfocus();
-                final success = await controller.handleSignUp();
+                final success = await controller.handleSignUp(context);
                 if (success && context.mounted) {
                   if (controller.authToken != null) {
                     // Navigate to email verification screen

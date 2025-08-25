@@ -1,19 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:giftginnie_ui/services/Cache/cache_service.dart';
 import '../models/auth_home_model.dart';
-import '../views/onboarding_screen.dart';
-import '../views/Auth Screen/sign_in_screen.dart';
 
 class AuthController extends ChangeNotifier {
   final AuthHomeModel _model = AuthHomeModel();
+  final CacheService _cache = CacheService();
+
+
+   bool _isGuest = true;
+  bool get isGuest => _isGuest;
+
+  void login() {
+    _isGuest = false;
+    notifyListeners(); // rebuild UI
+  }
+
   
   // Getter
   AuthHomeModel get model => _model;
+  // bool get isGuest => _isGuest;
 
-  Future<void> handleFacebookSignIn() async {
-    // TODO: Implement Facebook sign in logic
+  Future<void> init() async {
+    _isGuest = _cache.isGuest;
+    notifyListeners();
   }
 
-  Future<void> handleGoogleSignIn() async {
-    // TODO: Implement Google sign in logic
+  Future<void> guestLogin() async {
+    
+    // Save guest login flag
+    await _cache.saveBool("isGuest", true);
+    _isGuest = true;
+    notifyListeners();
   }
+
 }

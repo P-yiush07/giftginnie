@@ -284,7 +284,7 @@ class SignInView extends StatelessWidget {
             : () async {
                 // Dismiss keyboard
                 FocusScope.of(context).unfocus();
-                final success = await controller.handleEmailLogin();
+                final success = await controller.handleEmailLogin(context);
                 if (success && context.mounted) {
                   Navigator.pushReplacement(
                     context,

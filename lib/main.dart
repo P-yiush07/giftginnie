@@ -5,6 +5,7 @@ import 'package:giftginnie_ui/controllers/main/address_controller.dart';
 import 'package:giftginnie_ui/controllers/main/product_controller.dart';
 import 'package:giftginnie_ui/controllers/main/home_controller.dart';
 import 'package:giftginnie_ui/controllers/main/tabs/cart_tab_controller.dart';
+import 'package:giftginnie_ui/views/splash/homepage.dart';
 import 'package:giftginnie_ui/widgets/Splash%20Screen/splash_screen.dart';
 import 'constants/colors.dart';
 import 'utils/global.dart';
@@ -32,7 +33,7 @@ void main() async {
       statusBarBrightness: Brightness.light,
       systemNavigationBarColor: Colors.transparent,
       systemNavigationBarDividerColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
+      systemNavigationBarIconBrightness: Brightness.light,
     ));
 
     await SystemChrome.setEnabledSystemUIMode(
@@ -95,14 +96,7 @@ class MyApp extends StatelessWidget {
           ),
           scaffoldBackgroundColor: Colors.transparent,
         ),
-        darkTheme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppColors.primary,
-            brightness: Brightness.dark,
-          ),
-          scaffoldBackgroundColor: Colors.transparent,
-        ),
+        // home: const Showcase(title: "SplashScreen",),
         home: const SplashScreen(),
       );
   }

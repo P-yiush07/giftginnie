@@ -5,6 +5,7 @@ import 'package:giftginnie_ui/views/home_screen.dart';
 import 'package:giftginnie_ui/views/onboarding_screen.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/services/connectivity_service.dart';
+import 'package:giftginnie_ui/views/splash/homepage.dart';
 import 'package:giftginnie_ui/widgets/Error/no_internet_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -57,7 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
       MaterialPageRoute(
         builder: (context) => isAuthenticated 
           ? const HomeScreen() 
-          : const OnboardingScreen(),
+          : const Showcase(title: "Onboarding",),
       ),
     );
   }

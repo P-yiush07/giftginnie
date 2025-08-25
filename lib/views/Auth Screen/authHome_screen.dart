@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
 import 'package:giftginnie_ui/models/auth_home_model.dart';
+import 'package:giftginnie_ui/views/home_screen.dart';
 import 'package:giftginnie_ui/views/onboarding_screen.dart';
 import 'package:giftginnie_ui/views/Auth%20Screen/sign_in_screen.dart';
 import 'package:giftginnie_ui/views/Auth%20Screen/sign_up_screen.dart';
@@ -80,6 +81,17 @@ class AuthHomeView extends StatelessWidget {
     );
   }
 
+void handleGuestLogin(BuildContext context, AuthController controller) async {
+    await controller.guestLogin();
+
+    if (!context.mounted) return;
+
+   Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const HomeScreen()),
+  );
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = Provider.of<AuthController>(context);
@@ -98,35 +110,59 @@ class AuthHomeView extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              children: [
-                const Spacer(),
-                Text(
-                  model.welcomeTitle,
-                  style: AppFonts.heading1.copyWith(
-                    fontSize: 24,
-                    color: AppColors.authTitleText,
-                  ),
-                  textAlign: TextAlign.center,
+        child: Stack(
+          children: [
+            /// Main content (center/bottom part)
+            Positioned.fill(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    Text(
+                      model.welcomeTitle,
+                      style: AppFonts.heading1.copyWith(
+                        fontSize: 24,
+                        color: AppColors.authTitleText,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      model.welcomeDescription,
+                      style: AppFonts.paragraph.copyWith(
+                        fontSize: 16,
+                        color: AppColors.authDescriptionText,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 48),
+                    _buildAuthButtons(context, controller, model),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  model.welcomeDescription,
-                  style: AppFonts.paragraph.copyWith(
-                    fontSize: 16,
-                    color: AppColors.authDescriptionText,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 48),
-                _buildAuthButtons(context, controller, model),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-              ],
+              ),
             ),
-          ),
+
+            /// Guest Login Button (TOP RIGHT fixed)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: TextButton(
+               onPressed: () => handleGuestLogin(context, controller),
+                child: const Text(
+                  "Guest Login",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white, // or AppColors.primary
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
+      ),
       ),
     );
   }
