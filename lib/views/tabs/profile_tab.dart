@@ -283,11 +283,10 @@ class _ProfileTabViewState extends State<ProfileTabView> {
                           );
                         },
                       ),
-                    
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: const Divider(height: 1, thickness: 0.5),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: const Divider(height: 1, thickness: 0.5),
+                      ),
                     ],
                     // Removed Settings Option
                     // _buildProfileOption(
@@ -323,28 +322,87 @@ class _ProfileTabViewState extends State<ProfileTabView> {
               // Logout Button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: OutlinedButton(
-                  onPressed: () async {
-                    context.read<ProfileTabController>().handleLogout(context);
-                  },
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 56),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
+                child: Column(
+                  children: [
+                    OutlinedButton(
+                      onPressed: () async {
+                        context
+                            .read<ProfileTabController>()
+                            .handleLogout(context);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        side: BorderSide(
+                          color: AppColors.primaryRed,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Text(
+                        'Log Out',
+                        style: AppFonts.paragraph.copyWith(
+                          fontSize: 16,
+                          color: AppColors.primaryRed,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                    side: BorderSide(
-                      color: AppColors.primaryRed,
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Text(
-                    'Log Out',
-                    style: AppFonts.paragraph.copyWith(
-                      fontSize: 16,
-                      color: AppColors.primaryRed,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                    if (!authController.isGuest) ...[
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: () async {
+                          final shouldLogout = await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Confirm Delete'),
+                                content: const Text(
+                                    'Are you sure you want to Delete your account ?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(true),
+                                    child: const Text('Yes'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+
+                          if (shouldLogout == true) {
+                            context
+                                .read<ProfileTabController>()
+                                .handleLogout(context);
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 56),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                          ),
+                          side: BorderSide(
+                            color: AppColors.primaryRed,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Text(
+                          'Delete Your Account',
+                          style: AppFonts.paragraph.copyWith(
+                            fontSize: 16,
+                            color: AppColors.primaryRed,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
 
