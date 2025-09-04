@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:giftginnie_ui/constants/colors.dart';
+import 'package:giftginnie_ui/controllers/authHome_controller.dart';
 import 'package:giftginnie_ui/services/Auth/auth_service.dart';
+import 'package:giftginnie_ui/services/services.dart';
 import 'package:giftginnie_ui/views/home_screen.dart';
 import 'package:giftginnie_ui/views/onboarding_screen.dart';
 import 'package:giftginnie_ui/constants/fonts.dart';
@@ -28,7 +30,15 @@ class _SplashScreenState extends State<SplashScreen> {
     
     // Add a slight delay to show splash screen
     await Future.delayed(const Duration(seconds: 2));
-    
+
+  // ✅ Load cache properly
+ final authController = context.read<AuthController>();
+  await authController.init(); // ensure loaded
+
+  debugPrint("SplashScreen - isGuest = ${authController.isGuest}");
+  debugPrint("App start - isGuest = ${authController.isGuest}");
+
+
     if (!mounted) return;
 
     if (!connectivityService.isConnected) {

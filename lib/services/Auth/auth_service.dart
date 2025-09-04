@@ -90,7 +90,7 @@ class AuthService {
     );
 
     await _cacheService.saveBool("isGuest", false);
-    await _cacheService.saveBool("isGuest", true);
+    // await _cacheService.saveBool("isGuest", true);
   }
 
   // API Methods
