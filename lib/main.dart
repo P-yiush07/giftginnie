@@ -80,6 +80,9 @@ void main() async {
   }
 }
 
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -87,6 +90,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         navigatorKey: navigatorKey,
+        scaffoldMessengerKey: rootScaffoldMessengerKey,
         title: 'Gift App',
         theme: ThemeData(
           useMaterial3: true,

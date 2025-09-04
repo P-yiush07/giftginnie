@@ -111,6 +111,10 @@ class SignInController extends ChangeNotifier {
 
       final authController = Provider.of<AuthController>(context, listen: false);
      authController.login();
+
+      final cacheService = CacheService();
+      final isGuest = cacheService.isGuest;
+      debugPrint("on login = $isGuest");
       
       // If we got here, login was successful
       debugPrint('Login successful: $loginResult');
